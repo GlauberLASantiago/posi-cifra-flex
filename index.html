@@ -339,6 +339,25 @@
         </select>
       </div>
 
+      <div class="control-group">
+        <label>Registro</label>
+        <select id="registerFilter" onchange="reprocessScore()">
+          <option value="all" selected>Todos os Registros</option>
+          <option value="grave">Grave (máx. Mi4)</option>
+          <option value="medio">Médio (Ré3 a Lá4)</option>
+          <option value="agudo">Agudo (acima de Lá3)</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label>Projeto</label>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn" style="background-color: #5a5a5a;" onclick="saveProject()">Salvar</button>
+          <button class="btn" style="background-color: #5a5a5a;" onclick="document.getElementById('projectUpload').click()">Abrir</button>
+          <input type="file" id="projectUpload" accept=".txt" style="display:none;" onchange="handleProjectUpload(event)">
+        </div>
+      </div>
+
       <div class="control-group" style="align-items: flex-end; justify-content: flex-end;">
         <button class="btn btn-accent" onclick="exportPDF()">Exportar PDF</button>
       </div>
@@ -664,6 +683,19 @@
             let pSorted = [...played].sort((a,b) => a.midi - b.midi);
             if (pSorted.length >= 2 && pSorted[0].midi < 50 && (pSorted[1].midi - pSorted[0].midi) <= 2) return; 
 
+            // Filtro de Registro (Grave, Médio, Agudo)
+            const registerFilter = document.getElementById("registerFilter")?.value || "all";
+            if (registerFilter !== "all") {
+              const maxMidi = pSorted[pSorted.length - 1].midi; // highest note
+              if (registerFilter === "grave") {
+                if (maxMidi > 64) return; // máximo até Mi4 (64)
+              } else if (registerFilter === "medio") {
+                if (played.some(n => n.midi < 50 || n.midi > 69)) return; // apenas de Ré3 (50) a Lá4 (69)
+              } else if (registerFilter === "agudo") {
+                if (played.some(n => n.midi <= 57)) return; // apenas acima de Lá3 (57)
+              }
+            }
+
             let sig = currentVoicing.map(n => n.fret).join(',');
             if (!seen.has(sig)) { seen.add(sig); voicings.push({ notes: [...currentVoicing], bassMidi: played[0].midi }); }
             return;
@@ -937,6 +969,83 @@
         btns.forEach(b => b.style.display = 'block');
         element.classList.remove('pdf-print-mode');
       });
+    }
+
+    function saveProject() {
+      if (!currentRawXML) {
+        alert("Nenhum projeto ativo para salvar. Importe um arquivo MusicXML primeiro!");
+        return;
+      }
+
+      const selectedIndices = scoreData.map(measure => 
+        measure.chords.map(chord => chord.selectedIndex)
+      );
+
+      const projectData = {
+        globalTitle: globalTitle,
+        currentRawXML: currentRawXML,
+        selectedIndices: selectedIndices,
+        inversionFilter: document.getElementById("inversionFilter").value,
+        openStringsFilter: document.getElementById("openStringsFilter").value,
+        registerFilter: document.getElementById("registerFilter").value
+      };
+
+      const jsonStr = JSON.stringify(projectData, null, 2);
+      const blob = new Blob([jsonStr], { type: "text/plain;charset=utf-8" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `${globalTitle.replace(/\s+/g, '_')}_projeto.txt`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    function handleProjectUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const projectData = JSON.parse(e.target.result);
+          if (!projectData.currentRawXML) {
+            alert("Arquivo inválido. Certifique-se de que é um projeto do Posi-Cifra-Flex.");
+            return;
+          }
+
+          currentRawXML = projectData.currentRawXML;
+          if (projectData.inversionFilter) {
+            document.getElementById("inversionFilter").value = projectData.inversionFilter;
+          }
+          if (projectData.openStringsFilter) {
+            document.getElementById("openStringsFilter").value = projectData.openStringsFilter;
+          }
+          if (projectData.registerFilter) {
+            document.getElementById("registerFilter").value = projectData.registerFilter;
+          }
+
+          processXML();
+
+          if (projectData.selectedIndices) {
+            projectData.selectedIndices.forEach((measureIndices, mIdx) => {
+              if (scoreData[mIdx] && scoreData[mIdx].chords) {
+                measureIndices.forEach((selIdx, cIdx) => {
+                  if (scoreData[mIdx].chords[cIdx] && selIdx < scoreData[mIdx].chords[cIdx].options.length) {
+                    scoreData[mIdx].chords[cIdx].selectedIndex = selIdx;
+                  }
+                });
+              }
+            });
+            renderScoreGrid();
+          }
+          
+          alert("Projeto carregado com sucesso!");
+        } catch (err) {
+          console.error(err);
+          alert("Erro ao ler o arquivo de projeto. Verifique se o formato está correto.");
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = "";
     }
 
     window.addEventListener('DOMContentLoaded', () => {
