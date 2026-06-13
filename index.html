@@ -101,14 +101,18 @@
       border: 2px solid var(--finger);
       /* Borda verde */
       border-radius: 12px;
-      padding: 20px;
+      padding: 12px 20px;
       margin-bottom: 25px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 20px;
     }
 
     .title-card h1 {
       font-size: 2.2rem;
       font-weight: 700;
-      margin: 0 0 0.5rem 0;
+      margin: 0;
       color: #FFFFFF;
       text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
     }
@@ -660,6 +664,76 @@
       color: white;
       border-style: solid;
     }
+
+    /* Estilização Premium do Mini Mixer Inline */
+    .mini-mixer {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: 6px;
+      border-left: 1px solid var(--border);
+      padding-left: 8px;
+      vertical-align: middle;
+      height: 26px;
+    }
+
+    .mini-mixer span {
+      font-size: 0.72rem;
+      font-weight: bold;
+      color: var(--text-muted);
+      cursor: default;
+      user-select: none;
+      margin-left: 3px;
+    }
+
+    .mini-mixer input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 45px;
+      height: 4px;
+      background: #444;
+      border-radius: 2px;
+      outline: none;
+      margin: 0 4px 0 0;
+      padding: 0;
+      cursor: pointer;
+      vertical-align: middle;
+      transition: background 0.15s;
+    }
+
+    .mini-mixer input[type="range"]:hover {
+      background: #555;
+    }
+
+    .mini-mixer input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: none;
+      transition: transform 0.15s, background-color 0.15s;
+    }
+
+    .mini-mixer input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.3);
+      background: #ffb5b8;
+    }
+
+    .mini-mixer input[type="range"]::-moz-range-thumb {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: none;
+      transition: transform 0.15s, background-color 0.15s;
+    }
+
+    .mini-mixer input[type="range"]::-moz-range-thumb:hover {
+      transform: scale(1.3);
+      background: #ffb5b8;
+    }
   </style>
 </head>
 
@@ -669,8 +743,7 @@
     <div class="title-card">
       <h1>Posi-Cifra-Flex</h1>
       <p class="subtitle">
-        Posições alternativas para tocar acordes no violão. Importe arquivos XML ou crie projetos novos, gerencie e
-        edite cifras e posições.
+        Posições alternativas para tocar acordes no violão.
         <span id="audioStatus" class="audio-status">Carregando Violão Nylon...</span>
       </p>
     </div>
@@ -695,50 +768,79 @@
           </div>
         </div>
 
-        <div class="control-group" style="min-width: 350px;">
-          <div style="display: flex; align-items: center; margin-bottom: 12px; gap: 10px;">
+        <div class="control-group">
+          <label>Edição</label>
+          <div style="display: flex; align-items: center; gap: 8px; height: 30px;">
             <input type="checkbox" id="editCifrasToggle" onchange="toggleEditMode()"
-              style="width: 20px; height: 20px; cursor: pointer;">
+              style="width: 18px; height: 18px; cursor: pointer;">
             <label for="editCifrasToggle"
-              style="margin-left: 8px; cursor: pointer; color: var(--text-main); font-weight: normal; text-transform: none; font-size: 0.95rem;">Editar
-              Cifras</label>
+              style="margin-left: 5px; cursor: pointer; color: var(--text-main); font-weight: normal; text-transform: none; font-size: 0.9rem; white-space: nowrap;">Editar Cifras</label>
             <button class="btn" id="undoBtn" onclick="undoAction()"
-              style="padding: 3px 8px; font-size: 0.75rem; margin-left: 15px; background-color: #5a5a5a; line-height: 1;"
-              title="Desfazer a última ação (Ctrl+Z)" disabled>↶ Desfazer</button>
+              style="padding: 4px 12px; font-size: 0.95rem; margin-left: 5px; background-color: #5a5a5a; line-height: 1;"
+              title="Desfazer a última ação (Ctrl+Z)" disabled>↶</button>
             <button class="btn" id="redoBtn" onclick="redoAction()"
-              style="padding: 3px 8px; font-size: 0.75rem; background-color: #5a5a5a; line-height: 1;"
-              title="Refazer a última ação (Ctrl+Y)" disabled>↷ Refazer</button>
+              style="padding: 4px 12px; font-size: 0.95rem; background-color: #5a5a5a; line-height: 1;"
+              title="Refazer a última ação (Ctrl+Y)" disabled>↷</button>
+          </div>
+        </div>
+
+        <div class="control-group" style="min-width: 320px;">
+          <label>Prévia & Acompanhamento</label>
+          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-height: 30px;">
             <button class="btn" id="previewPlayBtn" onclick="togglePreviewPlay()"
-              style="padding: 3px 8px; font-size: 0.75rem; margin-left: 15px; background-color: #2e6f40; line-height: 1; font-weight: bold;"
-              title="Prévia">Prévia: Tocar</button>
+              style="padding: 3px 8px; font-size: 0.75rem; background-color: #2e6f40; line-height: 1; font-weight: bold;"
+              title="Prévia">▶</button>
+            <button class="btn" id="previewLoopBtn" onclick="togglePreviewLoop()"
+              style="padding: 3px 8px; font-size: 0.75rem; background-color: #5a5a5a; line-height: 1; font-weight: bold;"
+              title="Repetir ao terminar">🔁</button>
+            <button class="btn" id="previewCountBtn" onclick="togglePreviewCount()"
+              style="padding: 3px 8px; font-size: 0.75rem; background-color: #5a5a5a; line-height: 1; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; height: 26px; box-sizing: border-box; vertical-align: middle;"
+              title="Tocar contagem rítmica (8 batidas) antes de iniciar">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none; display: block;">
+                <polygon points="12 2 6 22 18 22" />
+                <line x1="12" y1="18" x2="16" y2="7" />
+                <circle cx="15.2" cy="9.2" r="1.5" fill="currentColor" />
+                <circle cx="12" cy="18" r="1" fill="currentColor" />
+              </svg>
+            </button>
             <select id="previewMode" onchange="stopPreview()"
-              style="padding: 3px 8px; font-size: 0.75rem; margin-left: 8px; background-color: var(--bg-color); color: var(--text-main); border: 2px solid var(--border); border-radius: 4px; cursor: pointer; height: 26px; line-height: 1; vertical-align: middle;">
-              <option value="ataque" selected>Ataque</option>
+              style="padding: 3px 8px; font-size: 0.75rem; background-color: var(--bg-color); color: var(--text-main); border: 2px solid var(--border); border-radius: 4px; cursor: pointer; height: 26px; line-height: 1; vertical-align: middle;">
+              <option value="cancao">Canção</option>
+              <option value="bossa" selected>Bossa</option>
+              <option value="ataque">Ataque</option>
               <option value="arpejo">Com Arpejo</option>
               <option value="colcheia">Em Colcheia</option>
             </select>
-            <label for="previewTempo" style="margin-left: 10px; color: var(--text-muted); font-size: 0.85rem; font-weight: bold; text-transform: uppercase; vertical-align: middle;">BPM:</label>
-            <input type="number" id="previewTempo" min="60" max="200" value="130" onchange="onTempoChange(false)" oninput="onTempoChange(true)"
-              style="width: 55px; padding: 3px 6px; font-size: 0.75rem; margin-left: 4px; background-color: var(--bg-color); color: var(--text-main); border: 2px solid var(--border); border-radius: 4px; height: 26px; box-sizing: border-box; text-align: center; vertical-align: middle;">
-          </div>
+            <label for="previewTempo" style="color: var(--text-muted); font-size: 0.8rem; font-weight: bold; text-transform: uppercase; vertical-align: middle; margin-left: 4px;">BPM:</label>
+            <input type="number" id="previewTempo" min="40" max="120" value="75" onchange="onTempoChange(false)" oninput="onTempoChange(true)"
+              style="width: 45px; padding: 3px 4px; font-size: 0.75rem; background-color: var(--bg-color); color: var(--text-main); border: 2px solid var(--border); border-radius: 4px; height: 26px; box-sizing: border-box; text-align: center; vertical-align: middle;">
 
-          <div style="display: flex; align-items: flex-end; gap: 20px; flex-wrap: wrap;">
-            <div style="display: flex; flex-direction: column; gap: 5px;">
-              <label>Notas</label>
-              <div style="display: flex; align-items: center; height: 30px;">
-                <input type="checkbox" id="viewNotesToggle" onchange="toggleViewNotes()"
-                  style="width: 20px; height: 20px; cursor: pointer;" checked>
-                <label for="viewNotesToggle"
-                  style="margin-left: 8px; cursor: pointer; color: var(--text-main); font-weight: normal; text-transform: none; font-size: 0.95rem;">Visualizar
-                  Notas</label>
-              </div>
+            <div class="mini-mixer">
+              <span title="Vol Bateria" style="margin-left: 0;">Bat.</span>
+              <input type="range" id="volDrums" min="0" max="1.5" step="0.1" value="1.0" oninput="updateVolumeDrums(this.value)">
+              <span title="Vol Violão">Viol.</span>
+              <input type="range" id="volGuitar" min="0" max="1.5" step="0.1" value="1.0" oninput="updateVolumeGuitar(this.value)">
+              <span title="Vol Baixo">Bx.</span>
+              <input type="range" id="volBass" min="0" max="1.5" step="0.1" value="1.0" oninput="updateVolumeBass(this.value)">
             </div>
+          </div>
+        </div>
 
-            <div style="display: flex; flex-direction: column; gap: 5px; max-width: 150px; min-width: 120px;">
-              <label>Zoom: <span id="zoomVal">80%</span></label>
+        <div class="control-group">
+          <label>Visualização</label>
+          <div style="display: flex; align-items: center; gap: 15px; height: 30px;">
+            <div style="display: flex; align-items: center;">
+              <input type="checkbox" id="viewNotesToggle" onchange="toggleViewNotes()"
+                style="width: 18px; height: 18px; cursor: pointer;" checked>
+              <label for="viewNotesToggle"
+                style="margin-left: 5px; cursor: pointer; color: var(--text-main); font-weight: normal; text-transform: none; font-size: 0.9rem; white-space: nowrap;">Mostrar Notas</label>
+            </div>
+            <div style="display: flex; align-items: center; gap: 5px;">
+              <label style="color: var(--text-muted); font-size: 0.8rem; font-weight: bold; text-transform: uppercase; white-space: nowrap;">Zoom:</label>
               <input type="range" id="diagramZoom" min="0.4" max="1.5" step="0.05" value="0.8"
                 oninput="updateDiagramZoom(this.value)"
-                style="cursor: pointer; width: 100%; height: 30px; margin: 0; box-sizing: border-box; vertical-align: middle;">
+                style="cursor: pointer; width: 60px; height: 20px; margin: 0; box-sizing: border-box; vertical-align: middle;">
+              <span id="zoomVal" style="font-size: 0.8rem; min-width: 30px; display: inline-block;">80%</span>
             </div>
           </div>
         </div>
@@ -843,8 +945,8 @@
                 Clique na cifra ou em "Editar" para digitar o acorde. O app corrige automaticamente o texto (minúsculas
                 viram maiúsculas, o caractere <code>3</code> vira sustenido <code>#</code>, e o <code>b</code> vira
                 bemol <code>b</code>), além de normalizar e validar musicalmente a cifra. Pressione <code>Enter</code>
-                para salvar e avançar para o próximo compasso. Você pode desfazer ou refazer edições utilizando os botões <strong>"↶ Desfazer"</strong> e <strong>"↷ Refazer"</strong> (ou atalhos <code>Ctrl+Z</code> e <code>Ctrl+Y</code>).</li>
-              <li><strong>Ouça uma prévia em andamento:</strong> Clique no botão <strong>"Prévia: Tocar"</strong> para escutar o arranjo acompanhado por uma bateria de bossa nova. O controle de BPM ao lado permite ajustar o andamento entre 60 e 200 (o padrão é 130 BPM). O seletor de estilo permite alternar a prévia entre <strong>Ataque</strong> (notas simultâneas), <strong>Com Arpejo</strong> (notas dedilhadas rapidamente) ou <strong>Em Colcheia</strong> (notas arpejadas sustentadas no tempo de colcheia). O acorde atual é destacado visualmente com um fundo verde no grid enquanto soa.</li>
+                para salvar e avançar para o próximo compasso. Você pode desfazer ou refazer edições utilizando os botões de seta (<strong>"↶"</strong> e <strong>"↷"</strong>) ou atalhos <code>Ctrl+Z</code> e <code>Ctrl+Y</code>.</li>
+              <li><strong>Ouça uma prévia em andamento:</strong> Clique no botão <strong>"▶"</strong> para escutar o arranjo acompanhado por uma bateria de bossa nova. Os botões de controle adicionais permitem ativar o loop (botão <strong>"🔁"</strong>) e a contagem rítmica de entrada (botão <strong>"⏱"</strong>). O controle de BPM permite ajustar o andamento entre 40 e 120 (o padrão é 75 BPM). O seletor de estilo permite alternar a prévia entre <strong>Canção</strong> (padrão, com colcheia, semínima e colcheia), <strong>Bossa</strong> (estilo de 2 compassos com síncope de antecipação de acordes), <strong>Ataque</strong> (notas simultâneas), <strong>Com Arpejo</strong> (notas dedilhadas rapidamente) ou <strong>Em Colcheia</strong> (notas arpejadas sustentadas no tempo de colcheia). O acorde atual é destacado visualmente com um fundo verde no grid enquanto soa.</li>
               <li><strong>Gerencie a partitura:</strong> Adicione novas cifras com <code>+ Cifra</code>, delete-as com o
                 botão vermelho <code>&times;</code>, ou aumente/diminua a quantidade total de compassos pelos botões
                 <code>+</code> e <code>-</code> abaixo da partitura.
@@ -1019,47 +1121,138 @@
 
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     const audioCtx = new AudioContext();
+
+    // Create gain nodes for each channel to enable real-time volume mixing
+    const drumsGainNode = audioCtx.createGain();
+    drumsGainNode.gain.setValueAtTime(1.0, audioCtx.currentTime);
+    drumsGainNode.connect(audioCtx.destination);
+
+    const guitarGainNode = audioCtx.createGain();
+    guitarGainNode.gain.setValueAtTime(1.0, audioCtx.currentTime);
+    guitarGainNode.connect(audioCtx.destination);
+
+    const bassGainNode = audioCtx.createGain();
+    bassGainNode.gain.setValueAtTime(1.0, audioCtx.currentTime);
+    bassGainNode.connect(audioCtx.destination);
+
     let guitarInstrument = null;
+    let bassInstrument = null;
     let diagramScale = 0.8;
 
     // Estado da Prévia Musical
     let previewPlaying = false;
-    let backingTrack85 = null;
-    let backingTrack130 = null;
+    let previewLoop = false;
+    let previewCountIn = false;
+    let audioBuffer85 = null;
+    let audioBuffer130 = null;
+    let audioSourceNode = null;
+    let backingTrackStartTime = 0;
+    let backingTrackElapsedBase = 0;
+    let currentBPMVal = 130;
+    let currentOriginalBPM = 130;
     let animationFrameId = null;
     const scheduledChords = new Set();
     let playlist = [];
+    let bossaVariations = [];
     let currentActiveChordEl = null;
+
+    let volumeDrums = 1.0;
+    let volumeGuitar = 1.0;
+    let volumeBass = 1.0;
+
+    function updateVolumeDrums(val) {
+      volumeDrums = parseFloat(val);
+      if (drumsGainNode) {
+        drumsGainNode.gain.setValueAtTime(volumeDrums, audioCtx.currentTime);
+      }
+    }
+    function updateVolumeGuitar(val) {
+      volumeGuitar = parseFloat(val);
+      if (guitarGainNode) {
+        guitarGainNode.gain.setValueAtTime(volumeGuitar, audioCtx.currentTime);
+      }
+    }
+    function updateVolumeBass(val) {
+      volumeBass = parseFloat(val);
+      if (bassGainNode) {
+        bassGainNode.gain.setValueAtTime(volumeBass, audioCtx.currentTime);
+      }
+    }
 
     function getTempoRatio() {
       const tempoInput = document.getElementById("previewTempo");
-      const tempo = tempoInput ? parseInt(tempoInput.value) : 130;
-      return isNaN(tempo) ? 1.0 : (tempo / 130);
+      const uiTempo = tempoInput ? parseInt(tempoInput.value) : 75;
+      const tempo = isNaN(uiTempo) ? 130 : (uiTempo * (130 / 75));
+      return tempo / 130;
     }
 
-    function getBackingTrackForTempo(tempo) {
-      if (tempo <= 120) {
-        if (!backingTrack85) {
-          let audioUrl = "https://github.com/GlauberLASantiago/posi-cifra-flex/blob/main/085-bossa2-bat.mp3";
-          if (audioUrl.includes("github.com") && audioUrl.includes("/blob/")) {
-            audioUrl = audioUrl.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/");
-          }
-          backingTrack85 = new Audio(audioUrl);
-          backingTrack85.crossOrigin = "anonymous";
-          backingTrack85.loop = true;
+    function togglePreviewLoop() {
+      previewLoop = !previewLoop;
+      const btn = document.getElementById("previewLoopBtn");
+      if (btn) {
+        if (previewLoop) {
+          btn.textContent = "🔁";
+          btn.style.backgroundColor = "#8e44ad";
+        } else {
+          btn.textContent = "🔁";
+          btn.style.backgroundColor = "#5a5a5a";
         }
-        return { track: backingTrack85, originalBPM: 85 };
-      } else {
-        if (!backingTrack130) {
-          let audioUrl = "https://github.com/GlauberLASantiago/posi-cifra-flex/blob/main/130-bossa1-bat.mp3";
-          if (audioUrl.includes("github.com") && audioUrl.includes("/blob/")) {
-            audioUrl = audioUrl.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/");
-          }
-          backingTrack130 = new Audio(audioUrl);
-          backingTrack130.crossOrigin = "anonymous";
-          backingTrack130.loop = true;
+      }
+    }
+
+    function togglePreviewCount() {
+      previewCountIn = !previewCountIn;
+      const btn = document.getElementById("previewCountBtn");
+      if (btn) {
+        if (previewCountIn) {
+          btn.style.backgroundColor = "#d35400";
+        } else {
+          btn.style.backgroundColor = "#5a5a5a";
         }
-        return { track: backingTrack130, originalBPM: 130 };
+      }
+    }
+
+    function playClickSound(time, freq = 1000) {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, time);
+      gainNode.gain.setValueAtTime(0.6, time);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
+      osc.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      osc.start(time);
+      osc.stop(time + 0.06);
+    }
+
+    async function ensureBackingTrackLoaded(tempo) {
+      const is85 = tempo <= 120;
+      if (is85 && !audioBuffer85) {
+        updatePlayButtonText("⏳");
+        let audioUrl = "https://github.com/GlauberLASantiago/posi-cifra-flex/blob/main/085-bossa2-bat.mp3";
+        if (audioUrl.includes("github.com") && audioUrl.includes("/blob/")) {
+          audioUrl = audioUrl.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/");
+        }
+        const response = await fetch(audioUrl);
+        const arrayBuffer = await response.arrayBuffer();
+        audioBuffer85 = await audioCtx.decodeAudioData(arrayBuffer);
+      } else if (!is85 && !audioBuffer130) {
+        updatePlayButtonText("⏳");
+        let audioUrl = "https://github.com/GlauberLASantiago/posi-cifra-flex/blob/main/130-bossa1-bat.mp3";
+        if (audioUrl.includes("github.com") && audioUrl.includes("/blob/")) {
+          audioUrl = audioUrl.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/");
+        }
+        const response = await fetch(audioUrl);
+        const arrayBuffer = await response.arrayBuffer();
+        audioBuffer130 = await audioCtx.decodeAudioData(arrayBuffer);
+      }
+    }
+
+    function updatePlayButtonText(text) {
+      const playBtn = document.getElementById("previewPlayBtn");
+      if (playBtn) {
+        playBtn.textContent = text;
       }
     }
 
@@ -1070,39 +1263,68 @@
       if (isNaN(val)) return;
 
       if (!isInput) {
-        if (val < 60) val = 60;
-        if (val > 200) val = 200;
+        if (val < 40) val = 40;
+        if (val > 120) val = 120;
         tempoInput.value = val;
       }
 
-      if (val >= 60 && val <= 200) {
+      if (val >= 40 && val <= 120) {
+        const actualVal = val * (130 / 75);
         if (previewPlaying) {
-          const currentInfo = getBackingTrackForTempo(val);
-          const newTrack = currentInfo.track;
-          const originalBPM = currentInfo.originalBPM;
+          const is85_new = actualVal <= 120;
+          const is85_old = currentOriginalBPM === 85;
 
-          let oldTrack = null;
-          let oldBPM = 85;
-          if (backingTrack85 && !backingTrack85.paused) {
-            oldTrack = backingTrack85;
-            oldBPM = 85;
-          } else if (backingTrack130 && !backingTrack130.paused) {
-            oldTrack = backingTrack130;
-            oldBPM = 130;
-          }
+          const now = audioCtx.currentTime;
+          const elapsedMediaActive = backingTrackElapsedBase + (now - backingTrackStartTime) * (currentBPMVal / currentOriginalBPM);
 
-          if (oldTrack && oldTrack !== newTrack) {
-            oldTrack.pause();
-            const beats = oldTrack.currentTime * (oldBPM / 60);
-            newTrack.currentTime = beats * (60 / originalBPM);
-            newTrack.playbackRate = val / originalBPM;
-            newTrack.play().catch(err => console.error("Error swapping track:", err));
-          } else if (oldTrack) {
-            oldTrack.playbackRate = val / originalBPM;
+          if (is85_new !== is85_old) {
+            ensureBackingTrackLoaded(actualVal).then(() => {
+              if (!previewPlaying) return;
+
+              const nowStart = audioCtx.currentTime;
+              const latestElapsedMediaActive = backingTrackElapsedBase + (nowStart - backingTrackStartTime) * (currentBPMVal / currentOriginalBPM);
+
+              let targetElapsedMedia = 0;
+              let newOriginalBPM = 130;
+              if (is85_new) {
+                targetElapsedMedia = latestElapsedMediaActive * (130 / 85);
+                newOriginalBPM = 85;
+              } else {
+                targetElapsedMedia = latestElapsedMediaActive * (85 / 130);
+                newOriginalBPM = 130;
+              }
+
+              if (audioSourceNode) {
+                try { audioSourceNode.stop(); } catch(e){}
+              }
+
+              const buffer = is85_new ? audioBuffer85 : audioBuffer130;
+              audioSourceNode = audioCtx.createBufferSource();
+              audioSourceNode.buffer = buffer;
+              audioSourceNode.loop = true;
+              audioSourceNode.connect(drumsGainNode);
+
+              backingTrackStartTime = nowStart;
+              backingTrackElapsedBase = targetElapsedMedia;
+              currentBPMVal = actualVal;
+              currentOriginalBPM = newOriginalBPM;
+
+              audioSourceNode.playbackRate.setValueAtTime(actualVal / newOriginalBPM, nowStart);
+              const offset = targetElapsedMedia % buffer.duration;
+              audioSourceNode.start(nowStart, offset);
+            }).catch(err => {
+              console.error("Error swapping and loading backing track:", err);
+              stopPreview();
+            });
+          } else {
+            backingTrackElapsedBase = elapsedMediaActive;
+            backingTrackStartTime = now;
+            currentBPMVal = actualVal;
+
+            if (audioSourceNode) {
+              audioSourceNode.playbackRate.setValueAtTime(actualVal / currentOriginalBPM, now);
+            }
           }
-        } else {
-          const { track, originalBPM } = getBackingTrackForTempo(val);
-          track.playbackRate = val / originalBPM;
         }
       }
     }
@@ -1113,16 +1335,15 @@
         cancelAnimationFrame(animationFrameId);
         animationFrameId = null;
       }
-      if (backingTrack85) {
-        backingTrack85.pause();
-        backingTrack85.currentTime = 0;
-      }
-      if (backingTrack130) {
-        backingTrack130.pause();
-        backingTrack130.currentTime = 0;
+      if (audioSourceNode) {
+        try { audioSourceNode.stop(); } catch(e){}
+        audioSourceNode = null;
       }
       if (guitarInstrument && typeof guitarInstrument.stop === "function") {
         guitarInstrument.stop();
+      }
+      if (bassInstrument && typeof bassInstrument.stop === "function") {
+        bassInstrument.stop();
       }
       if (currentActiveChordEl) {
         currentActiveChordEl.classList.remove("playing");
@@ -1131,12 +1352,12 @@
       document.querySelectorAll(".chord-event.playing").forEach(el => el.classList.remove("playing"));
       const playBtn = document.getElementById("previewPlayBtn");
       if (playBtn) {
-        playBtn.textContent = "Prévia: Tocar";
+        playBtn.textContent = "▶";
         playBtn.style.backgroundColor = "#2e6f40";
       }
     }
 
-    function playChordAtTime(notesArr, targetTime, maxAllowedDuration) {
+    function playChordAtTime(notesArr, targetTime, maxAllowedDuration, nextNotesArr = null, startBeat = 0, chordName = "") {
       if (!guitarInstrument) return;
       const playableNotes = notesArr.filter(n => n.fret !== -1).sort((a, b) => a.midi - b.midi);
       if (playableNotes.length === 0) return;
@@ -1146,7 +1367,189 @@
       const chordDurationReal = chordDuration / ratio;
       const mode = document.getElementById("previewMode")?.value || "ataque";
 
-      if (mode === "ataque") {
+      // Acompanhamento de Contrabaixo (Sempre Ativo)
+      if (bassInstrument && chordName) {
+        const baseChordName = chordName.split('/')[0];
+        const match = baseChordName.match(/^[A-G](?:#|##|b|bb)?/);
+        const rootNoteStr = match ? match[0] : "";
+        if (rootNoteStr) {
+          let bassMidi = Tonal.Note.midi(rootNoteStr + "2");
+          if (bassMidi && !isNaN(bassMidi)) {
+            // Transpor para a oitava entre E1 (MIDI 28) e E2 (MIDI 40) inclusive
+            while (bassMidi > 40) {
+              bassMidi -= 12;
+            }
+            while (bassMidi < 28) {
+              bassMidi += 12;
+            }
+
+            const tempoInput = document.getElementById("previewTempo");
+            const uiTempo = tempoInput ? parseInt(tempoInput.value) : 75;
+            const tempo = uiTempo * (130 / 75);
+            const beatDuration = 60 / tempo;
+            const maxDurationBeats = maxAllowedDuration / (60 / 130);
+
+            const bassEvents = [
+              { offset: 0.0, dur: 1.0 },
+              { offset: 1.5, dur: 0.5 },
+              { offset: 2.0, dur: 1.4 },
+              { offset: 3.5, dur: 0.5 }
+            ];
+
+            for (let baseOffset = 0; baseOffset < maxDurationBeats; baseOffset += 4.0) {
+              for (const event of bassEvents) {
+                const eventOffset = baseOffset + event.offset;
+                if (eventOffset < maxDurationBeats) {
+                  const eventTime = targetTime + eventOffset * beatDuration;
+                  const remainingBeats = maxDurationBeats - eventOffset;
+                  const finalDurBeats = Math.min(event.dur, remainingBeats);
+                  if (finalDurBeats > 0) {
+                    bassInstrument.play(bassMidi, eventTime, { duration: finalDurBeats * beatDuration, gain: 1.8 });
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if (mode === "bossa") {
+        const tempoInput = document.getElementById("previewTempo");
+        const uiTempo = tempoInput ? parseInt(tempoInput.value) : 75;
+        const tempo = uiTempo * (130 / 75);
+        const beatDuration = 60 / tempo;
+        const bassNote = playableNotes[0];
+        const remainingNotes = playableNotes.slice(1);
+        const maxDurationBeats = maxAllowedDuration / (60 / 130);
+
+        const startMeasure = Math.floor(startBeat / 4.0);
+        const endMeasure = Math.floor((startBeat + maxDurationBeats - 0.01) / 4.0);
+
+        for (let m = startMeasure; m <= endMeasure; m++) {
+          const isSecondMeasure = (m % 2 === 1);
+          const useAltB = bossaVariations[m] || false;
+
+          let events = [];
+          if (!isSecondMeasure) {
+            // 1º Compasso (Ímpar)
+            if (!useAltB) {
+              // Alt A (Original)
+              events = [
+                { offset: 0.0, isBass: true,  isRemaining: true,  bassDur: 2.0, remDur: 1.0, useNext: false },
+                { offset: 1.0, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 1.0, useNext: false },
+                { offset: 2.0, isBass: true,  isRemaining: false, bassDur: 0.5, remDur: 0.0, useNext: false },
+                { offset: 2.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 1.0, useNext: false },
+                { offset: 3.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 0.5, useNext: true  }
+              ];
+            } else {
+              // Alt B
+              events = [
+                { offset: 0.0, isBass: true,  isRemaining: true,  bassDur: 1.5, remDur: 1.0, useNext: false },
+                { offset: 1.0, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 1.0, useNext: false },
+                { offset: 1.5, isBass: true,  isRemaining: false, bassDur: 0.5, remDur: 0.0, useNext: false },
+                { offset: 2.0, isBass: true,  isRemaining: false, bassDur: 2.0, remDur: 0.0, useNext: false },
+                { offset: 2.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 1.0, useNext: false },
+                { offset: 3.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 0.5, useNext: true  }
+              ];
+            }
+          } else {
+            // 2º Compasso (Par)
+            if (!useAltB) {
+              // Alt A (Original)
+              events = [
+                { offset: 0.0, isBass: true,  isRemaining: false, bassDur: 0.5, remDur: 0.0, useNext: false },
+                { offset: 0.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 1.0, useNext: false },
+                { offset: 1.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 0.5, useNext: false },
+                { offset: 2.0, isBass: true,  isRemaining: false, bassDur: 2.0, remDur: 0.0, useNext: false },
+                { offset: 3.0, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 1.0, useNext: false }
+              ];
+            } else {
+              // Alt B
+              events = [
+                { offset: 0.0, isBass: true,  isRemaining: false, bassDur: 0.5, remDur: 0.0, useNext: false },
+                { offset: 0.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 1.0, useNext: false },
+                { offset: 1.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 0.5, useNext: false },
+                { offset: 2.0, isBass: true,  isRemaining: false, bassDur: 2.0, remDur: 0.0, useNext: false },
+                { offset: 3.0, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 1.0, useNext: false },
+                { offset: 4.0, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 1.0, useNext: true  }
+              ];
+            }
+          }
+
+          events.forEach(event => {
+            const absoluteEventBeat = m * 4.0 + event.offset;
+            const offsetBeats = absoluteEventBeat - startBeat;
+            if (offsetBeats < 0 || offsetBeats > maxDurationBeats) return;
+
+            const eventTime = targetTime + offsetBeats * beatDuration;
+
+            if (event.isBass) {
+              const bassDurationReal = Math.max(0.1, Math.min(event.bassDur, maxDurationBeats - offsetBeats) * beatDuration);
+              guitarInstrument.play(bassNote.midi, eventTime, { duration: bassDurationReal, gain: 2.5 });
+            }
+
+            if (event.isRemaining) {
+              const remainingDurationReal = Math.max(0.1, (event.useNext ? event.remDur : Math.min(event.remDur, maxDurationBeats - offsetBeats)) * beatDuration);
+
+              let notesToUse = playableNotes;
+              if (event.useNext && nextNotesArr) {
+                const nextPlayable = nextNotesArr.filter(n => n.fret !== -1).sort((a, b) => a.midi - b.midi);
+                if (nextPlayable.length > 0) {
+                  notesToUse = nextPlayable;
+                }
+              }
+
+              const currentBassNote = notesToUse[0];
+              const currentRemainingNotes = notesToUse.slice(1);
+              const notesToPlay = currentRemainingNotes.length > 0 ? currentRemainingNotes : [currentBassNote];
+
+              notesToPlay.forEach(note => {
+                guitarInstrument.play(note.midi, eventTime, { duration: remainingDurationReal, gain: 2.5 });
+              });
+            }
+          });
+        }
+      } else if (mode === "cancao") {
+        const tempoInput = document.getElementById("previewTempo");
+        const uiTempo = tempoInput ? parseInt(tempoInput.value) : 75;
+        const tempo = uiTempo * (130 / 75);
+        const beatDuration = 60 / tempo;
+        const bassNote = playableNotes[0];
+        const remainingNotes = playableNotes.slice(1);
+        const maxDurationBeats = maxAllowedDuration / (60 / 130);
+
+        let index = 0;
+        while (true) {
+          const patternIndex = Math.floor(index / 3);
+          const eventInPattern = index % 3;
+          let offsetBeats = patternIndex * 2.0;
+          let eventBeatsDuration = 0.5;
+
+          if (eventInPattern === 1) {
+            offsetBeats += 0.5;
+            eventBeatsDuration = 1.0;
+          } else if (eventInPattern === 2) {
+            offsetBeats += 1.5;
+            eventBeatsDuration = 0.5;
+          }
+
+          if (offsetBeats >= maxDurationBeats) break;
+
+          const actualBeatsDuration = Math.min(eventBeatsDuration, maxDurationBeats - offsetBeats);
+          const eventTime = targetTime + offsetBeats * beatDuration;
+          const eventDurationReal = Math.max(0.1, actualBeatsDuration * beatDuration);
+
+          if (eventInPattern === 0) {
+            guitarInstrument.play(bassNote.midi, eventTime, { duration: eventDurationReal, gain: 2.5 });
+          } else {
+            const notesToPlay = remainingNotes.length > 0 ? remainingNotes : [bassNote];
+            notesToPlay.forEach(note => {
+              guitarInstrument.play(note.midi, eventTime, { duration: eventDurationReal, gain: 2.5 });
+            });
+          }
+          index++;
+        }
+      } else if (mode === "ataque") {
         playableNotes.forEach((note) => {
           guitarInstrument.play(note.midi, targetTime, { duration: Math.max(0.2, chordDurationReal), gain: 2.5 });
         });
@@ -1157,7 +1560,8 @@
         });
       } else if (mode === "colcheia") {
         const tempoInput = document.getElementById("previewTempo");
-        const tempo = tempoInput ? parseInt(tempoInput.value) : 130;
+        const uiTempo = tempoInput ? parseInt(tempoInput.value) : 75;
+        const tempo = uiTempo * (130 / 75);
         const colcheiaDelayReal = (60 / tempo) / 2;
         const colcheiaDelayMedia = (60 / 130) / 2;
         const count = Math.max(1, Math.floor(maxAllowedDuration / colcheiaDelayMedia));
@@ -1192,26 +1596,32 @@
       if (audioCtx.state === 'suspended') {
         await audioCtx.resume();
       }
-      if (!guitarInstrument) {
-        alert("O áudio do Violão Nylon ainda está sendo carregado. Por favor, aguarde.");
+      if (!guitarInstrument || !bassInstrument) {
+        alert("Os instrumentos de áudio ainda estão sendo carregados. Por favor, aguarde.");
         return;
       }
 
       playlist = [];
+      bossaVariations = [];
+      for (let i = 0; i < 2000; i++) {
+        bossaVariations.push(Math.random() < 0.5);
+      }
       let accumulatedBeats = 0;
       scoreData.forEach((measure, mIdx) => {
         const numChords = measure.chords.length;
+        const measureBeatsScaled = measure.beats * 2; // Dobrado para mudar os acordes na metade da velocidade
         if (numChords === 0) {
-          accumulatedBeats += measure.beats;
+          accumulatedBeats += measureBeatsScaled;
         } else {
-          const beatsPerChord = measure.beats / numChords;
+          const beatsPerChord = measureBeatsScaled / numChords;
           measure.chords.forEach((chord, cIdx) => {
             playlist.push({
               measureIdx: mIdx,
               chordIdx: cIdx,
               startTime: accumulatedBeats * (60 / 130),
               duration: beatsPerChord * (60 / 130),
-              chordData: chord
+              chordData: chord,
+              startBeat: accumulatedBeats
             });
             accumulatedBeats += beatsPerChord;
           });
@@ -1225,61 +1635,95 @@
       }
 
       const tempoInput = document.getElementById("previewTempo");
-      const tempo = tempoInput ? parseInt(tempoInput.value) : 130;
-      const { track, originalBPM } = getBackingTrackForTempo(tempo);
-
-      if (backingTrack85) {
-        backingTrack85.pause();
-        backingTrack85.currentTime = 0;
-      }
-      if (backingTrack130) {
-        backingTrack130.pause();
-        backingTrack130.currentTime = 0;
-      }
-
-      track.currentTime = 0;
-      track.playbackRate = tempo / originalBPM;
-      scheduledChords.clear();
+      const tempo = tempoInput ? parseInt(tempoInput.value) : 75;
+      const actualBPM = tempo * (130 / 75);
 
       try {
-        await track.play();
+        await ensureBackingTrackLoaded(actualBPM);
       } catch (err) {
-        console.error("Erro ao iniciar áudio da prévia:", err);
-        alert("Erro ao iniciar a faixa de acompanhamento. Verifique se há restrições de reprodução ou conexão de rede.");
+        console.error("Erro ao carregar áudio da bateria:", err);
+        alert("Erro ao carregar a bateria de acompanhamento. Verifique sua conexão de rede.");
+        updatePlayButtonText("▶");
+        return;
       }
+
+      if (audioSourceNode) {
+        try { audioSourceNode.stop(); } catch(e){}
+        audioSourceNode = null;
+      }
+
+      const originalBPM = actualBPM <= 120 ? 85 : 130;
+      const buffer = actualBPM <= 120 ? audioBuffer85 : audioBuffer130;
+
+      audioSourceNode = audioCtx.createBufferSource();
+      audioSourceNode.buffer = buffer;
+      audioSourceNode.loop = true;
+      audioSourceNode.connect(drumsGainNode);
 
       previewPlaying = true;
       const playBtn = document.getElementById("previewPlayBtn");
       if (playBtn) {
-        playBtn.textContent = "Prévia: Parar";
+        playBtn.textContent = "■";
         playBtn.style.backgroundColor = "#c0392b";
       }
+
+      const beatDuration = 60 / actualBPM;
+      const countInDurationReal = previewCountIn ? 8 * beatDuration : 0;
+      const now = audioCtx.currentTime;
+      const startDelay = 0.3; // 300ms delay to allow the audio hardware to fully initialize/wake up
+
+      if (previewCountIn) {
+        const h = 1200; // Pitch do Beat 1 (mais agudo)
+        const l = 800;  // Pitch do Beat 2 (mais grave)
+        playClickSound(now + startDelay, h); // Beat 1
+        // pausa no segundo beat (now + startDelay + beatDuration)
+        playClickSound(now + startDelay + 2 * beatDuration, l); // Beat 2
+        // pausa no quarto beat (now + startDelay + 3 * beatDuration)
+        playClickSound(now + startDelay + 4 * beatDuration, h); // Beat 1
+        playClickSound(now + startDelay + 5 * beatDuration, l); // Beat 2
+        playClickSound(now + startDelay + 6 * beatDuration, h); // Beat 1
+        playClickSound(now + startDelay + 7 * beatDuration, l); // Beat 2
+      }
+
+      backingTrackStartTime = now + startDelay + countInDurationReal;
+      backingTrackElapsedBase = 0;
+      currentBPMVal = actualBPM;
+      currentOriginalBPM = originalBPM;
+
+      audioSourceNode.playbackRate.setValueAtTime(actualBPM / originalBPM, backingTrackStartTime);
+      audioSourceNode.start(backingTrackStartTime);
+
+      scheduledChords.clear();
 
       function tick() {
         if (!previewPlaying) return;
 
         const currentTempoInput = document.getElementById("previewTempo");
-        const currentTempo = currentTempoInput ? parseInt(currentTempoInput.value) : 130;
+        const currentTempo = currentTempoInput ? parseInt(currentTempoInput.value) * (130 / 75) : 130;
         const ratio130 = currentTempo / 130;
-        const currentInfo = getBackingTrackForTempo(currentTempo);
-        const currentTrack = currentInfo.track;
-        const originalBPM = currentInfo.originalBPM;
-
-        const playhead130 = currentTrack.currentTime * (originalBPM / 130) + 0.02 * ratio130;
         const nowCtx = audioCtx.currentTime;
+
+        let playhead130 = 0;
+        if (nowCtx >= backingTrackStartTime) {
+          const elapsedMediaActive = backingTrackElapsedBase + (nowCtx - backingTrackStartTime) * (currentTempo / currentOriginalBPM);
+          playhead130 = elapsedMediaActive * (currentOriginalBPM / 130);
+        }
 
         // 1. Audio scheduling: lookahead 150ms real (scaled to 130 BPM media seconds)
         const lookaheadMedia = 0.15 * ratio130;
         playlist.forEach((item, index) => {
           if (!scheduledChords.has(index)) {
-            if (item.startTime >= playhead130 - (0.1 * ratio130) && item.startTime < playhead130 + lookaheadMedia) {
+            const distanceMedia = item.startTime - backingTrackElapsedBase * (currentOriginalBPM / 130);
+            const distanceReal = distanceMedia / ratio130;
+            const targetTime = backingTrackStartTime + distanceReal;
+
+            if (targetTime >= nowCtx - 0.1 && targetTime < nowCtx + 0.15) {
               scheduledChords.add(index);
-              const delayMedia = Math.max(0, item.startTime - playhead130);
-              const delayReal = delayMedia / ratio130;
-              const targetTime = nowCtx + delayReal;
               const selectedVoicing = item.chordData.options[item.chordData.selectedIndex];
               if (selectedVoicing) {
-                playChordAtTime(selectedVoicing.notes, targetTime, item.duration);
+                const nextItem = playlist[index + 1];
+                const nextNotes = nextItem?.chordData?.options[nextItem.chordData.selectedIndex]?.notes || null;
+                playChordAtTime(selectedVoicing.notes, targetTime, item.duration, nextNotes, item.startBeat, item.chordData.chordName);
               }
             }
           }
@@ -1287,19 +1731,45 @@
 
         // 2. UI update: active chord
         let activeItem = null;
-        for (let i = 0; i < playlist.length; i++) {
-          const item = playlist[i];
-          if (playhead130 >= item.startTime && playhead130 < item.startTime + item.duration) {
-            activeItem = item;
-            break;
+        if (nowCtx >= backingTrackStartTime) {
+          for (let i = 0; i < playlist.length; i++) {
+            const item = playlist[i];
+            if (playhead130 >= item.startTime && playhead130 < item.startTime + item.duration) {
+              activeItem = item;
+              break;
+            }
           }
         }
         updateUIActiveChord(activeItem);
 
         // 3. Loop/end check
         if (playhead130 >= totalDuration) {
-          stopPreview();
-          return;
+          if (previewLoop) {
+            if (audioSourceNode) {
+              try { audioSourceNode.stop(); } catch(e){}
+            }
+            scheduledChords.clear();
+            
+            const buffer = currentTempo <= 120 ? audioBuffer85 : audioBuffer130;
+            const originalBPM = currentTempo <= 120 ? 85 : 130;
+
+            audioSourceNode = audioCtx.createBufferSource();
+            audioSourceNode.buffer = buffer;
+            audioSourceNode.loop = true;
+            audioSourceNode.connect(drumsGainNode);
+
+            const now = audioCtx.currentTime;
+            backingTrackStartTime = now;
+            backingTrackElapsedBase = 0;
+            currentBPMVal = currentTempo;
+            currentOriginalBPM = originalBPM;
+
+            audioSourceNode.playbackRate.setValueAtTime(currentTempo / originalBPM, now);
+            audioSourceNode.start(now);
+          } else {
+            stopPreview();
+            return;
+          }
         }
 
         animationFrameId = requestAnimationFrame(tick);
@@ -1316,12 +1786,28 @@
       }
     }
 
-    Soundfont.instrument(audioCtx, 'acoustic_guitar_nylon').then(function (instrument) {
+    let guitarReady = false;
+    let bassReady = false;
+
+    function updateAudioReadyStatus() {
+      if (guitarReady && bassReady) {
+        const statusBadge = document.getElementById("audioStatus");
+        statusBadge.textContent = "Áudio Pronto (Violão & Baixo)";
+        statusBadge.classList.add("ready");
+      }
+    }
+
+    Soundfont.instrument(audioCtx, 'acoustic_guitar_nylon', { destination: guitarGainNode }).then(function (instrument) {
       guitarInstrument = instrument;
-      const statusBadge = document.getElementById("audioStatus");
-      statusBadge.textContent = "Áudio Pronto (Violão Nylon)";
-      statusBadge.classList.add("ready");
-    });
+      guitarReady = true;
+      updateAudioReadyStatus();
+    }).catch(err => console.error("Error loading guitar:", err));
+
+    Soundfont.instrument(audioCtx, 'electric_bass_finger', { destination: bassGainNode }).then(function (instrument) {
+      bassInstrument = instrument;
+      bassReady = true;
+      updateAudioReadyStatus();
+    }).catch(err => console.error("Error loading bass:", err));
 
     async function playArpeggio(notesArr) {
       if (audioCtx.state === 'suspended') await audioCtx.resume();
