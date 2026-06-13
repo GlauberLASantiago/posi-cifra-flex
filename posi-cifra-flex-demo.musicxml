@@ -9,7 +9,7 @@
     <creator type="composer">Glauber Santiago</creator>
     <encoding>
       <software>MuseScore Studio 4.7.3</software>
-      <encoding-date>2026-06-12</encoding-date>
+      <encoding-date>2026-06-13</encoding-date>
       <supports element="accidental" type="yes"/>
       <supports element="beam" type="yes"/>
       <supports element="print" attribute="new-page" type="no"/>
@@ -98,6 +98,12 @@
         </note>
       </measure>
     <measure number="4">
+      <harmony print-frame="no">
+        <root>
+          <root-step>D</root-step>
+          </root>
+        <kind text="9">dominant-ninth</kind>
+        </harmony>
       <note>
         <rest measure="yes"/>
         <duration>2</duration>
@@ -145,6 +151,12 @@
         </note>
       </measure>
     <measure number="8">
+      <harmony print-frame="no">
+        <root>
+          <root-step>A</root-step>
+          </root>
+        <kind text="m6">minor-sixth</kind>
+        </harmony>
       <note>
         <rest measure="yes"/>
         <duration>2</duration>
@@ -156,7 +168,7 @@
         <root>
           <root-step>G</root-step>
           </root>
-        <kind text="m7">minor-seventh</kind>
+        <kind text="m7b5">half-diminished</kind>
         </harmony>
       <note>
         <rest measure="yes"/>
@@ -191,6 +203,12 @@
         </note>
       </measure>
     <measure number="12">
+      <harmony print-frame="no">
+        <root>
+          <root-step>F</root-step>
+          </root>
+        <kind text="6">major-sixth</kind>
+        </harmony>
       <note>
         <rest measure="yes"/>
         <duration>2</duration>
@@ -233,7 +251,7 @@
         <root>
           <root-step>A</root-step>
           </root>
-        <kind text="m6">minor-sixth</kind>
+        <kind text="m9">minor-ninth</kind>
         </harmony>
       <note>
         <rest measure="yes"/>
@@ -242,6 +260,12 @@
         </note>
       </measure>
     <measure number="16">
+      <harmony print-frame="no">
+        <root>
+          <root-step>A</root-step>
+          </root>
+        <kind text="mmaj7" parentheses-degrees="yes">major-minor</kind>
+        </harmony>
       <note>
         <rest measure="yes"/>
         <duration>2</duration>
