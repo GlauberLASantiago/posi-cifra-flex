@@ -96,8 +96,10 @@
     }
 
     .title-card {
-      background-color: rgba(27, 77, 34, 0.85); /* Fundo verde com leve transparência */
-      border: 2px solid var(--finger); /* Borda verde */
+      background-color: rgba(27, 77, 34, 0.85);
+      /* Fundo verde com leve transparência */
+      border: 2px solid var(--finger);
+      /* Borda verde */
       border-radius: 12px;
       padding: 20px;
       margin-bottom: 25px;
@@ -186,8 +188,10 @@
 
     /* Garantir legibilidade das opções de seleção (Windows/Chrome/Edge) */
     select option {
-      background-color: #1E1E1E; /* matches --card-bg */
-      color: #E0E0E0; /* matches --text-main */
+      background-color: #1E1E1E;
+      /* matches --card-bg */
+      color: #E0E0E0;
+      /* matches --text-main */
     }
 
     /* Estilização do botão interno de upload de arquivo */
@@ -453,8 +457,10 @@
     .app-footer {
       margin-top: 50px;
       padding: 20px;
-      background-color: rgba(27, 77, 34, 0.85); /* Fundo verde com leve transparência */
-      border: 2px solid var(--finger); /* Borda verde */
+      background-color: rgba(27, 77, 34, 0.85);
+      /* Fundo verde com leve transparência */
+      border: 2px solid var(--finger);
+      /* Borda verde */
       border-radius: 12px;
       text-align: center;
       color: #E0E0E0;
@@ -597,6 +603,7 @@
       transition: all 0.2s;
       font-weight: bold;
     }
+
     .edit-cifra-btn:hover {
       background: var(--accent);
       color: white;
@@ -616,6 +623,7 @@
       align-items: center;
       justify-content: center;
     }
+
     .delete-chord-btn:hover {
       background: #c0392b;
       color: white;
@@ -635,6 +643,7 @@
       display: inline-block;
       text-align: center;
     }
+
     .add-chord-btn:hover {
       background: var(--accent);
       color: white;
@@ -649,7 +658,8 @@
     <div class="title-card">
       <h1>Posi-Cifra-Flex</h1>
       <p class="subtitle">
-        Posições alternativas para tocar acordes no violão. Importe arquivos XML ou crie projetos novos, gerencie e edite cifras e posições.
+        Posições alternativas para tocar acordes no violão. Importe arquivos XML ou crie projetos novos, gerencie e
+        edite cifras e posições.
         <span id="audioStatus" class="audio-status">Carregando Violão Nylon...</span>
       </p>
     </div>
@@ -675,9 +685,34 @@
           </div>
         </div>
 
-        <div class="control-group">
-          <label>Zoom dos Diagramas: <span id="zoomVal">80%</span></label>
-          <input type="range" id="diagramZoom" min="0.4" max="1.5" step="0.05" value="0.8" oninput="updateDiagramZoom(this.value)" style="cursor: pointer; width: 100%;">
+        <div class="control-group" style="min-width: 350px;">
+          <label>Modo de Edição</label>
+          <div style="display: flex; align-items: center; margin-bottom: 12px; gap: 10px;">
+            <input type="checkbox" id="editCifrasToggle" onchange="toggleEditMode()"
+              style="width: 20px; height: 20px; cursor: pointer;">
+            <label for="editCifrasToggle"
+              style="margin-left: 8px; cursor: pointer; color: var(--text-main); font-weight: normal; text-transform: none; font-size: 0.95rem;">Editar Cifras</label>
+            <button class="btn" id="undoBtn" onclick="undoAction()" style="padding: 3px 8px; font-size: 0.75rem; margin-left: 15px; background-color: #5a5a5a; line-height: 1;" title="Desfazer a última ação (Ctrl+Z)" disabled>↶ Desfazer</button>
+            <button class="btn" id="redoBtn" onclick="redoAction()" style="padding: 3px 8px; font-size: 0.75rem; background-color: #5a5a5a; line-height: 1;" title="Refazer a última ação (Ctrl+Y)" disabled>↷ Refazer</button>
+          </div>
+          
+          <div style="display: flex; align-items: flex-end; gap: 20px; flex-wrap: wrap;">
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <label>Notas</label>
+              <div style="display: flex; align-items: center; height: 30px;">
+                <input type="checkbox" id="viewNotesToggle" onchange="toggleViewNotes()"
+                  style="width: 20px; height: 20px; cursor: pointer;">
+                <label for="viewNotesToggle"
+                  style="margin-left: 8px; cursor: pointer; color: var(--text-main); font-weight: normal; text-transform: none; font-size: 0.95rem;">Visualizar Notas</label>
+              </div>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 5px; max-width: 150px; min-width: 120px;">
+              <label>Zoom: <span id="zoomVal">80%</span></label>
+              <input type="range" id="diagramZoom" min="0.4" max="1.5" step="0.05" value="0.8"
+                oninput="updateDiagramZoom(this.value)" style="cursor: pointer; width: 100%; height: 30px; margin: 0; box-sizing: border-box; vertical-align: middle;">
+            </div>
+          </div>
         </div>
 
         <div class="control-group">
@@ -692,20 +727,20 @@
       <!-- Segunda Linha: Filtros e Configurações -->
       <div class="controls-row">
         <div class="control-group">
-          <label>Limitar Inversões</label>
-          <select id="inversionFilter" onchange="reprocessScore()">
-            <option value="0" selected>Apenas Estado Fundamental</option>
-            <option value="1">Até 1ª Inversão</option>
-            <option value="2">Até 2ª Inversão</option>
-            <option value="3">Até 3ª Inversão (Livre)</option>
+          <label>Abertura Máxima</label>
+          <select id="spanFilter" onchange="reprocessScore()">
+            <option value="3" selected>3 casas</option>
+            <option value="4">4 casas</option>
           </select>
         </div>
 
         <div class="control-group">
-          <label>Cordas Soltas</label>
-          <select id="openStringsFilter" onchange="reprocessScore()">
-            <option value="false" selected>Ignorar Cordas Soltas</option>
-            <option value="true">Permitir Cordas Soltas</option>
+          <label>Limitar Inversões</label>
+          <select id="inversionFilter" onchange="reprocessScore()">
+            <option value="0" selected>Estado Fundamental</option>
+            <option value="1">Até 1ª Inversão</option>
+            <option value="2">Até 2ª Inversão</option>
+            <option value="3">Até 3ª Inversão (Livre)</option>
           </select>
         </div>
 
@@ -720,19 +755,20 @@
         </div>
 
         <div class="control-group">
-          <label>Abertura Máxima</label>
-          <select id="spanFilter" onchange="reprocessScore()">
-            <option value="3">3 casas</option>
-            <option value="4" selected>4 casas</option>
+          <label>Fundamentais</label>
+          <select id="rootFilter" onchange="onRootFilterChange(this.value)">
+            <option value="manter" selected>Manter</option>
+            <option value="incluir">Incluir omissão</option>
+            <option value="omitir">Omitir</option>
+            <option value="recifrar">Omitir recifrando</option>
           </select>
         </div>
-
-        <div class="control-group" style="min-width: 180px;">
-          <label>Modo de Edição</label>
-          <div style="display: flex; align-items: center; height: 100%; padding-top: 5px;">
-            <input type="checkbox" id="editCifrasToggle" onchange="toggleEditMode()" style="width: 20px; height: 20px; cursor: pointer;">
-            <label for="editCifrasToggle" style="margin-left: 8px; cursor: pointer; color: var(--text-main); font-weight: normal; text-transform: none; font-size: 0.95rem;">Editar Cifras</label>
-          </div>
+        <div class="control-group">
+          <label>Cordas Soltas</label>
+          <select id="openStringsFilter" onchange="reprocessScore()">
+            <option value="false" selected>Ignorar Cordas Soltas</option>
+            <option value="true">Permitir Cordas Soltas</option>
+          </select>
         </div>
       </div>
     </div>
@@ -744,11 +780,15 @@
       <div class="score-systems measures-4" id="scoreGrid">
         <p style="color: var(--text-muted); text-align: center; width: 100%;">Aguardando upload do MusicXML...</p>
       </div>
-      <div id="editMeasuresBox" class="data-html2canvas-ignore" style="display: none; margin-top: 20px; justify-content: center; align-items: center; gap: 12px; border-top: 1.5px dashed var(--border); padding-top: 15px;">
+      <div id="editMeasuresBox" class="data-html2canvas-ignore"
+        style="display: none; margin-top: 20px; justify-content: center; align-items: center; gap: 12px; border-top: 1.5px dashed var(--border); padding-top: 15px;">
         <span style="font-weight: bold; color: var(--text-main);">Quantidade de Compassos:</span>
-        <button class="btn" style="background-color: #c0392b; padding: 4px 12px; font-size: 0.95rem; font-weight: bold;" onclick="decrementMeasures()">-</button>
-        <span id="editMeasuresCount" style="font-weight: 900; font-size: 1.25rem; min-width: 40px; text-align: center; color: var(--text-main);">16</span>
-        <button class="btn" style="background-color: #2e6f40; padding: 4px 12px; font-size: 0.95rem; font-weight: bold;" onclick="incrementMeasures()">+</button>
+        <button class="btn" style="background-color: #c0392b; padding: 4px 12px; font-size: 0.95rem; font-weight: bold;"
+          onclick="decrementMeasures()">-</button>
+        <span id="editMeasuresCount"
+          style="font-weight: 900; font-size: 1.25rem; min-width: 40px; text-align: center; color: var(--text-main);">16</span>
+        <button class="btn" style="background-color: #2e6f40; padding: 4px 12px; font-size: 0.95rem; font-weight: bold;"
+          onclick="incrementMeasures()">+</button>
       </div>
     </div>
 
@@ -759,13 +799,30 @@
           <div class="accordion-section">
             <h3>📖 Mini Tutorial</h3>
             <ol>
-              <li><strong>Inicie um projeto:</strong> Carregue um arquivo no formato <code>.xml</code> ou <code>.musicxml</code> (exportado do MuseScore, Finale, Sibelius, etc.) usando o botão de upload, ou crie um projeto do zero clicando em <strong>"Novo"</strong> para definir o título, fórmula de compasso e quantidade inicial de compassos.</li>
-              <li><strong>Veja e ouça os diagramas:</strong> O app desenha automaticamente os diagramas de acordes (posições no braço do violão) no grid. Clique no diagrama para ouvir o acorde dedilhado em áudio sintetizado de alta fidelidade.</li>
-              <li><strong>Selecione posições alternativas:</strong> Clique no botão <strong>"Mudar"</strong> sob qualquer acorde para abrir a galeria com todas as posições correspondentes encontradas e clique na desejada.</li>
-              <li><strong>Edite cifras de forma inteligente:</strong> Ative a caixa <strong>"Editar Cifras"</strong>. Clique na cifra ou em "Editar" para digitar o acorde. O app corrige automaticamente o texto (minúsculas viram maiúsculas, o caractere <code>3</code> vira sustenido <code>#</code>, e o <code>b</code> vira bemol <code>b</code>), além de normalizar e validar musicalmente a cifra. Pressione <code>Enter</code> para salvar e avançar para o próximo compasso.</li>
-              <li><strong>Gerencie a partitura:</strong> Adicione novas cifras com <code>+ Cifra</code>, delete-as com o botão vermelho <code>&times;</code>, ou aumente/diminua a quantidade total de compassos pelos botões <code>+</code> e <code>-</code> abaixo da partitura.</li>
-              <li><strong>Filtre posições:</strong> Configure o limite de inversão de baixos, permissão de cordas soltas, registro de altura (grave, médio ou agudo) e a abertura de casas para adequar os diagramas.</li>
-              <li><strong>Exporte o arranjo:</strong> Clique em <strong>"Exportar Imagem"</strong> para baixar os diagramas diagramados em páginas no formato retrato (A4), prontas para visualização ou impressão.</li>
+              <li><strong>Inicie um projeto:</strong> Carregue um arquivo no formato <code>.xml</code> ou
+                <code>.musicxml</code> (exportado do MuseScore, Finale, Sibelius, etc.) usando o botão de upload, ou
+                crie um projeto do zero clicando em <strong>"Novo"</strong> para definir o título, fórmula de compasso e
+                quantidade inicial de compassos.
+              </li>
+              <li><strong>Veja e ouça os diagramas:</strong> O app desenha automaticamente os diagramas de acordes
+                (posições no braço do violão) no grid. Clique no diagrama para ouvir o acorde dedilhado em áudio
+                sintetizado de alta fidelidade.</li>
+              <li><strong>Selecione posições alternativas:</strong> Clique no botão <strong>"Mudar"</strong> sob
+                qualquer acorde para abrir a galeria com todas as posições correspondentes encontradas e clique na
+                desejada.</li>
+              <li><strong>Edite cifras de forma inteligente:</strong> Ative a caixa <strong>"Editar Cifras"</strong>.
+                Clique na cifra ou em "Editar" para digitar o acorde. O app corrige automaticamente o texto (minúsculas
+                viram maiúsculas, o caractere <code>3</code> vira sustenido <code>#</code>, e o <code>b</code> vira
+                bemol <code>b</code>), além de normalizar e validar musicalmente a cifra. Pressione <code>Enter</code>
+                para salvar e avançar para o próximo compasso.</li>
+              <li><strong>Gerencie a partitura:</strong> Adicione novas cifras com <code>+ Cifra</code>, delete-as com o
+                botão vermelho <code>&times;</code>, ou aumente/diminua a quantidade total de compassos pelos botões
+                <code>+</code> e <code>-</code> abaixo da partitura.
+              </li>
+              <li><strong>Filtre posições:</strong> Configure o limite de inversão de baixos, permissão de cordas
+                soltas, registro de altura (grave, médio ou agudo) e a abertura de casas para adequar os diagramas.</li>
+              <li><strong>Exporte o arranjo:</strong> Clique em <strong>"Exportar Imagem"</strong> para baixar os
+                diagramas diagramados em páginas no formato retrato (A4), prontas para visualização ou impressão.</li>
             </ol>
           </div>
 
@@ -858,10 +915,14 @@
         <button class="close-btn" onclick="closeExportModal()">&times;</button>
       </div>
       <p style="color: var(--text-main); margin-bottom: 15px;">
-        Se a imagem não foi baixada automaticamente, clique com o botão direito nela abaixo e escolha <strong>"Salvar imagem como..."</strong> para salvar no seu computador.
+        Se a imagem não foi baixada automaticamente, clique com o botão direito nela abaixo e escolha <strong>"Salvar
+          imagem como..."</strong> para salvar no seu computador.
       </p>
-      <div id="exportPreviewContainer" style="text-align: center; background: #eee; padding: 20px; border-radius: 8px; overflow: auto; margin-bottom: 15px; display: flex; flex-direction: column; align-items: center; gap: 15px;">
-        <img id="exportPreview" style="max-width: 100%; max-height: 60vh; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.15);" alt="Visualização do Arranjo" />
+      <div id="exportPreviewContainer"
+        style="text-align: center; background: #eee; padding: 20px; border-radius: 8px; overflow: auto; margin-bottom: 15px; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+        <img id="exportPreview"
+          style="max-width: 100%; max-height: 60vh; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.15);"
+          alt="Visualização do Arranjo" />
       </div>
       <div style="text-align: right; margin-top: 15px;">
         <button class="btn" style="background-color: #5a5a5a;" onclick="closeExportModal()">Fechar</button>
@@ -877,15 +938,20 @@
       <div style="display: flex; flex-direction: column; gap: 15px;">
         <div class="control-group" style="flex: none;">
           <label for="newProjectTitle" style="color: var(--text-main); text-transform: none;">Título da Música</label>
-          <input type="text" id="newProjectTitle" placeholder="Ex: Garota de Ipanema" value="Minha Música" style="border: 1px solid var(--border); background-color: var(--bg-color); color: var(--text-main); padding: 10px; border-radius: 6px; font-size: 1rem; width: 100%; box-sizing: border-box;">
+          <input type="text" id="newProjectTitle" placeholder="Ex: Garota de Ipanema" value="Minha Música"
+            style="border: 1px solid var(--border); background-color: var(--bg-color); color: var(--text-main); padding: 10px; border-radius: 6px; font-size: 1rem; width: 100%; box-sizing: border-box;">
         </div>
         <div class="control-group" style="flex: none;">
-          <label for="newProjectTimeSig" style="color: var(--text-main); text-transform: none;">Tipo de Compasso (x/y)</label>
-          <input type="text" id="newProjectTimeSig" placeholder="Ex: 4/4, 3/4, 6/8" value="4/4" style="border: 1px solid var(--border); background-color: var(--bg-color); color: var(--text-main); padding: 10px; border-radius: 6px; font-size: 1rem; width: 100%; box-sizing: border-box;">
+          <label for="newProjectTimeSig" style="color: var(--text-main); text-transform: none;">Tipo de Compasso
+            (x/y)</label>
+          <input type="text" id="newProjectTimeSig" placeholder="Ex: 4/4, 3/4, 6/8" value="4/4"
+            style="border: 1px solid var(--border); background-color: var(--bg-color); color: var(--text-main); padding: 10px; border-radius: 6px; font-size: 1rem; width: 100%; box-sizing: border-box;">
         </div>
         <div class="control-group" style="flex: none;">
-          <label for="newProjectMeasures" style="color: var(--text-main); text-transform: none;">Quantidade de Compassos</label>
-          <input type="number" id="newProjectMeasures" placeholder="Ex: 16" min="1" max="500" value="16" style="border: 1px solid var(--border); background-color: var(--bg-color); color: var(--text-main); padding: 10px; border-radius: 6px; font-size: 1rem; width: 100%; box-sizing: border-box;">
+          <label for="newProjectMeasures" style="color: var(--text-main); text-transform: none;">Quantidade de
+            Compassos</label>
+          <input type="number" id="newProjectMeasures" placeholder="Ex: 16" min="1" max="500" value="16"
+            style="border: 1px solid var(--border); background-color: var(--bg-color); color: var(--text-main); padding: 10px; border-radius: 6px; font-size: 1rem; width: 100%; box-sizing: border-box;">
         </div>
         <div id="newProjectErrorMsg" style="color: #c0392b; font-size: 0.9rem; font-weight: bold; display: none;"></div>
         <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
@@ -904,8 +970,10 @@
       </div>
       <div style="display: flex; flex-direction: column; gap: 15px;">
         <div class="control-group" style="flex: none;">
-          <label for="cifraInput" style="color: var(--text-main); text-transform: none;">Digite a Cifra (ex: C, Dm7, G#7, F/A, Bb9)</label>
-          <input type="text" id="cifraInput" placeholder="Ex: C#m7" onkeydown="handleCifraInputKeyDown(event)" style="border: 1px solid var(--border); background-color: var(--bg-color); color: var(--text-main); padding: 10px; border-radius: 6px; font-size: 1.1rem; width: 100%; box-sizing: border-box;">
+          <label for="cifraInput" style="color: var(--text-main); text-transform: none;">Digite a Cifra (ex: C, Dm7,
+            G#7, F/A, Bb9)</label>
+          <input type="text" id="cifraInput" placeholder="Ex: C#m7" onkeydown="handleCifraInputKeyDown(event)"
+            style="border: 1px solid var(--border); background-color: var(--bg-color); color: var(--text-main); padding: 10px; border-radius: 6px; font-size: 1.1rem; width: 100%; box-sizing: border-box;">
         </div>
         <div id="cifraErrorMsg" style="color: #c0392b; font-size: 0.9rem; font-weight: bold; display: none;"></div>
         <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
@@ -957,6 +1025,36 @@
         grid.classList.remove("measures-8");
         grid.classList.add("measures-4");
       }
+    }
+
+    function onRootFilterChange(val) {
+      if (val === "incluir" || val === "omitir" || val === "recifrar") {
+        const invSelect = document.getElementById("inversionFilter");
+        if (invSelect) {
+          invSelect.value = "1";
+        }
+        const regSelect = document.getElementById("registerFilter");
+        if (regSelect) {
+          regSelect.value = "agudo";
+        }
+      }
+      reprocessScore();
+    }
+
+    function recifrarAcorde(chordName) {
+      const parts = chordName.split('/');
+      const baseChord = parts[0];
+      const tonalChord = Tonal.Chord.get(baseChord);
+      if (tonalChord.empty) return chordName;
+
+      const rootNote = tonalChord.tonic;
+      const notesWithoutRoot = tonalChord.notes.filter(n => Tonal.Note.chroma(n) !== Tonal.Note.chroma(rootNote));
+      
+      const detected = Tonal.Chord.detect(notesWithoutRoot);
+      if (detected && detected.length > 0) {
+        return detected[0];
+      }
+      return chordName;
     }
 
     function createFretboardSVG(notesArr, scale = 1) {
@@ -1085,14 +1183,19 @@
       return name;
     }
 
-    function findPlayableVoicings(chordInput) {
+    function findPlayableVoicings(chordInput, omitRoot = false, overrides = {}) {
       const chord = Tonal.Chord.get(chordInput);
       if (chord.empty) return [];
 
       const rootChroma = Tonal.Note.chroma(chord.tonic);
-      const reqChromas = chord.notes.map(n => Tonal.Note.chroma(n));
-      const maxInversionAllowed = parseInt(document.getElementById("inversionFilter").value);
-      const allowOpenStrings = document.getElementById("openStringsFilter")?.value === "true";
+      let reqChromas = chord.notes.map(n => Tonal.Note.chroma(n));
+      if (omitRoot) {
+        reqChromas = reqChromas.filter(c => c !== rootChroma);
+      }
+      const maxInversionAllowed = overrides.inversion !== undefined ? overrides.inversion : parseInt(document.getElementById("inversionFilter").value);
+      const allowOpenStrings = overrides.openStrings !== undefined ? overrides.openStrings : (document.getElementById("openStringsFilter")?.value === "true");
+      const spanVal = overrides.span !== undefined ? overrides.span : parseInt(document.getElementById("spanFilter")?.value || "4");
+      const regFilter = overrides.reg !== undefined ? overrides.reg : (document.getElementById("registerFilter")?.value || "all");
 
       let requiredForVoicing = [...reqChromas];
       if (reqChromas.length >= 5) {
@@ -1105,7 +1208,7 @@
           requiredForVoicing = requiredForVoicing.filter(c => c !== eleventhChroma);
         }
         if (requiredForVoicing.length >= 5 && (chord.intervals.includes("9M") || chord.intervals.includes("9m"))) {
-          const ninthChroma = (rootChroma + 2) % 12;
+          const ninthChroma = chord.intervals.includes("9m") ? (rootChroma + 1) % 12 : (rootChroma + 2) % 12;
           requiredForVoicing = requiredForVoicing.filter(c => c !== ninthChroma);
         }
       }
@@ -1137,6 +1240,7 @@
             if (played.length < 3) return;
 
             let chromas = played.map(n => n.chroma);
+            if (omitRoot && chromas.includes(rootChroma)) return;
             if (!requiredForVoicing.every(c => chromas.includes(c))) return;
 
             let bassChroma = played[0].chroma;
@@ -1150,7 +1254,7 @@
             let fretted = played.filter(n => n.fret > 0);
             if (fretted.length > 0) {
               let minF = Math.min(...fretted.map(n => n.fret)), maxF = Math.max(...fretted.map(n => n.fret));
-              const maxSpan = parseInt(document.getElementById("spanFilter")?.value || "4");
+              const maxSpan = spanVal;
               const maxDiff = (maxSpan - 1) + (minF >= 8 ? 1 : 0);
               if (maxF - minF > maxDiff) return;
               let notesOnMinFret = fretted.filter(n => n.fret === minF);
@@ -1167,14 +1271,13 @@
             if (pSorted.length >= 2 && pSorted[0].midi < 50 && (pSorted[1].midi - pSorted[0].midi) <= 2) return;
 
             // Filtro de Registro (Grave, Médio, Agudo)
-            const registerFilter = document.getElementById("registerFilter")?.value || "all";
-            if (registerFilter !== "all") {
+            if (regFilter !== "all") {
               const maxMidi = pSorted[pSorted.length - 1].midi; // highest note
-              if (registerFilter === "grave") {
+              if (regFilter === "grave") {
                 if (maxMidi > 64) return; // máximo até Mi4 (64)
-              } else if (registerFilter === "medio") {
+              } else if (regFilter === "medio") {
                 if (played.some(n => n.midi < 50 || n.midi > 69)) return; // apenas de Ré3 (50) a Lá4 (69)
-              } else if (registerFilter === "agudo") {
+              } else if (regFilter === "agudo") {
                 if (played.some(n => n.midi <= 57)) return; // apenas acima de Lá3 (57)
               }
             }
@@ -1188,6 +1291,52 @@
         build(0, []);
       }
       return voicings.sort((a, b) => a.bassMidi - b.bassMidi);
+    }
+
+    function getVoicingsForChord(chordName) {
+      const rootFilter = document.getElementById("rootFilter")?.value || "manter";
+      let options = [];
+      let isException = false;
+
+      const omitRoot = (rootFilter === "omitir" || rootFilter === "recifrar");
+
+      if (rootFilter === "manter") {
+        options = findPlayableVoicings(chordName, false);
+      } else if (omitRoot) {
+        options = findPlayableVoicings(chordName, true);
+      } else if (rootFilter === "incluir") {
+        const withRoot = findPlayableVoicings(chordName, false);
+        const withoutRoot = findPlayableVoicings(chordName, true);
+        
+        const combined = [...withRoot];
+        const seenSigs = new Set(withRoot.map(v => v.notes.map(n => n.fret).join(',')));
+        
+        withoutRoot.forEach(v => {
+          const sig = v.notes.map(n => n.fret).join(',');
+          if (!seenSigs.has(sig)) {
+            seenSigs.add(sig);
+            combined.push(v);
+          }
+        });
+        options = combined.sort((a, b) => a.bassMidi - b.bassMidi);
+      }
+
+      // Se não encontrou nenhuma digitação sob os filtros ativos, aplica o comportamento de Exceção
+      if (options.length === 0) {
+        isException = true;
+        // Busca o rol de posições em geral para aquela cifragem (sem omissão de fundamental, sem restrições de filtros)
+        options = findPlayableVoicings(chordName, false, {
+          inversion: 3,
+          openStrings: true,
+          span: 4,
+          reg: "all"
+        });
+      }
+
+      return {
+        options: options,
+        isException: isException
+      };
     }
 
     let scoreData = [];
@@ -1272,6 +1421,9 @@
         if (alt === '3') alt = '#';
         else if (alt.toLowerCase() === 'b') alt = 'b';
 
+        // Remove parênteses para suportar formatos como 7(b9), 7(#9), etc.
+        suf = suf.replace(/[\(\)]/g, "");
+
         // Normalização do sufixo
         let normalizedSuf = suf.toLowerCase().replace(/3/g, '#').replace(/b/g, 'b');
         let canonSuf = suffixMap[normalizedSuf];
@@ -1337,6 +1489,148 @@
       renderScoreGrid();
     }
 
+    function toggleViewNotes() {
+      renderScoreGrid();
+    }
+
+    function toPortugueseNote(noteName) {
+      const pMap = { C: "Dó", D: "Ré", E: "Mi", F: "Fá", G: "Sol", A: "Lá", B: "Si" };
+      const base = noteName.charAt(0).toUpperCase();
+      const accidental = noteName.slice(1);
+      return (pMap[base] || base) + accidental;
+    }
+
+    function getVoicingNoteNames(notesArr, chordName) {
+      const baseChord = chordName.split('/')[0];
+      const rootFilter = document.getElementById("rootFilter")?.value || "manter";
+      let chordToUse = baseChord;
+      if (rootFilter === "recifrar") {
+        chordToUse = recifrarAcorde(chordName);
+      }
+      const tonalChord = Tonal.Chord.get(chordToUse);
+      
+      let candidates = [];
+      if (!tonalChord.empty) {
+        candidates = [...tonalChord.notes];
+      }
+      const bassPart = chordName.split('/')[1];
+      if (bassPart) {
+        candidates.push(bassPart);
+      }
+
+      // Descobre se o acorde prefere sustenidos ou bemóis
+      const useSharps = chordName.includes('#') || candidates.some(n => n.includes('#'));
+
+      // Ordena de string 6 para string 1 (do mais grave para o mais agudo na ordem física do braço)
+      const playedNotes = [...notesArr].sort((a, b) => b.string - a.string).filter(n => n.fret !== -1);
+
+      return playedNotes.map(n => {
+        const chroma = n.midi % 12;
+        const match = candidates.find(c => Tonal.Note.chroma(c) === chroma);
+        let name = "";
+        if (match) {
+          name = match.charAt(0).toUpperCase() + match.slice(1);
+        } else {
+          const noteName = Tonal.Note.fromMidi(n.midi);
+          if (useSharps && noteName.includes('b')) {
+            name = Tonal.Note.enharmonic(noteName).replace(/\d+$/, "");
+          } else if (!useSharps && noteName.includes('#')) {
+            name = Tonal.Note.enharmonic(noteName).replace(/\d+$/, "");
+          } else {
+            name = noteName.replace(/\d+$/, "");
+          }
+        }
+        return toPortugueseNote(name);
+      });
+    }
+
+    let undoStack = [];
+    let redoStack = [];
+
+    function saveStateToHistory() {
+      const state = {
+        scoreData: JSON.parse(JSON.stringify(scoreData)),
+        globalTitle: globalTitle,
+        currentRawXML: currentRawXML
+      };
+      undoStack.push(state);
+      if (undoStack.length > 50) {
+        undoStack.shift();
+      }
+      redoStack = [];
+      updateUndoRedoButtons();
+    }
+
+    function undoAction() {
+      if (undoStack.length <= 1) return;
+      
+      const currentState = undoStack.pop();
+      redoStack.push(currentState);
+      
+      const prevState = undoStack[undoStack.length - 1];
+      
+      scoreData = JSON.parse(JSON.stringify(prevState.scoreData));
+      globalTitle = prevState.globalTitle;
+      currentRawXML = prevState.currentRawXML;
+      
+      document.getElementById("scoreTitle").innerText = globalTitle;
+      renderScoreGrid();
+      updateUndoRedoButtons();
+    }
+
+    function redoAction() {
+      if (redoStack.length === 0) return;
+      
+      const nextState = redoStack.pop();
+      undoStack.push(nextState);
+      
+      scoreData = JSON.parse(JSON.stringify(nextState.scoreData));
+      globalTitle = nextState.globalTitle;
+      currentRawXML = nextState.currentRawXML;
+      
+      document.getElementById("scoreTitle").innerText = globalTitle;
+      renderScoreGrid();
+      updateUndoRedoButtons();
+    }
+
+    function updateUndoRedoButtons() {
+      const undoBtn = document.getElementById("undoBtn");
+      const redoBtn = document.getElementById("redoBtn");
+      
+      if (undoBtn) {
+        const canUndo = undoStack.length > 1;
+        undoBtn.disabled = !canUndo;
+        undoBtn.style.opacity = canUndo ? "1" : "0.5";
+        undoBtn.style.cursor = canUndo ? "pointer" : "not-allowed";
+      }
+      
+      if (redoBtn) {
+        const canRedo = redoStack.length > 0;
+        redoBtn.disabled = !canRedo;
+        redoBtn.style.opacity = canRedo ? "1" : "0.5";
+        redoBtn.style.cursor = canRedo ? "pointer" : "not-allowed";
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      // Evita disparar se o usuário estiver digitando no input da cifra ou outro input
+      const activeEl = document.activeElement;
+      if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'SELECT' || activeEl.tagName === 'TEXTAREA')) {
+        // Deixa prosseguir caso não seja Ctrl+Z / Ctrl+Y
+        if (activeEl.id === 'cifraInput' && e.key === 'Enter') return;
+        if (!e.ctrlKey) return;
+      }
+      
+      if (e.ctrlKey && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        undoAction();
+      }
+      if (e.ctrlKey && e.key.toLowerCase() === 'y') {
+        e.preventDefault();
+        redoAction();
+      }
+    });
+
     function openNewProjectModal() {
       document.getElementById("newProjectTitle").value = "Minha Música";
       document.getElementById("newProjectTimeSig").value = "4/4";
@@ -1396,6 +1690,9 @@
       }
 
       closeNewProjectModal();
+      undoStack = [];
+      redoStack = [];
+      saveStateToHistory();
       renderScoreGrid();
     }
 
@@ -1439,11 +1736,12 @@
       const mIdx = cifraEditingState.measureIdx;
       const cIdx = cifraEditingState.chordIdx;
       const adjustedChordName = result.adjusted;
-      const options = findPlayableVoicings(adjustedChordName);
+      const resVoicings = getVoicingsForChord(adjustedChordName);
 
       const chordObj = {
         chordName: adjustedChordName,
-        options: options,
+        options: resVoicings.options,
+        isException: resVoicings.isException,
         selectedIndex: 0
       };
 
@@ -1453,10 +1751,12 @@
         scoreData[mIdx].chords.push(chordObj);
       }
 
+      saveStateToHistory();
+
       closeEditCifraModal();
       renderScoreGrid();
 
-      if (options.length === 0) {
+      if (resVoicings.options.length === 0) {
         alert(`Aviso: O acorde "${adjustedChordName}" foi salvo, mas nenhuma posição de violão foi encontrada com os filtros atuais. Experimente ajustar os filtros (ex: habilitar cordas soltas ou aumentar a abertura máxima).`);
       }
 
@@ -1482,6 +1782,7 @@
     function deleteChord(mIdx, cIdx) {
       if (confirm(`Deseja excluir a cifra "${scoreData[mIdx].chords[cIdx].chordName}"?`)) {
         scoreData[mIdx].chords.splice(cIdx, 1);
+        saveStateToHistory();
         renderScoreGrid();
       }
     }
@@ -1494,14 +1795,15 @@
         beats = scoreData[scoreData.length - 1].beats;
         beatType = scoreData[scoreData.length - 1].beatType;
       }
-      
+
       scoreData.push({
         measureNum: newNum,
         beats: beats,
         beatType: beatType,
         chords: []
       });
-      
+
+      saveStateToHistory();
       renderScoreGrid();
     }
 
@@ -1510,14 +1812,15 @@
         alert("A partitura deve conter pelo menos 1 compasso!");
         return;
       }
-      
+
       const lastMeasure = scoreData[scoreData.length - 1];
       if (lastMeasure.chords.length > 0) {
         const confirmDelete = confirm(`O último compasso (${lastMeasure.measureNum}) contém cifras. Deseja realmente removê-lo?`);
         if (!confirmDelete) return;
       }
-      
+
       scoreData.pop();
+      saveStateToHistory();
       renderScoreGrid();
     }
 
@@ -1536,7 +1839,7 @@
         reader.onload = async function (e) {
           try {
             const zip = await JSZip.loadAsync(e.target.result);
-            
+
             // Procurar container.xml para localizar o arquivo principal
             let xmlPath = "";
             const containerFile = zip.file("META-INF/container.xml");
@@ -1552,7 +1855,7 @@
 
             // Fallback: pegar o primeiro arquivo com extensão .xml ou .musicxml
             if (!xmlPath) {
-              const xmlFiles = Object.keys(zip.files).filter(name => 
+              const xmlFiles = Object.keys(zip.files).filter(name =>
                 (name.endsWith('.xml') || name.endsWith('.musicxml')) && !name.includes('container.xml')
               );
               if (xmlFiles.length > 0) {
@@ -1587,9 +1890,10 @@
     function reprocessScore() {
       scoreData.forEach(measure => {
         measure.chords.forEach(chord => {
-          const options = findPlayableVoicings(chord.chordName);
-          chord.options = options;
-          if (chord.selectedIndex >= options.length) {
+          const resVoicings = getVoicingsForChord(chord.chordName);
+          chord.options = resVoicings.options;
+          chord.isException = resVoicings.isException;
+          if (chord.selectedIndex >= resVoicings.options.length) {
             chord.selectedIndex = 0;
           }
         });
@@ -1702,14 +2006,29 @@
               }
             }
 
-            // Verifica graus adicionados (<degree>) na partitura XML
+            // Verifica graus (<degree>) na partitura XML para extensões ou alterações
             const degrees = child.getElementsByTagName("degree");
             let addedDegrees = [];
+            let hasFlat9 = false;
+            let hasSharp9 = false;
+            let hasFlat5 = false;
+            let hasSharp5 = false;
+
             for (let d = 0; d < degrees.length; d++) {
               const degVal = degrees[d].querySelector("degree-value")?.textContent;
               const degType = degrees[d].querySelector("degree-type")?.textContent;
-              if (degType === "add" && degVal) {
-                addedDegrees.push(degVal);
+              const degAlter = degrees[d].querySelector("degree-alter")?.textContent;
+
+              if (degVal === "7" && degType === "add") {
+                addedDegrees.push("7");
+              }
+              if (degVal === "9") {
+                if (degAlter === "-1") hasFlat9 = true;
+                if (degAlter === "1") hasSharp9 = true;
+              }
+              if (degVal === "5") {
+                if (degAlter === "-1") hasFlat5 = true;
+                if (degAlter === "1") hasSharp5 = true;
               }
             }
 
@@ -1718,6 +2037,31 @@
               else if (suffix === "sus2") suffix = "7sus2";
               else if (suffix === "") suffix = "7";
               else if (suffix === "m") suffix = "m7";
+            }
+
+            // Aplica alterações de nona e quinta
+            if (hasFlat9) {
+              if (suffix === "9" || suffix === "7" || suffix === "") {
+                suffix = "7b9";
+              } else if (suffix === "m7" || suffix === "m") {
+                suffix = "m7b9";
+              }
+            } else if (hasSharp9) {
+              if (suffix === "9" || suffix === "7" || suffix === "") {
+                suffix = "7#9";
+              } else if (suffix === "m7" || suffix === "m") {
+                suffix = "m7#9";
+              }
+            }
+
+            if (hasFlat5) {
+              if (suffix === "7") suffix = "7b5";
+              else if (suffix === "m7") suffix = "m7b5";
+              else if (suffix === "") suffix = "b5";
+            } else if (hasSharp5) {
+              if (suffix === "7") suffix = "7#5";
+              else if (suffix === "m7") suffix = "m7#5";
+              else if (suffix === "") suffix = "aug";
             }
 
             if (suffix === undefined) {
@@ -1737,19 +2081,24 @@
               chordName += "/" + bassPart;
             }
 
-            let options = findPlayableVoicings(chordName);
-            if (options.length === 0) {
+            let resVoicings = getVoicingsForChord(chordName);
+            if (resVoicings.options.length === 0) {
               let fallbackChordName = simplifyChordName(chordName);
               if (fallbackChordName !== chordName) {
-                options = findPlayableVoicings(fallbackChordName);
-                if (options.length > 0) {
+                resVoicings = getVoicingsForChord(fallbackChordName);
+                if (resVoicings.options.length > 0) {
                   chordName = fallbackChordName;
                 }
               }
             }
 
-            if (options.length > 0) {
-              measureChords.push({ chordName: chordName, options: options, selectedIndex: 0 });
+            if (resVoicings.options.length > 0) {
+              measureChords.push({
+                chordName: chordName,
+                options: resVoicings.options,
+                isException: resVoicings.isException,
+                selectedIndex: 0
+              });
             }
           }
         }
@@ -1761,6 +2110,9 @@
           chords: measureChords
         });
       }
+      undoStack = [];
+      redoStack = [];
+      saveStateToHistory();
       renderScoreGrid();
     }
 
@@ -1798,12 +2150,23 @@
           const selectedVoicing = chordData.options[chordData.selectedIndex];
 
           let displayChord = chordData.chordName;
-          const tonalChord = Tonal.Chord.get(chordData.chordName.split('/')[0]);
+          const rootFilter = document.getElementById("rootFilter")?.value || "manter";
+          
+          let baseChord = chordData.chordName.split('/')[0];
+          if (rootFilter === "recifrar") {
+            baseChord = recifrarAcorde(chordData.chordName);
+          }
+
+          const tonalChord = Tonal.Chord.get(baseChord);
           if (!tonalChord.empty) {
             let bassNoteStr = tonalChord.notes.find(n => Tonal.Note.chroma(n) === ((selectedVoicing ? selectedVoicing.bassMidi : 0) % 12));
             if (bassNoteStr && Tonal.Note.chroma(bassNoteStr) !== Tonal.Note.chroma(tonalChord.tonic)) {
-              displayChord = `${chordData.chordName.split('/')[0]}/${bassNoteStr.charAt(0).toUpperCase() + bassNoteStr.slice(1)}`;
+              displayChord = `${baseChord}/${bassNoteStr.charAt(0).toUpperCase() + bassNoteStr.slice(1)}`;
+            } else {
+              displayChord = baseChord;
             }
+          } else {
+            displayChord = baseChord;
           }
           displayChord = displayChord.replace(/maj7/g, "7M");
 
@@ -1821,8 +2184,10 @@
 
           let chordHeader = "";
           let actionButtons = "";
+          let exceptionBadge = chordData.isException ? `<span style="font-size: 0.65rem; background-color: var(--accent); color: white; padding: 1px 4px; border-radius: 3px; margin-left: 4px; vertical-align: middle;">exceção</span>` : "";
+
           if (isEditMode) {
-            chordHeader = `<h4 onclick="openEditCifraModal(${mIdx}, ${cIdx})" style="cursor: pointer; text-decoration: underline dashed 1.5px var(--accent); margin: 0 0 4px 0;" title="Clique para editar cifra">${displayChord}</h4>`;
+            chordHeader = `<h4 onclick="openEditCifraModal(${mIdx}, ${cIdx})" style="cursor: pointer; text-decoration: underline dashed 1.5px var(--accent); margin: 0 0 4px 0;" title="Clique para editar cifra">${displayChord}${exceptionBadge}</h4>`;
             actionButtons = `
               <div style="display: flex; gap: 4px; margin-top: 6px;">
                 <button class="change-btn data-html2canvas-ignore" onclick="openEditCifraModal(${mIdx}, ${cIdx})">Editar</button>
@@ -1830,10 +2195,16 @@
               </div>
             `;
           } else {
-            chordHeader = `<h4 style="margin: 0 0 4px 0;">${displayChord}</h4>`;
+            chordHeader = `<h4 style="margin: 0 0 4px 0;">${displayChord}${exceptionBadge}</h4>`;
             actionButtons = `
               <button class="change-btn data-html2canvas-ignore" onclick="openModal(${mIdx}, ${cIdx})">Mudar</button>
             `;
+          }
+
+          let notesTextHTML = "";
+          if (document.getElementById("viewNotesToggle")?.checked && selectedVoicing) {
+            const noteNames = getVoicingNoteNames(selectedVoicing.notes, chordData.chordName);
+            notesTextHTML = `<div class="chord-notes-list" style="font-size: 0.58rem; color: var(--text-muted); margin-top: 4px; font-weight: bold; text-align: center; max-width: ${85 * diagramScale}px; overflow-wrap: break-word;">${noteNames.join(" ")}</div>`;
           }
 
           eventDiv.innerHTML = `
@@ -1841,6 +2212,7 @@
             <div ${arpeggioClick}>
               ${fretboardSVG}
             </div>
+            ${notesTextHTML}
             ${actionButtons}
           `;
           chordsContainer.appendChild(eventDiv);
@@ -1872,7 +2244,14 @@
     function openModal(mIdx, cIdx) {
       editingContext = { measureIdx: mIdx, chordIdx: cIdx };
       const chordData = scoreData[mIdx].chords[cIdx];
-      document.getElementById("modalTitle").innerText = `Escolher posição: ${chordData.chordName.replace(/maj7/g, "7M")}`;
+      
+      let displayTitle = chordData.chordName;
+      const rootFilter = document.getElementById("rootFilter")?.value || "manter";
+      if (rootFilter === "recifrar") {
+        displayTitle = recifrarAcorde(chordData.chordName);
+      }
+      
+      document.getElementById("modalTitle").innerText = `Escolher posição: ${displayTitle.replace(/maj7/g, "7M")}`;
 
       const optionsContainer = document.getElementById("modalOptions");
       optionsContainer.innerHTML = "";
@@ -1881,13 +2260,22 @@
         const card = document.createElement("div");
         card.className = `option-card ${optIndex === chordData.selectedIndex ? 'selected' : ''}`;
 
+        let notesTextHTML = "";
+        if (document.getElementById("viewNotesToggle")?.checked) {
+          const noteNames = getVoicingNoteNames(opt.notes, chordData.chordName);
+          notesTextHTML = `<div class="chord-notes-list" style="font-size: 0.58rem; color: #444; margin-top: 4px; font-weight: bold; text-align: center; max-width: 100px; overflow-wrap: break-word;">${noteNames.join(" ")}</div>`;
+        }
+
         card.innerHTML = `
           <div style="font-size:0.85rem; font-weight:bold; margin-bottom:8px; color: #000;">Opção ${optIndex + 1}</div>
-          ${createFretboardSVG(opt.notes, 1.0)} `;
+          ${createFretboardSVG(opt.notes, 1.0)}
+          ${notesTextHTML}
+        `;
 
         card.onclick = () => {
           playArpeggio(opt.notes);
           scoreData[editingContext.measureIdx].chords[editingContext.chordIdx].selectedIndex = optIndex;
+          saveStateToHistory();
           closeModal();
           renderScoreGrid();
         };
@@ -1910,11 +2298,11 @@
       const totalMeasures = scoreData.length;
       const measuresPerLine = document.getElementById("measuresPerLine").value;
       const cols = (measuresPerLine === "8") ? 8 : 4;
-      
+
       // Define a quantidade máxima de linhas por página (8 linhas por página é ideal para preencher a folha A4 Retrato)
       const linesPerPage = 8;
       const measuresPerPage = cols * linesPerPage; // 32 compassos para layout de 4, ou 64 para layout de 8
-      
+
       // O app calcula automaticamente o número de páginas necessárias
       const numPages = Math.ceil(totalMeasures / measuresPerPage);
       const windowWidth = (measuresPerLine === "8") ? 1040 : 720;
@@ -2029,7 +2417,7 @@
 
         canvases.forEach((canvas, idx) => {
           try {
-            canvas.toBlob(function(blob) {
+            canvas.toBlob(function (blob) {
               const url = URL.createObjectURL(blob);
 
               // Adiciona imagem ao container de pré-visualização do modal
@@ -2075,6 +2463,7 @@
         globalTitle: globalTitle,
         currentRawXML: currentRawXML,
         scoreData: scoreData,
+        rootFilter: document.getElementById("rootFilter").value,
         inversionFilter: document.getElementById("inversionFilter").value,
         openStringsFilter: document.getElementById("openStringsFilter").value,
         registerFilter: document.getElementById("registerFilter").value,
@@ -2083,8 +2472,18 @@
         diagramScale: diagramScale
       };
 
+      const headerText = `========================================================================
+ESTE É UM ARQUIVO DE PROJETO DO POSI-CIFRA-FLEX.
+Se você deseja abrir este projeto para visualizar e editar os diagramas,
+acesse o aplicativo em: https://github.com/GlauberLASantiago/posi-cifra-flex
+
+Para carregar o projeto no aplicativo, clique no botão "Abrir" 
+e selecione este arquivo de texto.
+========================================================================\n\n`;
+
       const jsonStr = JSON.stringify(projectData, null, 2);
-      const blob = new Blob([jsonStr], { type: "text/plain;charset=utf-8" });
+      const fileText = headerText + jsonStr;
+      const blob = new Blob([fileText], { type: "text/plain;charset=utf-8" });
       const link = document.createElement("a");
       const url = URL.createObjectURL(blob);
       link.href = url;
@@ -2102,7 +2501,12 @@
       const reader = new FileReader();
       reader.onload = function (e) {
         try {
-          const projectData = JSON.parse(e.target.result);
+          let fileContent = e.target.result;
+          const jsonStart = fileContent.indexOf('{');
+          if (jsonStart !== -1) {
+            fileContent = fileContent.slice(jsonStart);
+          }
+          const projectData = JSON.parse(fileContent);
           if (!projectData.scoreData && !projectData.currentRawXML) {
             alert("Arquivo inválido. Certifique-se de que é um projeto do Posi-Cifra-Flex.");
             return;
@@ -2112,6 +2516,9 @@
           globalTitle = projectData.globalTitle || "Arranjo";
           document.getElementById("scoreTitle").innerText = globalTitle;
 
+          if (projectData.rootFilter) {
+            document.getElementById("rootFilter").value = projectData.rootFilter;
+          }
           if (projectData.inversionFilter) {
             document.getElementById("inversionFilter").value = projectData.inversionFilter;
           }
@@ -2136,6 +2543,9 @@
 
           if (projectData.scoreData) {
             scoreData = projectData.scoreData;
+            undoStack = [];
+            redoStack = [];
+            saveStateToHistory();
             renderScoreGrid();
           } else {
             // Suporte retroativo para arquivos do formato antigo
@@ -2150,6 +2560,9 @@
                   });
                 }
               });
+              undoStack = [];
+              redoStack = [];
+              saveStateToHistory();
               renderScoreGrid();
             }
           }
