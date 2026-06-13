@@ -2,7 +2,8 @@
 
 Aplicação web para gerar, editar e organizar cifras com posições alternativas de acordes no violão.
 
-<img width="1234" height="933" alt="image" src="https://github.com/user-attachments/assets/5e514154-fa05-4f85-81fa-166151f23310" />
+<img width="1248" height="927" alt="image" src="https://github.com/user-attachments/assets/0573c5dc-cc2a-4a7d-bd06-0b8c89cac240" />
+
 
 
 
