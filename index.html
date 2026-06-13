@@ -53,20 +53,28 @@
       background: white !important;
     }
 
-    #printableScore.pdf-print-mode.print-measures-4 {
+    .pdf-print-mode.print-measures-4 {
       width: 700px !important;
       max-width: 700px !important;
+      height: 990px !important;
       margin: 0 auto !important;
     }
 
-    #printableScore.pdf-print-mode.print-measures-8 {
+    .pdf-print-mode.print-measures-8 {
       width: 1020px !important;
       max-width: 1020px !important;
+      height: 1440px !important;
       margin: 0 auto !important;
     }
 
-    #printableScore.pdf-print-mode.print-measures-8 .measure-box {
-      width: 125px !important;
+    .pdf-print-mode.print-measures-8 .measure-box {
+      width: 12.5% !important;
+      flex-shrink: 1 !important;
+    }
+
+    .pdf-print-mode.print-measures-4 .measure-box {
+      width: 25% !important;
+      flex-shrink: 1 !important;
     }
 
     body {
@@ -281,11 +289,13 @@
     }
 
     .score-systems.measures-4 .measure-box {
-      width: 170px;
+      width: 25%;
+      flex-shrink: 1;
     }
 
     .score-systems.measures-8 .measure-box {
-      width: 140px;
+      width: 12.5%;
+      flex-shrink: 1;
     }
 
     /* Define o início do sistema a cada 4 ou 8 compassos */
@@ -574,6 +584,62 @@
       font-size: 0.8rem;
       color: var(--accent);
     }
+
+    /* Estilos dos botões de Edição de Cifras */
+    .edit-cifra-btn {
+      background: none;
+      border: 1.5px solid var(--accent);
+      color: var(--accent);
+      border-radius: 4px;
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: bold;
+    }
+    .edit-cifra-btn:hover {
+      background: var(--accent);
+      color: white;
+    }
+
+    .delete-chord-btn {
+      background: none;
+      border: 1.5px solid #c0392b;
+      color: #c0392b;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      padding: 1px 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .delete-chord-btn:hover {
+      background: #c0392b;
+      color: white;
+    }
+
+    .add-chord-btn {
+      background: none;
+      border: 1.5px dashed var(--accent);
+      color: var(--accent);
+      border-radius: 6px;
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: bold;
+      margin-top: 6px;
+      display: inline-block;
+      text-align: center;
+    }
+    .add-chord-btn:hover {
+      background: var(--accent);
+      color: white;
+      border-style: solid;
+    }
   </style>
 </head>
 
@@ -599,7 +665,8 @@
 
         <div class="control-group">
           <label>Projeto</label>
-          <div style="display: flex; gap: 8px;">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn" style="background-color: #2e6f40;" onclick="openNewProjectModal()">Novo</button>
             <button class="btn" style="background-color: #5a5a5a;" onclick="saveProject()">Salvar</button>
             <button class="btn" style="background-color: #5a5a5a;"
               onclick="document.getElementById('projectUpload').click()">Abrir</button>
@@ -653,12 +720,12 @@
           </select>
         </div>
 
-        <div class="control-group">
-          <label>Abertura Máxima</label>
-          <select id="spanFilter" onchange="reprocessScore()">
-            <option value="3">3 casas</option>
-            <option value="4" selected>4 casas</option>
-          </select>
+        <div class="control-group" style="min-width: 180px;">
+          <label>Modo de Edição</label>
+          <div style="display: flex; align-items: center; height: 100%; padding-top: 5px;">
+            <input type="checkbox" id="editCifrasToggle" onchange="toggleEditMode()" style="width: 20px; height: 20px; cursor: pointer;">
+            <label for="editCifrasToggle" style="margin-left: 8px; cursor: pointer; color: var(--text-main); font-weight: normal; text-transform: none; font-size: 0.95rem;">Editar Cifras</label>
+          </div>
         </div>
       </div>
     </div>
@@ -669,6 +736,12 @@
       </div>
       <div class="score-systems measures-4" id="scoreGrid">
         <p style="color: var(--text-muted); text-align: center; width: 100%;">Aguardando upload do MusicXML...</p>
+      </div>
+      <div id="editMeasuresBox" class="data-html2canvas-ignore" style="display: none; margin-top: 20px; justify-content: center; align-items: center; gap: 12px; border-top: 1.5px dashed var(--border); padding-top: 15px;">
+        <span style="font-weight: bold; color: var(--text-main);">Quantidade de Compassos:</span>
+        <button class="btn" style="background-color: #c0392b; padding: 4px 12px; font-size: 0.95rem; font-weight: bold;" onclick="decrementMeasures()">-</button>
+        <span id="editMeasuresCount" style="font-weight: 900; font-size: 1.25rem; min-width: 40px; text-align: center; color: var(--text-main);">16</span>
+        <button class="btn" style="background-color: #2e6f40; padding: 4px 12px; font-size: 0.95rem; font-weight: bold;" onclick="incrementMeasures()">+</button>
       </div>
     </div>
 
@@ -785,11 +858,58 @@
       <p style="color: var(--text-main); margin-bottom: 15px;">
         Se a imagem não foi baixada automaticamente, clique com o botão direito nela abaixo e escolha <strong>"Salvar imagem como..."</strong> para salvar no seu computador.
       </p>
-      <div style="text-align: center; background: #eee; padding: 20px; border-radius: 8px; overflow: auto; margin-bottom: 15px;">
+      <div id="exportPreviewContainer" style="text-align: center; background: #eee; padding: 20px; border-radius: 8px; overflow: auto; margin-bottom: 15px; display: flex; flex-direction: column; align-items: center; gap: 15px;">
         <img id="exportPreview" style="max-width: 100%; max-height: 60vh; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.15);" alt="Visualização do Arranjo" />
       </div>
-      <div style="text-align: right;">
+      <div style="text-align: right; margin-top: 15px;">
         <button class="btn" style="background-color: #5a5a5a;" onclick="closeExportModal()">Fechar</button>
+      </div>
+    </div>
+  </div>
+  <div class="modal-overlay" id="newProjectModal">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-header">
+        <h2>Criar Novo Projeto</h2>
+        <button class="close-btn" onclick="closeNewProjectModal()">&times;</button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 15px;">
+        <div class="control-group" style="flex: none;">
+          <label for="newProjectTitle" style="color: var(--text-main); text-transform: none;">Título da Música</label>
+          <input type="text" id="newProjectTitle" placeholder="Ex: Garota de Ipanema" value="Minha Música" style="border: 1px solid var(--border); background-color: var(--bg-color); color: var(--text-main); padding: 10px; border-radius: 6px; font-size: 1rem; width: 100%; box-sizing: border-box;">
+        </div>
+        <div class="control-group" style="flex: none;">
+          <label for="newProjectTimeSig" style="color: var(--text-main); text-transform: none;">Tipo de Compasso (x/y)</label>
+          <input type="text" id="newProjectTimeSig" placeholder="Ex: 4/4, 3/4, 6/8" value="4/4" style="border: 1px solid var(--border); background-color: var(--bg-color); color: var(--text-main); padding: 10px; border-radius: 6px; font-size: 1rem; width: 100%; box-sizing: border-box;">
+        </div>
+        <div class="control-group" style="flex: none;">
+          <label for="newProjectMeasures" style="color: var(--text-main); text-transform: none;">Quantidade de Compassos</label>
+          <input type="number" id="newProjectMeasures" placeholder="Ex: 16" min="1" max="500" value="16" style="border: 1px solid var(--border); background-color: var(--bg-color); color: var(--text-main); padding: 10px; border-radius: 6px; font-size: 1rem; width: 100%; box-sizing: border-box;">
+        </div>
+        <div id="newProjectErrorMsg" style="color: #c0392b; font-size: 0.9rem; font-weight: bold; display: none;"></div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+          <button class="btn" style="background-color: #7f8c8d;" onclick="closeNewProjectModal()">Cancelar</button>
+          <button class="btn btn-accent" onclick="createBlankProject()">Criar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="editCifraModal">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-header">
+        <h2>Editar Cifra</h2>
+        <button class="close-btn" onclick="closeEditCifraModal()">&times;</button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 15px;">
+        <div class="control-group" style="flex: none;">
+          <label for="cifraInput" style="color: var(--text-main); text-transform: none;">Digite a Cifra (ex: C, Dm7, G#7, F/A, Bb9)</label>
+          <input type="text" id="cifraInput" placeholder="Ex: C#m7" onkeydown="handleCifraInputKeyDown(event)" style="border: 1px solid var(--border); background-color: var(--bg-color); color: var(--text-main); padding: 10px; border-radius: 6px; font-size: 1.1rem; width: 100%; box-sizing: border-box;">
+        </div>
+        <div id="cifraErrorMsg" style="color: #c0392b; font-size: 0.9rem; font-weight: bold; display: none;"></div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+          <button class="btn" style="background-color: #7f8c8d;" onclick="closeEditCifraModal()">Cancelar</button>
+          <button class="btn btn-accent" id="saveCifraBtn" onclick="saveCifraEdits()">Salvar</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1073,6 +1193,333 @@
     let globalTitle = "Arranjo Importado";
     let editingContext = { measureIdx: null, chordIdx: null };
 
+    let isEditMode = false;
+    let cifraEditingState = { measureIdx: null, chordIdx: null };
+
+    // Dicionário de normalização de sufixos de acordes comuns
+    const suffixMap = {
+      "": "",
+      "m": "m",
+      "min": "m",
+      "7": "7",
+      "7m": "7M",
+      "7m": "7M",
+      "7M": "7M",
+      "maj7": "maj7",
+      "m7": "m7",
+      "min7": "m7",
+      "dim": "dim",
+      "dim7": "dim7",
+      "o": "dim7",
+      "o7": "dim7",
+      "ø": "m7b5",
+      "m7b5": "m7b5",
+      "ø7": "m7b5",
+      "aug": "aug",
+      "+": "aug",
+      "sus2": "sus2",
+      "sus4": "sus4",
+      "7sus4": "7sus4",
+      "6": "6",
+      "m6": "m6",
+      "min6": "m6",
+      "9": "9",
+      "maj9": "maj9",
+      "m9": "m9",
+      "min9": "m9",
+      "11": "11",
+      "m11": "m11",
+      "min11": "m11",
+      "13": "13",
+      "m13": "m13",
+      "min13": "m13",
+      "5": "5",
+      "7b5": "7b5",
+      "7#5": "7#5",
+      "7+5": "7#5",
+      "7b9": "7b9",
+      "7#9": "7#9",
+      "9b5": "9b5",
+      "9#5": "9#5",
+      "mmaj7": "mMaj7",
+      "minmaj7": "mMaj7",
+      "maj7b5": "maj7b5"
+    };
+
+    function adjustAndValidateCifra(input) {
+      input = input.trim();
+      if (!input) {
+        return { valid: false, message: "A cifra não pode ser vazia." };
+      }
+
+      let parts = input.split('/');
+      if (parts.length > 2) {
+        return { valid: false, message: "A cifra não pode conter mais de uma barra '/'." };
+      }
+
+      function adjustPart(p) {
+        p = p.trim();
+        if (!p) return null;
+
+        const match = p.match(/^([a-gA-G])([3#bB]?)(.*)$/);
+        if (!match) return null;
+
+        let note = match[1].toUpperCase();
+        let alt = match[2];
+        let suf = match[3];
+
+        if (alt === '3') alt = '#';
+        else if (alt.toLowerCase() === 'b') alt = 'b';
+
+        // Normalização do sufixo
+        let normalizedSuf = suf.toLowerCase().replace(/3/g, '#').replace(/b/g, 'b');
+        let canonSuf = suffixMap[normalizedSuf];
+        if (canonSuf === undefined) {
+          // Se não estiver no mapa, tenta usar o original ou apenas substitui 3/# e b/b
+          canonSuf = suf.replace(/3/g, '#').replace(/B/g, 'b');
+        }
+
+        return note + alt + canonSuf;
+      }
+
+      function adjustBass(b) {
+        b = b.trim();
+        if (!b) return null;
+        const match = b.match(/^([a-gA-G])([3#bB]?)$/);
+        if (!match) return null;
+
+        let note = match[1].toUpperCase();
+        let alt = match[2];
+        if (alt === '3') alt = '#';
+        else if (alt.toLowerCase() === 'b') alt = 'b';
+
+        return note + alt;
+      }
+
+      let adjustedChordPart = adjustPart(parts[0]);
+      if (!adjustedChordPart) {
+        return { valid: false, message: `Acorde principal inválido: "${parts[0]}"` };
+      }
+
+      let adjustedBassPart = "";
+      if (parts.length === 2) {
+        adjustedBassPart = adjustBass(parts[1]);
+        if (!adjustedBassPart) {
+          return { valid: false, message: `Nota do baixo inválida após a barra: "${parts[1]}"` };
+        }
+      }
+
+      let fullChord = adjustedChordPart;
+      if (adjustedBassPart) {
+        fullChord += "/" + adjustedBassPart;
+      }
+
+      // Validar tônica e acordes usando Tonal.js
+      const mainChordPart = fullChord.split('/')[0];
+      const tonalMain = Tonal.Chord.get(mainChordPart);
+      if (tonalMain.empty) {
+        return { valid: false, message: `Cifra inválida ou não reconhecida: "${mainChordPart}"` };
+      }
+
+      if (adjustedBassPart) {
+        const noteDetails = Tonal.Note.get(adjustedBassPart);
+        if (noteDetails.empty) {
+          return { valid: false, message: `Nota do baixo inválida: "${adjustedBassPart}"` };
+        }
+      }
+
+      return { valid: true, adjusted: fullChord };
+    }
+
+    function toggleEditMode() {
+      isEditMode = document.getElementById("editCifrasToggle").checked;
+      renderScoreGrid();
+    }
+
+    function openNewProjectModal() {
+      document.getElementById("newProjectTitle").value = "Minha Música";
+      document.getElementById("newProjectTimeSig").value = "4/4";
+      document.getElementById("newProjectMeasures").value = "16";
+      document.getElementById("newProjectErrorMsg").style.display = "none";
+      document.getElementById("newProjectModal").style.display = "flex";
+    }
+
+    function closeNewProjectModal() {
+      document.getElementById("newProjectModal").style.display = "none";
+    }
+
+    function createBlankProject() {
+      const title = document.getElementById("newProjectTitle").value.trim() || "Sem Título";
+      const timeSig = document.getElementById("newProjectTimeSig").value.trim();
+      const measuresCount = parseInt(document.getElementById("newProjectMeasures").value);
+
+      const errorDiv = document.getElementById("newProjectErrorMsg");
+      errorDiv.style.display = "none";
+
+      const timeSigRegex = /^([1-9][0-9]*)\/([1-9][0-9]*)$/;
+      const match = timeSig.match(timeSigRegex);
+      if (!match) {
+        errorDiv.textContent = "O compasso deve ser no formato x/y (ex: 4/4, 3/4, 6/8).";
+        errorDiv.style.display = "block";
+        return;
+      }
+
+      const beats = parseInt(match[1]);
+      const beatType = parseInt(match[2]);
+
+      const validBeatTypes = [1, 2, 4, 8, 16, 32];
+      if (!validBeatTypes.includes(beatType)) {
+        errorDiv.textContent = "O denominador do compasso (y) deve ser uma potência de 2 (ex: 2, 4, 8, 16).";
+        errorDiv.style.display = "block";
+        return;
+      }
+
+      if (isNaN(measuresCount) || measuresCount < 1 || measuresCount > 500) {
+        errorDiv.textContent = "A quantidade de compassos deve ser um número entre 1 e 500.";
+        errorDiv.style.display = "block";
+        return;
+      }
+
+      globalTitle = title;
+      document.getElementById("scoreTitle").innerText = globalTitle;
+      currentRawXML = null;
+
+      scoreData = [];
+      for (let i = 1; i <= measuresCount; i++) {
+        scoreData.push({
+          measureNum: i,
+          beats: beats,
+          beatType: beatType,
+          chords: []
+        });
+      }
+
+      closeNewProjectModal();
+      renderScoreGrid();
+    }
+
+    function openEditCifraModal(mIdx, cIdx) {
+      cifraEditingState = { measureIdx: mIdx, chordIdx: cIdx };
+      const errorDiv = document.getElementById("cifraErrorMsg");
+      errorDiv.style.display = "none";
+
+      const titleNode = document.getElementById("editCifraModal").querySelector("h2");
+      const inputNode = document.getElementById("cifraInput");
+
+      if (cIdx !== null) {
+        titleNode.textContent = "Editar Cifra";
+        inputNode.value = scoreData[mIdx].chords[cIdx].chordName;
+      } else {
+        titleNode.textContent = "Adicionar Cifra";
+        inputNode.value = "";
+      }
+
+      document.getElementById("editCifraModal").style.display = "flex";
+      setTimeout(() => {
+        inputNode.focus();
+        inputNode.select();
+      }, 50);
+    }
+
+    function closeEditCifraModal() {
+      document.getElementById("editCifraModal").style.display = "none";
+    }
+
+    function saveCifraEdits(goToNext = false) {
+      const input = document.getElementById("cifraInput").value;
+      const result = adjustAndValidateCifra(input);
+      if (!result.valid) {
+        const errorDiv = document.getElementById("cifraErrorMsg");
+        errorDiv.textContent = result.message;
+        errorDiv.style.display = "block";
+        return;
+      }
+
+      const mIdx = cifraEditingState.measureIdx;
+      const cIdx = cifraEditingState.chordIdx;
+      const adjustedChordName = result.adjusted;
+      const options = findPlayableVoicings(adjustedChordName);
+
+      const chordObj = {
+        chordName: adjustedChordName,
+        options: options,
+        selectedIndex: 0
+      };
+
+      if (cIdx !== null) {
+        scoreData[mIdx].chords[cIdx] = chordObj;
+      } else {
+        scoreData[mIdx].chords.push(chordObj);
+      }
+
+      closeEditCifraModal();
+      renderScoreGrid();
+
+      if (options.length === 0) {
+        alert(`Aviso: O acorde "${adjustedChordName}" foi salvo, mas nenhuma posição de violão foi encontrada com os filtros atuais. Experimente ajustar os filtros (ex: habilitar cordas soltas ou aumentar a abertura máxima).`);
+      }
+
+      if (goToNext) {
+        const nextMIdx = mIdx + 1;
+        if (nextMIdx < scoreData.length) {
+          if (scoreData[nextMIdx].chords.length > 0) {
+            openEditCifraModal(nextMIdx, 0);
+          } else {
+            openEditCifraModal(nextMIdx, null);
+          }
+        }
+      }
+    }
+
+    function handleCifraInputKeyDown(event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        saveCifraEdits(true);
+      }
+    }
+
+    function deleteChord(mIdx, cIdx) {
+      if (confirm(`Deseja excluir a cifra "${scoreData[mIdx].chords[cIdx].chordName}"?`)) {
+        scoreData[mIdx].chords.splice(cIdx, 1);
+        renderScoreGrid();
+      }
+    }
+
+    function incrementMeasures() {
+      const newNum = scoreData.length + 1;
+      let beats = 4;
+      let beatType = 4;
+      if (scoreData.length > 0) {
+        beats = scoreData[scoreData.length - 1].beats;
+        beatType = scoreData[scoreData.length - 1].beatType;
+      }
+      
+      scoreData.push({
+        measureNum: newNum,
+        beats: beats,
+        beatType: beatType,
+        chords: []
+      });
+      
+      renderScoreGrid();
+    }
+
+    function decrementMeasures() {
+      if (scoreData.length <= 1) {
+        alert("A partitura deve conter pelo menos 1 compasso!");
+        return;
+      }
+      
+      const lastMeasure = scoreData[scoreData.length - 1];
+      if (lastMeasure.chords.length > 0) {
+        const confirmDelete = confirm(`O último compasso (${lastMeasure.measureNum}) contém cifras. Deseja realmente removê-lo?`);
+        if (!confirmDelete) return;
+      }
+      
+      scoreData.pop();
+      renderScoreGrid();
+    }
+
     function handleXMLUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -1137,7 +1584,16 @@
     }
 
     function reprocessScore() {
-      if (currentRawXML) processXML();
+      scoreData.forEach(measure => {
+        measure.chords.forEach(chord => {
+          const options = findPlayableVoicings(chord.chordName);
+          chord.options = options;
+          if (chord.selectedIndex >= options.length) {
+            chord.selectedIndex = 0;
+          }
+        });
+      });
+      renderScoreGrid();
     }
 
     function processXML() {
@@ -1308,6 +1764,10 @@
     }
 
     function renderScoreGrid() {
+      // Sincroniza o estado de isEditMode diretamente com a checkbox do DOM para evitar qualquer dessincronização
+      const editToggle = document.getElementById("editCifrasToggle");
+      isEditMode = editToggle ? editToggle.checked : false;
+
       const grid = document.getElementById("scoreGrid");
       grid.innerHTML = "";
 
@@ -1339,7 +1799,7 @@
           let displayChord = chordData.chordName;
           const tonalChord = Tonal.Chord.get(chordData.chordName.split('/')[0]);
           if (!tonalChord.empty) {
-            let bassNoteStr = tonalChord.notes.find(n => Tonal.Note.chroma(n) === (selectedVoicing.bassMidi % 12));
+            let bassNoteStr = tonalChord.notes.find(n => Tonal.Note.chroma(n) === ((selectedVoicing ? selectedVoicing.bassMidi : 0) % 12));
             if (bassNoteStr && Tonal.Note.chroma(bassNoteStr) !== Tonal.Note.chroma(tonalChord.tonic)) {
               displayChord = `${chordData.chordName.split('/')[0]}/${bassNoteStr.charAt(0).toUpperCase() + bassNoteStr.slice(1)}`;
             }
@@ -1349,17 +1809,63 @@
           const eventDiv = document.createElement("div");
           eventDiv.className = "chord-event";
 
+          let fretboardSVG = "";
+          let arpeggioClick = "";
+          if (selectedVoicing) {
+            fretboardSVG = createFretboardSVG(selectedVoicing.notes, diagramScale);
+            arpeggioClick = `onclick="playArpeggio(scoreData[${mIdx}].chords[${cIdx}].options[scoreData[${mIdx}].chords[${cIdx}].selectedIndex].notes)" style="cursor:pointer;" title="Ouvir"`;
+          } else {
+            fretboardSVG = `<div style="font-size:0.75rem; color:#c0392b; border: 1.5px dashed #c0392b; padding: 12px 6px; text-align:center; border-radius:4px; margin: 4px 0; width: ${85 * diagramScale}px; box-sizing: border-box;">Sem digitação</div>`;
+          }
+
+          let chordHeader = "";
+          let actionButtons = "";
+          if (isEditMode) {
+            chordHeader = `<h4 onclick="openEditCifraModal(${mIdx}, ${cIdx})" style="cursor: pointer; text-decoration: underline dashed 1.5px var(--accent); margin: 0 0 4px 0;" title="Clique para editar cifra">${displayChord}</h4>`;
+            actionButtons = `
+              <div style="display: flex; gap: 4px; margin-top: 6px;">
+                <button class="change-btn data-html2canvas-ignore" onclick="openEditCifraModal(${mIdx}, ${cIdx})">Editar</button>
+                <button class="delete-chord-btn data-html2canvas-ignore" onclick="deleteChord(${mIdx}, ${cIdx})">&times;</button>
+              </div>
+            `;
+          } else {
+            chordHeader = `<h4 style="margin: 0 0 4px 0;">${displayChord}</h4>`;
+            actionButtons = `
+              <button class="change-btn data-html2canvas-ignore" onclick="openModal(${mIdx}, ${cIdx})">Mudar</button>
+            `;
+          }
+
           eventDiv.innerHTML = `
-            <h4>${displayChord}</h4>
-            <div onclick="playArpeggio(scoreData[${mIdx}].chords[${cIdx}].options[scoreData[${mIdx}].chords[${cIdx}].selectedIndex].notes)" style="cursor:pointer;" title="Ouvir">
-              ${createFretboardSVG(selectedVoicing.notes, diagramScale)} </div>
-            <button class="change-btn data-html2canvas-ignore" onclick="openModal(${mIdx}, ${cIdx})">Mudar</button>
+            ${chordHeader}
+            <div ${arpeggioClick}>
+              ${fretboardSVG}
+            </div>
+            ${actionButtons}
           `;
           chordsContainer.appendChild(eventDiv);
         });
 
+        if (isEditMode) {
+          const addBtn = document.createElement("button");
+          addBtn.className = "add-chord-btn data-html2canvas-ignore";
+          addBtn.innerHTML = "+ Cifra";
+          addBtn.onclick = () => openEditCifraModal(mIdx, null);
+          chordsContainer.appendChild(addBtn);
+        }
+
         grid.appendChild(box);
       });
+
+      // Exibe ou oculta a caixa de edição da quantidade de compassos logo após a partitura
+      const editMeasuresBox = document.getElementById("editMeasuresBox");
+      if (editMeasuresBox) {
+        if (isEditMode && scoreData.length > 0) {
+          editMeasuresBox.style.display = "flex";
+          document.getElementById("editMeasuresCount").innerText = scoreData.length;
+        } else {
+          editMeasuresBox.style.display = "none";
+        }
+      }
     }
 
     function openModal(mIdx, cIdx) {
@@ -1395,94 +1901,179 @@
     function closeExportModal() { document.getElementById("exportModal").style.display = "none"; }
 
     function exportImage() {
-      const element = document.getElementById('printableScore');
-      element.classList.add('pdf-print-mode');
-      document.body.classList.add('pdf-body-print-mode');
-
-      const measuresPerLine = document.getElementById("measuresPerLine").value;
-      const windowWidth = (measuresPerLine === "8") ? 1040 : 720;
-
-      if (measuresPerLine === "8") {
-        element.classList.add('print-measures-8');
-      } else {
-        element.classList.add('print-measures-4');
-      }
-
-      const btns = document.querySelectorAll('.change-btn');
-      btns.forEach(b => b.style.display = 'none');
-
-      if (typeof html2canvas === "undefined") {
-        alert("Erro: A biblioteca de captura de imagem (html2canvas) não foi carregada corretamente. Verifique sua conexão com a internet.");
-        btns.forEach(b => b.style.display = 'block');
-        element.classList.remove('pdf-print-mode');
-        element.classList.remove('print-measures-4');
-        element.classList.remove('print-measures-8');
-        document.body.classList.remove('pdf-body-print-mode');
+      if (scoreData.length === 0) {
+        alert("Nenhum projeto ativo para exportar!");
         return;
       }
 
-      html2canvas(element, {
-        scale: 3,
-        useCORS: true,
-        windowWidth: windowWidth,
-        scrollX: 0,
-        scrollY: 0
-      }).then(canvas => {
-        // Restaurar estado da página
-        btns.forEach(b => b.style.display = 'block');
-        element.classList.remove('pdf-print-mode');
-        element.classList.remove('print-measures-4');
-        element.classList.remove('print-measures-8');
-        document.body.classList.remove('pdf-body-print-mode');
+      const totalMeasures = scoreData.length;
+      const measuresPerLine = document.getElementById("measuresPerLine").value;
+      const cols = (measuresPerLine === "8") ? 8 : 4;
+      
+      // Define a quantidade máxima de linhas por página (8 linhas por página é ideal para preencher a folha A4 Retrato)
+      const linesPerPage = 8;
+      const measuresPerPage = cols * linesPerPage; // 32 compassos para layout de 4, ou 64 para layout de 8
+      
+      // O app calcula automaticamente o número de páginas necessárias
+      const numPages = Math.ceil(totalMeasures / measuresPerPage);
+      const windowWidth = (measuresPerLine === "8") ? 1040 : 720;
 
-        try {
-          canvas.toBlob(function(blob) {
-            const url = URL.createObjectURL(blob);
-            
-            // Define o preview da imagem no modal
-            const previewImg = document.getElementById("exportPreview");
-            previewImg.src = url;
-            
-            // Tenta forçar o download automático adicionando o link temporariamente ao DOM
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = `${globalTitle.replace(/\s+/g, '_')}_Arranjo.png`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            // Abre o modal de fallback com a prévia da imagem para o usuário poder salvar caso o download automático seja bloqueado
-            document.getElementById("exportModal").style.display = "flex";
-          }, "image/png");
-        } catch (err) {
-          console.error("Erro ao exportar imagem:", err);
-          alert("O navegador bloqueou a exportação automática da imagem devido a restrições de segurança de arquivos locais (Same-Origin Policy).\n\nPara resolver isso:\n1. Execute o arquivo usando um servidor local (ex: extensão Live Server do VS Code, ou Python: python -m http.server);\n2. Ou hospede o aplicativo online.");
+      // Criar wrapper temporário oculto para renderização das páginas
+      const tempWrapper = document.createElement("div");
+      tempWrapper.style.position = "absolute";
+      tempWrapper.style.left = "-9999px";
+      tempWrapper.style.top = "-9999px";
+      tempWrapper.style.width = (measuresPerLine === "8") ? "1040px" : "720px";
+      document.body.appendChild(tempWrapper);
+
+      const allMeasureBoxes = document.querySelectorAll("#scoreGrid .measure-box");
+
+      for (let p = 0; p < numPages; p++) {
+        const startIdx = p * measuresPerPage;
+        const endIdx = Math.min((p + 1) * measuresPerPage, totalMeasures);
+        if (startIdx >= totalMeasures) break;
+
+        const pageDiv = document.createElement("div");
+        pageDiv.id = "printableScore";
+        pageDiv.className = "score-container pdf-print-mode " + (measuresPerLine === "8" ? "print-measures-8" : "print-measures-4");
+        pageDiv.style.setProperty("width", (measuresPerLine === "8" ? "1020px" : "700px"), "important");
+        pageDiv.style.setProperty("max-width", (measuresPerLine === "8" ? "1020px" : "700px"), "important");
+        pageDiv.style.setProperty("height", (measuresPerLine === "8" ? "1440px" : "990px"), "important");
+        pageDiv.style.background = "white";
+        pageDiv.style.color = "black";
+        pageDiv.style.padding = "30px 15px";
+        pageDiv.style.boxSizing = "border-box";
+
+        // Título da página: nome da música em todas, indicando a numeração nas demais
+        const pageTitle = (p === 0) ? globalTitle : `${globalTitle} - Página ${p + 1}`;
+        pageDiv.innerHTML = `
+          <div class="score-title-area" style="text-align: center; margin-bottom: 30px;">
+            <h2 style="margin: 0; font-size: 1.6rem; color: black; font-family: sans-serif;">${pageTitle}</h2>
+          </div>
+          <div class="score-systems ${measuresPerLine === "8" ? "measures-8" : "measures-4"}" style="display: flex; flex-wrap: wrap; gap: 0; justify-content: flex-start; margin: 0 auto; max-width: 100%;"></div>
+        `;
+
+        const systemsGrid = pageDiv.querySelector(".score-systems");
+
+        for (let i = startIdx; i < endIdx; i++) {
+          if (allMeasureBoxes[i]) {
+            const clonedBox = allMeasureBoxes[i].cloneNode(true);
+            clonedBox.style.setProperty("width", (measuresPerLine === "8" ? "12.5%" : "25%"), "important");
+            clonedBox.style.setProperty("flex-shrink", "1", "important");
+
+            // Oculta botões de interação no clone de impressão
+            const btns = clonedBox.querySelectorAll('.change-btn, .edit-cifra-btn, .delete-chord-btn, .add-chord-btn');
+            btns.forEach(b => b.style.display = 'none');
+
+            // Garante Time Signature visível no início de cada página
+            if (i === startIdx && !clonedBox.querySelector('.time-signature')) {
+              const activeMeasure = scoreData[startIdx];
+              const timeSigDiv = document.createElement("div");
+              timeSigDiv.className = "time-signature";
+              timeSigDiv.style.position = "absolute";
+              timeSigDiv.style.top = "20px";
+              timeSigDiv.style.left = "6px";
+              timeSigDiv.style.fontSize = "1.1rem";
+              timeSigDiv.style.fontWeight = "900";
+              timeSigDiv.style.color = "black";
+              timeSigDiv.style.lineHeight = "1.1";
+              timeSigDiv.innerHTML = `${activeMeasure.beats}<br>${activeMeasure.beatType}`;
+              clonedBox.appendChild(timeSigDiv);
+            }
+
+            systemsGrid.appendChild(clonedBox);
+          }
         }
+
+        // Adiciona borda esquerda no início de cada linha do sistema na página
+        const boxesOnPage = systemsGrid.querySelectorAll(".measure-box");
+        boxesOnPage.forEach((box, index) => {
+          if (index % cols === 0) {
+            box.style.borderLeft = "1.5px solid black";
+          }
+        });
+
+        tempWrapper.appendChild(pageDiv);
+      }
+
+      if (typeof html2canvas === "undefined") {
+        alert("Erro: A biblioteca de captura de imagem (html2canvas) não foi carregada corretamente. Verifique sua conexão com a internet.");
+        document.body.removeChild(tempWrapper);
+        return;
+      }
+
+      const canvases = [];
+      let pPromise = Promise.resolve();
+
+      for (let p = 0; p < tempWrapper.children.length; p++) {
+        const pageDiv = tempWrapper.children[p];
+        pPromise = pPromise.then(() => {
+          return html2canvas(pageDiv, {
+            scale: 3,
+            useCORS: true,
+            windowWidth: windowWidth,
+            scrollX: 0,
+            scrollY: 0
+          }).then(canvas => {
+            canvases.push(canvas);
+          });
+        });
+      }
+
+      pPromise.then(() => {
+        document.body.removeChild(tempWrapper);
+
+        const previewContainer = document.getElementById("exportPreviewContainer");
+        previewContainer.innerHTML = "";
+
+        canvases.forEach((canvas, idx) => {
+          try {
+            canvas.toBlob(function(blob) {
+              const url = URL.createObjectURL(blob);
+
+              // Adiciona imagem ao container de pré-visualização do modal
+              const img = document.createElement("img");
+              img.src = url;
+              img.style.maxWidth = "100%";
+              img.style.maxHeight = "50vh";
+              img.style.border = "1px solid #ccc";
+              img.style.boxShadow = "0 4px 8px rgba(0,0,0,0.15)";
+              img.style.marginBottom = "15px";
+              img.alt = `Página ${idx + 1}`;
+              previewContainer.appendChild(img);
+
+              // Dispara o download automático do arquivo de imagem da página
+              const link = document.createElement("a");
+              link.href = url;
+              const pageSuffix = (canvases.length > 1) ? `_Pagina_${idx + 1}` : "";
+              link.download = `${globalTitle.replace(/\s+/g, '_')}${pageSuffix}.png`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }, "image/png");
+          } catch (err) {
+            console.error("Erro ao gerar blob da página:", err);
+          }
+        });
+
+        document.getElementById("exportModal").style.display = "flex";
       }).catch(err => {
         console.error("Erro no html2canvas:", err);
         alert("Erro ao renderizar a imagem: " + err.message);
-        btns.forEach(b => b.style.display = 'block');
-        element.classList.remove('pdf-print-mode');
-        element.classList.remove('print-measures-4');
-        element.classList.remove('print-measures-8');
-        document.body.classList.remove('pdf-body-print-mode');
+        if (tempWrapper.parentNode) document.body.removeChild(tempWrapper);
       });
     }
 
     function saveProject() {
-      if (!currentRawXML) {
-        alert("Nenhum projeto ativo para salvar. Importe um arquivo MusicXML primeiro!");
+      if (scoreData.length === 0) {
+        alert("Nenhum projeto ativo para salvar!");
         return;
       }
-
-      const selectedIndices = scoreData.map(measure =>
-        measure.chords.map(chord => chord.selectedIndex)
-      );
 
       const projectData = {
         globalTitle: globalTitle,
         currentRawXML: currentRawXML,
-        selectedIndices: selectedIndices,
+        scoreData: scoreData,
         inversionFilter: document.getElementById("inversionFilter").value,
         openStringsFilter: document.getElementById("openStringsFilter").value,
         registerFilter: document.getElementById("registerFilter").value,
@@ -1511,12 +2102,15 @@
       reader.onload = function (e) {
         try {
           const projectData = JSON.parse(e.target.result);
-          if (!projectData.currentRawXML) {
+          if (!projectData.scoreData && !projectData.currentRawXML) {
             alert("Arquivo inválido. Certifique-se de que é um projeto do Posi-Cifra-Flex.");
             return;
           }
 
-          currentRawXML = projectData.currentRawXML;
+          currentRawXML = projectData.currentRawXML || null;
+          globalTitle = projectData.globalTitle || "Arranjo";
+          document.getElementById("scoreTitle").innerText = globalTitle;
+
           if (projectData.inversionFilter) {
             document.getElementById("inversionFilter").value = projectData.inversionFilter;
           }
@@ -1539,19 +2133,24 @@
             document.getElementById("zoomVal").innerText = Math.round(diagramScale * 100) + "%";
           }
 
-          processXML();
-
-          if (projectData.selectedIndices) {
-            projectData.selectedIndices.forEach((measureIndices, mIdx) => {
-              if (scoreData[mIdx] && scoreData[mIdx].chords) {
-                measureIndices.forEach((selIdx, cIdx) => {
-                  if (scoreData[mIdx].chords[cIdx] && selIdx < scoreData[mIdx].chords[cIdx].options.length) {
-                    scoreData[mIdx].chords[cIdx].selectedIndex = selIdx;
-                  }
-                });
-              }
-            });
+          if (projectData.scoreData) {
+            scoreData = projectData.scoreData;
             renderScoreGrid();
+          } else {
+            // Suporte retroativo para arquivos do formato antigo
+            processXML();
+            if (projectData.selectedIndices) {
+              projectData.selectedIndices.forEach((measureIndices, mIdx) => {
+                if (scoreData[mIdx] && scoreData[mIdx].chords) {
+                  measureIndices.forEach((selIdx, cIdx) => {
+                    if (scoreData[mIdx].chords[cIdx] && selIdx < scoreData[mIdx].chords[cIdx].options.length) {
+                      scoreData[mIdx].chords[cIdx].selectedIndex = selIdx;
+                    }
+                  });
+                }
+              });
+              renderScoreGrid();
+            }
           }
 
           alert("Projeto carregado com sucesso!");
