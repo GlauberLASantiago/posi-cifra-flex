@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Posi-Cifra-Flex (Posições alternativas para tocar acordes no violão)</title>
-  <meta name="description" content="Posi-Cifra-Flex: Encontre e selecione posições alternativas de acordes para tocar no violão. Importe arquivos MusicXML, visualize diagramas e exporte partituras e arranjos.">
-  
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎸</text></svg>">
-  
+  <meta name="description"
+    content="Posi-Cifra-Flex: Encontre e selecione posições alternativas de acordes para tocar no violão. Importe arquivos MusicXML, visualize diagramas e exporte partituras e arranjos.">
+
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎸</text></svg>">
+
   <script src="https://cdn.jsdelivr.net/npm/tonal/browser/tonal.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/soundfont-player@0.12.0/dist/soundfont-player.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <style>
     :root {
@@ -35,10 +39,39 @@
       color: black !important;
     }
 
+    /* Desativa transições durante a captura do PDF para evitar lag na largura da renderização */
+    .pdf-print-mode,
+    .pdf-print-mode * {
+      transition: none !important;
+      animation: none !important;
+    }
+
+    body.pdf-body-print-mode {
+      padding: 0 !important;
+      margin: 0 !important;
+      background: white !important;
+    }
+
+    #printableScore.pdf-print-mode.print-measures-4 {
+      width: 700px !important;
+      max-width: 700px !important;
+      margin: 0 auto !important;
+    }
+
+    #printableScore.pdf-print-mode.print-measures-8 {
+      width: 1020px !important;
+      max-width: 1020px !important;
+      margin: 0 auto !important;
+    }
+
+    #printableScore.pdf-print-mode.print-measures-8 .measure-box {
+      width: 125px !important;
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background-color: var(--bg-color);
-      background-image: linear-gradient(rgba(18, 18, 18, 0.9), rgba(18, 18, 18, 0.9)), url('https://raw.githubusercontent.com/GlauberLASantiago/posi-cifra-flex/main/violoes.png');
+      background-image: url('violoes.png');
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
@@ -48,43 +81,152 @@
       line-height: 1.5;
     }
 
-    .container { max-width: 1200px; margin: 0 auto; }
-    h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 0.2rem; }
-    p.subtitle { color: var(--text-muted); margin-bottom: 2rem; display: flex; align-items: center; gap: 15px; }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .title-card {
+      background-color: rgba(27, 77, 34, 0.85); /* Fundo verde com leve transparência */
+      border: 2px solid var(--finger); /* Borda verde */
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 25px;
+    }
+
+    .title-card h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem 0;
+      color: #FFFFFF;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .title-card p.subtitle {
+      color: #E0E0E0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 15px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
 
     .audio-status {
-      font-size: 0.85rem; padding: 4px 8px; border-radius: 4px; font-weight: bold;
-      background: #2a2a2a; color: #aaa; transition: all 0.3s;
+      font-size: 0.85rem;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+      background: #2a2a2a;
+      color: #aaa;
+      transition: all 0.3s;
     }
-    .audio-status.ready { background: #1b4d22; color: #81c784; }
+
+    .audio-status.ready {
+      background: #1b4d22;
+      color: #81c784;
+    }
 
     .controls-bar {
-      display: flex; flex-wrap: wrap; gap: 15px; align-items: center;
-      background: var(--card-bg); padding: 20px; border-radius: 12px;
-      border: 1px solid var(--border); margin-bottom: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      align-items: stretch;
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      margin-bottom: 30px;
     }
 
-    .control-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 200px; }
-    .control-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
-    
-    select, input[type="file"] {
-      padding: 8px; border-radius: 8px; border: 2px solid var(--border); font-size: 0.95rem;
-      background: var(--bg-color); outline: none; cursor: pointer; color: var(--text-main);
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: flex-end;
+      width: 100%;
     }
-    
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .control-group label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    select,
+    input[type="file"] {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 2px solid var(--border);
+      font-size: 0.95rem;
+      background-color: var(--bg-color);
+      outline: none;
+      cursor: pointer;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    /* Garantir legibilidade das opções de seleção (Windows/Chrome/Edge) */
+    select option {
+      background-color: #1E1E1E; /* matches --card-bg */
+      color: #E0E0E0; /* matches --text-main */
+    }
+
+    /* Estilização do botão interno de upload de arquivo */
+    input[type="file"]::-webkit-file-upload-button {
+      background: var(--card-bg);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 8px;
+      font-family: inherit;
+      font-size: 0.85rem;
+    }
+
+    input[type="file"]::-webkit-file-upload-button:hover {
+      background: var(--border);
+    }
+
     .btn {
-      padding: 10px 18px; font-size: 0.95rem; font-weight: 600; border: none; border-radius: 8px;
-      cursor: pointer; transition: opacity 0.2s; color: white; display: inline-block;
+      padding: 10px 18px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      color: white;
+      display: inline-block;
     }
-    .btn-accent { background-color: var(--accent); }
-    .btn:hover { opacity: 0.9; }
+
+    .btn-accent {
+      background-color: var(--accent);
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+    }
 
     /* Estilos Compactos para a Partitura */
     .score-container {
-      background: white; padding: 30px 15px; border-radius: 12px;
-      border: 1px solid #CCCCCC; min-height: 400px;
+      background: white;
+      padding: 30px 15px;
+      border-radius: 12px;
+      border: 1px solid #CCCCCC;
+      min-height: 400px;
       color: black;
-      
+
       /* Forçar variáveis CSS de tema claro apenas para a partitura */
       --text-main: #000000;
       --text-muted: #444444;
@@ -92,67 +234,152 @@
       --border: #CCCCCC;
       --finger: #BCDFB9;
     }
-    
-    .score-title-area { text-align: center; margin-bottom: 30px; }
-    .score-title-area h2 { margin: 0; font-size: 1.6rem; color: var(--text-main); }
 
-    .score-systems { 
-      display: flex; 
-      flex-wrap: wrap; 
-      gap: 0; 
-      align-items: stretch; 
+    .score-title-area {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .score-title-area h2 {
+      margin: 0;
+      font-size: 1.6rem;
+      color: var(--text-main);
+    }
+
+    .score-systems {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+      align-items: stretch;
       justify-content: flex-start;
-      max-width: 680px;
       margin: 0 auto;
+      transition: max-width 0.3s ease;
+    }
+
+    .score-systems.measures-4 {
+      max-width: 680px;
+    }
+
+    .score-systems.measures-8 {
+      max-width: 1120px;
     }
 
     .measure-box {
-      position: relative; 
-      width: 170px; /* Reduzido para caberem ~4 por linha na A4 retrato */
-      min-height: 120px; /* Altura mais compacta com diagramas menores */
+      position: relative;
+      /* Altura mais compacta com diagramas menores */
+      min-height: 120px;
       border-right: 1.5px solid var(--text-main);
       border-bottom: 1px solid var(--border);
-      box-sizing: border-box; margin-bottom: 15px;
-      display: flex; flex-direction: column;
+      box-sizing: border-box;
+      margin-bottom: 15px;
+      display: flex;
+      flex-direction: column;
       page-break-inside: avoid;
       break-inside: avoid;
+      transition: width 0.3s ease;
     }
-    /* Define o início do sistema a cada 4 compassos (ajustado para retrato) */
-    .measure-box:nth-child(4n + 1) { border-left: 1.5px solid var(--text-main); } 
+
+    .score-systems.measures-4 .measure-box {
+      width: 170px;
+    }
+
+    .score-systems.measures-8 .measure-box {
+      width: 140px;
+    }
+
+    /* Define o início do sistema a cada 4 ou 8 compassos */
+    .score-systems.measures-4 .measure-box:nth-child(4n + 1) {
+      border-left: 1.5px solid var(--text-main);
+    }
+
+    .score-systems.measures-8 .measure-box:nth-child(8n + 1) {
+      border-left: 1.5px solid var(--text-main);
+    }
 
     .measure-header {
-      position: absolute; top: 4px; left: 6px;
-      font-size: 0.75rem; font-weight: bold; color: var(--text-main);
+      position: absolute;
+      top: 4px;
+      left: 6px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      color: var(--text-main);
     }
+
     .time-signature {
-      position: absolute; top: 20px; left: 6px;
-      font-size: 1.1rem; font-weight: 900; color: var(--text-main);
+      position: absolute;
+      top: 20px;
+      left: 6px;
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: var(--text-main);
       line-height: 1.1;
     }
 
     .chords-container {
-      display: flex; justify-content: space-evenly; align-items: flex-end;
-      flex: 1; width: 100%; padding-top: 35px; padding-bottom: 10px;
+      display: flex;
+      justify-content: space-evenly;
+      align-items: flex-end;
+      flex: 1;
+      width: 100%;
+      padding-top: 35px;
+      padding-bottom: 10px;
     }
 
-    .chord-event { display: flex; flex-direction: column; align-items: center; }
-    .chord-event h4 { margin: 0 0 4px 0; font-size: 0.95rem; color: var(--text-main); font-weight: 700; letter-spacing: -0.02em; }
-    
-    .chord-event .change-btn {
-      background: none; border: 1.5px solid var(--accent); color: var(--accent);
-      border-radius: 4px; font-size: 0.7rem; padding: 2px 6px; margin-top: 6px; 
-      cursor: pointer; transition: all 0.2s; font-weight: bold;
+    .chord-event {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    .chord-event .change-btn:hover { background: var(--accent); color: white; }
+
+    .chord-event h4 {
+      margin: 0 0 4px 0;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .chord-event .change-btn {
+      background: none;
+      border: 1.5px solid var(--accent);
+      color: var(--accent);
+      border-radius: 4px;
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      margin-top: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: bold;
+    }
+
+    .chord-event .change-btn:hover {
+      background: var(--accent);
+      color: white;
+    }
 
     .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
     }
+
     .modal-content {
-      background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 800px; max-height: 80vh; overflow-y: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 800px;
+      max-height: 80vh;
+      overflow-y: auto;
       border: 1px solid #CCCCCC;
-      
+
       /* Forçar variáveis CSS de tema claro apenas para o modal */
       --bg-color: #FAFAFA;
       --card-bg: #FFFFFF;
@@ -162,43 +389,86 @@
       --border: #CCCCCC;
       --finger: #BCDFB9;
     }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .modal-header h2 { color: var(--text-main); }
-    .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-main); }
-    .options-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 15px; }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-header h2 {
+      color: var(--text-main);
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-main);
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 15px;
+    }
+
     .option-card {
-      border: 2px solid var(--border); border-radius: 8px; padding: 10px;
-      cursor: pointer; text-align: center; transition: all 0.2s;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
       background: var(--bg-color);
     }
-    .option-card:hover { border-color: var(--accent); transform: translateY(-3px); }
-    .option-card.selected { border: 3px solid var(--accent); background: #fdf5f6; }
-    .option-card div { color: var(--text-main); }
+
+    .option-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+    }
+
+    .option-card.selected {
+      border: 3px solid var(--accent);
+      background: #fdf5f6;
+    }
+
+    .option-card div {
+      color: var(--text-main);
+    }
 
     .app-footer {
       margin-top: 50px;
-      padding-top: 20px;
-      padding-bottom: 20px;
-      border-top: 1px solid var(--border);
+      padding: 20px;
+      background-color: rgba(27, 77, 34, 0.85); /* Fundo verde com leve transparência */
+      border: 2px solid var(--finger); /* Borda verde */
+      border-radius: 12px;
       text-align: center;
-      color: var(--text-muted);
+      color: #E0E0E0;
       font-size: 0.85rem;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
     }
+
     .app-footer p {
       margin: 5px 0;
     }
+
     .app-footer a {
-      color: var(--text-muted);
+      color: #FFFFFF;
       text-decoration: none;
       transition: color 0.2s;
     }
+
     .app-footer a:hover {
       color: var(--accent);
       text-decoration: underline;
     }
+
     .app-footer .separator {
       margin: 0 10px;
-      color: var(--border);
+      color: var(--finger);
     }
 
     /* Estilos do Acordeon de Ajuda */
@@ -210,7 +480,7 @@
       background: var(--card-bg);
       overflow: hidden;
     }
-    
+
     .info-accordion summary {
       padding: 15px;
       font-weight: 600;
@@ -223,26 +493,26 @@
       align-items: center;
       transition: background 0.2s;
     }
-    
+
     .info-accordion summary::-webkit-details-marker {
       display: none;
     }
-    
+
     .info-accordion summary::after {
       content: "▼";
       font-size: 0.8rem;
       transition: transform 0.3s;
       color: var(--accent);
     }
-    
+
     .info-accordion[open] summary::after {
       transform: rotate(180deg);
     }
-    
+
     .info-accordion summary:hover {
       background: #3d262a;
     }
-    
+
     .accordion-body {
       padding: 20px;
       border-top: 1px solid var(--border);
@@ -250,11 +520,11 @@
       color: var(--text-muted);
       line-height: 1.6;
     }
-    
+
     .accordion-section {
       margin-bottom: 25px;
     }
-    
+
     .accordion-section h3 {
       margin: 0 0 12px 0;
       color: var(--text-main);
@@ -263,39 +533,39 @@
       padding-bottom: 5px;
       display: inline-block;
     }
-    
+
     .accordion-section ol {
       margin: 0;
       padding-left: 20px;
     }
-    
+
     .accordion-section ol li {
       margin-bottom: 8px;
     }
-    
+
     .chord-list-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 20px;
       margin-top: 15px;
     }
-    
+
     .chord-list-grid h4 {
       margin: 0 0 8px 0;
       color: var(--text-main);
       font-size: 0.95rem;
     }
-    
+
     .chord-list-grid ul {
       margin: 0;
       padding-left: 15px;
     }
-    
+
     .chord-list-grid ul li {
       margin-bottom: 4px;
       font-size: 0.85rem;
     }
-    
+
     .chord-list-grid code {
       background: #2a2a2a;
       padding: 2px 4px;
@@ -303,63 +573,92 @@
       font-size: 0.8rem;
       color: var(--accent);
     }
-
   </style>
 </head>
+
 <body>
 
   <div class="container">
-    <h1>Posi-Cifra-Flex</h1>
-    <p class="subtitle">
-      Posições alternativas para tocar acordes no violão. Importe um arquivo XML, gerencie posições e exporte o arranjo diagramado.
-      <span id="audioStatus" class="audio-status">Carregando Violão Nylon...</span>
-    </p>
+    <div class="title-card">
+      <h1>Posi-Cifra-Flex</h1>
+      <p class="subtitle">
+        Posições alternativas para tocar acordes no violão. Importe um arquivo XML, gerencie posições e exporte o arranjo
+        diagramado.
+        <span id="audioStatus" class="audio-status">Carregando Violão Nylon...</span>
+      </p>
+    </div>
 
     <div class="controls-bar">
-      <div class="control-group">
-        <label>Arquivo MusicXML</label>
-        <input type="file" id="xmlUpload" accept=".xml,.musicxml" onchange="handleXMLUpload(event)">
-      </div>
-      
-      <div class="control-group">
-        <label>Limitar Inversões</label>
-        <select id="inversionFilter" onchange="reprocessScore()">
-          <option value="0" selected>Apenas Estado Fundamental</option>
-          <option value="1">Até 1ª Inversão</option>
-          <option value="2">Até 2ª Inversão</option>
-          <option value="3">Até 3ª Inversão (Livre)</option>
-        </select>
-      </div>
-      
-      <div class="control-group">
-        <label>Cordas Soltas</label>
-        <select id="openStringsFilter" onchange="reprocessScore()">
-          <option value="false" selected>Ignorar Cordas Soltas</option>
-          <option value="true">Permitir Cordas Soltas</option>
-        </select>
-      </div>
+      <!-- Primeira Linha: Carregar, Salvar e Exportar -->
+      <div class="controls-row">
+        <div class="control-group">
+          <label>Arquivo MusicXML</label>
+          <input type="file" id="xmlUpload" accept=".xml,.musicxml" onchange="handleXMLUpload(event)">
+        </div>
 
-      <div class="control-group">
-        <label>Registro</label>
-        <select id="registerFilter" onchange="reprocessScore()">
-          <option value="all" selected>Todos os Registros</option>
-          <option value="grave">Grave (máx. Mi4)</option>
-          <option value="medio">Médio (Ré3 a Lá4)</option>
-          <option value="agudo">Agudo (acima de Lá3)</option>
-        </select>
-      </div>
+        <div class="control-group">
+          <label>Projeto</label>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn" style="background-color: #5a5a5a;" onclick="saveProject()">Salvar</button>
+            <button class="btn" style="background-color: #5a5a5a;"
+              onclick="document.getElementById('projectUpload').click()">Abrir</button>
+            <input type="file" id="projectUpload" accept=".txt" style="display:none;"
+              onchange="handleProjectUpload(event)">
+            <button class="btn btn-accent" onclick="exportImage()">Exportar Imagem</button>
+          </div>
+        </div>
 
-      <div class="control-group">
-        <label>Projeto</label>
-        <div style="display: flex; gap: 8px;">
-          <button class="btn" style="background-color: #5a5a5a;" onclick="saveProject()">Salvar</button>
-          <button class="btn" style="background-color: #5a5a5a;" onclick="document.getElementById('projectUpload').click()">Abrir</button>
-          <input type="file" id="projectUpload" accept=".txt" style="display:none;" onchange="handleProjectUpload(event)">
+        <div class="control-group">
+          <label>Zoom dos Diagramas: <span id="zoomVal">50%</span></label>
+          <input type="range" id="diagramZoom" min="0.3" max="1.0" step="0.05" value="0.5" oninput="updateDiagramZoom(this.value)" style="cursor: pointer; width: 100%;">
+        </div>
+
+        <div class="control-group">
+          <label>Compassos por Linha</label>
+          <select id="measuresPerLine" onchange="updateMeasuresPerLine(this.value)">
+            <option value="4" selected>4 compassos</option>
+            <option value="8">8 compassos</option>
+          </select>
         </div>
       </div>
 
-      <div class="control-group" style="align-items: flex-end; justify-content: flex-end;">
-        <button class="btn btn-accent" onclick="exportPDF()">Exportar PDF</button>
+      <!-- Segunda Linha: Filtros e Configurações -->
+      <div class="controls-row">
+        <div class="control-group">
+          <label>Limitar Inversões</label>
+          <select id="inversionFilter" onchange="reprocessScore()">
+            <option value="0" selected>Apenas Estado Fundamental</option>
+            <option value="1">Até 1ª Inversão</option>
+            <option value="2">Até 2ª Inversão</option>
+            <option value="3">Até 3ª Inversão (Livre)</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label>Cordas Soltas</label>
+          <select id="openStringsFilter" onchange="reprocessScore()">
+            <option value="false" selected>Ignorar Cordas Soltas</option>
+            <option value="true">Permitir Cordas Soltas</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label>Registro</label>
+          <select id="registerFilter" onchange="reprocessScore()">
+            <option value="all" selected>Todos os Registros</option>
+            <option value="grave">Grave (máx. Mi4)</option>
+            <option value="medio">Médio (Ré3 a Lá4)</option>
+            <option value="agudo">Agudo (acima de Lá3)</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label>Abertura Máxima</label>
+          <select id="spanFilter" onchange="reprocessScore()">
+            <option value="3">3 casas</option>
+            <option value="4" selected>4 casas</option>
+          </select>
+        </div>
       </div>
     </div>
 
@@ -367,7 +666,7 @@
       <div class="score-title-area">
         <h2 id="scoreTitle">Arranjo</h2>
       </div>
-      <div class="score-systems" id="scoreGrid">
+      <div class="score-systems measures-4" id="scoreGrid">
         <p style="color: var(--text-muted); text-align: center; width: 100%;">Aguardando upload do MusicXML...</p>
       </div>
     </div>
@@ -379,19 +678,28 @@
           <div class="accordion-section">
             <h3>📖 Mini Tutorial</h3>
             <ol>
-              <li><strong>Importe a partitura:</strong> Carregue um arquivo no formato <code>.xml</code> ou <code>.musicxml</code> (exportado do MuseScore, Finale, Sibelius, etc.) usando o botão de upload.</li>
-              <li><strong>Veja os diagramas:</strong> O aplicativo desenha automaticamente os diagramas de acordes (posições de violão) no grid de compassos.</li>
-              <li><strong>Selecione posições alternativas:</strong> Clique no botão <strong>"Mudar"</strong> sob qualquer acorde para abrir a galeria com todas as posições encontradas no braço do violão. Clique na opção desejada para atualizar a cifra e o diagrama.</li>
-              <li><strong>Ouça o acorde:</strong> Clique no diagrama do acorde para ouvir um arpejo dedilhado em áudio sintetizado de Violão Nylon de alta fidelidade.</li>
-              <li><strong>Filtre inversões:</strong> Escolha o limite de inversão de acordes (por exemplo: apenas estado fundamental ou livre) no menu de filtros.</li>
-              <li><strong>Exporte para PDF:</strong> Clique em <strong>"Exportar PDF"</strong> para gerar um arquivo PDF otimizado em formato A4 Retrato com quebras de página limpas.</li>
+              <li><strong>Importe a partitura:</strong> Carregue um arquivo no formato <code>.xml</code> ou
+                <code>.musicxml</code> (exportado do MuseScore, Finale, Sibelius, etc.) usando o botão de upload.</li>
+              <li><strong>Veja os diagramas:</strong> O aplicativo desenha automaticamente os diagramas de acordes
+                (posições de violão) no grid de compassos.</li>
+              <li><strong>Selecione posições alternativas:</strong> Clique no botão <strong>"Mudar"</strong> sob
+                qualquer acorde para abrir a galeria com todas as posições encontradas no braço do violão. Clique na
+                opção desejada para atualizar a cifra e o diagrama.</li>
+              <li><strong>Ouça o acorde:</strong> Clique no diagrama do acorde para ouvir um arpejo dedilhado em áudio
+                sintetizado de Violão Nylon de alta fidelidade.</li>
+              <li><strong>Filtre inversões e posições:</strong> Refine as posições configurando os filtros de limite de inversão, uso de cordas soltas, registro de altura (grave, médio ou agudo) e a abertura máxima de casas (3 ou 4 casas).</li>
+              <li><strong>Exporte para PDF:</strong> Clique em <strong>"Exportar PDF"</strong> para gerar um arquivo PDF
+                otimizado em formato A4 Retrato com quebras de página limpas.</li>
             </ol>
           </div>
-          
+
           <div class="accordion-section">
             <h3>🎸 Acordes Suportados (Biblioteca Ampliada)</h3>
-            <p>O <strong>Posi-Cifra-Flex</strong> suporta uma ampla gama de cifras, mapeando automaticamente do MusicXML e utilizando a biblioteca <em>Tonal.js</em>. Em acordes estendidos complexos (5+ vozes), o aplicativo realiza <strong>omit do 5º grau, 11ª ou 9ª</strong> para viabilizar posições tocáveis no violão, além de realizar simplificações inteligentes e suportar baixos alterados (Ex: <code>D/F#</code>).</p>
-            
+            <p>O <strong>Posi-Cifra-Flex</strong> suporta uma ampla gama de cifras, mapeando automaticamente do MusicXML
+              e utilizando a biblioteca <em>Tonal.js</em>. Em acordes estendidos complexos (5+ vozes), o aplicativo
+              realiza <strong>omit do 5º grau, 11ª ou 9ª</strong> para viabilizar posições tocáveis no violão, além de
+              realizar simplificações inteligentes e suportar baixos alterados (Ex: <code>D/F#</code>).</p>
+
             <div class="chord-list-grid">
               <div>
                 <h4>Tríades</h4>
@@ -409,7 +717,7 @@
                   <li>Sétima c/ 4ª suspensa (ex: <code>C7sus4</code>)</li>
                 </ul>
               </div>
-              
+
               <div>
                 <h4>Tétrades (Sétimas)</h4>
                 <ul>
@@ -422,7 +730,7 @@
                   <li>Sexta Maior / Menor (ex: <code>C6</code> / <code>Cm6</code>)</li>
                 </ul>
               </div>
-              
+
               <div>
                 <h4>Extensões e Alterados</h4>
                 <ul>
@@ -435,9 +743,10 @@
                 </ul>
               </div>
             </div>
-            
+
             <p style="margin-top: 15px; font-size: 0.8rem; font-style: italic; color: var(--text-muted);">
-              * Nota: Cifras não listadas ou customizadas do arquivo MusicXML são automaticamente simplificadas para a tríade ou tétrade correspondente mais próxima, garantindo que diagramas válidos sempre sejam exibidos.
+              * Nota: Cifras não listadas ou customizadas do arquivo MusicXML são automaticamente simplificadas para a
+              tríade ou tétrade correspondente mais próxima, garantindo que diagramas válidos sempre sejam exibidos.
             </p>
           </div>
         </div>
@@ -447,9 +756,11 @@
     <footer class="app-footer">
       <p>Desenvolvido pelo professor Glauber Santiago — DAC/UFSCar</p>
       <p class="footer-links">
-        <a href="https://servidores.ufscar.br/glauber/" target="_blank" rel="noopener noreferrer">servidores.ufscar.br/glauber/</a>
+        <a href="https://servidores.ufscar.br/glauber/" target="_blank"
+          rel="noopener noreferrer">servidores.ufscar.br/glauber/</a>
         <span class="separator">•</span>
-        <a href="https://sites.google.com/view/glauberia" target="_blank" rel="noopener noreferrer">sites.google.com/view/glauberia</a>
+        <a href="https://sites.google.com/view/glauberia" target="_blank"
+          rel="noopener noreferrer">sites.google.com/view/glauberia</a>
       </p>
     </footer>
   </div>
@@ -465,11 +776,12 @@
   </div>
 
   <script>
-    const tuning = [{string:6,midi:40},{string:5,midi:45},{string:4,midi:50},{string:3,midi:55},{string:2,midi:59},{string:1,midi:64}];
-    
+    const tuning = [{ string: 6, midi: 40 }, { string: 5, midi: 45 }, { string: 4, midi: 50 }, { string: 3, midi: 55 }, { string: 2, midi: 59 }, { string: 1, midi: 64 }];
+
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     const audioCtx = new AudioContext();
     let guitarInstrument = null;
+    let diagramScale = 0.5;
 
     Soundfont.instrument(audioCtx, 'acoustic_guitar_nylon').then(function (instrument) {
       guitarInstrument = instrument;
@@ -480,13 +792,30 @@
 
     async function playArpeggio(notesArr) {
       if (audioCtx.state === 'suspended') await audioCtx.resume();
-      if (!guitarInstrument) return; 
+      if (!guitarInstrument) return;
 
       const playableNotes = notesArr.filter(n => n.fret !== -1).sort((a, b) => a.midi - b.midi);
       const now = audioCtx.currentTime;
       playableNotes.forEach((note, index) => {
         guitarInstrument.play(note.midi, now + (index * 0.15), { duration: 2, gain: 2.5 });
       });
+    }
+
+    function updateDiagramZoom(val) {
+      diagramScale = parseFloat(val);
+      document.getElementById("zoomVal").innerText = Math.round(diagramScale * 100) + "%";
+      renderScoreGrid();
+    }
+
+    function updateMeasuresPerLine(val) {
+      const grid = document.getElementById("scoreGrid");
+      if (val === "8") {
+        grid.classList.remove("measures-4");
+        grid.classList.add("measures-8");
+      } else {
+        grid.classList.remove("measures-8");
+        grid.classList.add("measures-4");
+      }
     }
 
     function createFretboardSVG(notesArr, scale = 1) {
@@ -505,45 +834,56 @@
       let svg = `<svg width="${width}px" height="${height}px" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">`;
 
       if (baseFret > 1) {
-        svg += `<text x="0" y="${startY + 12*scale}" font-size="${12*scale}" font-weight="900" fill="var(--text-main)">${baseFret}</text>`;
+        svg += `<text x="0" y="${startY + 12 * scale}" font-size="${12 * scale}" font-weight="900" fill="var(--text-main)">${baseFret}</text>`;
       } else {
-        svg += `<line x1="${startX}" y1="${startY}" x2="${startX + stringSpacing * 5}" y2="${startY}" stroke="var(--text-main)" stroke-width="${4.5*scale}"/>`;
+        svg += `<line x1="${startX}" y1="${startY}" x2="${startX + stringSpacing * 5}" y2="${startY}" stroke="var(--text-main)" stroke-width="${4.5 * scale}"/>`;
       }
 
       for (let i = 0; i <= 4; i++) {
         const y = startY + (i * fretSpacing);
-        const thickness = (baseFret === 1 && i === 0) ? 0 : 2.5 * scale; 
+        const thickness = (baseFret === 1 && i === 0) ? 0 : 2.5 * scale;
         if (thickness > 0) svg += `<line x1="${startX}" y1="${y}" x2="${startX + stringSpacing * 5}" y2="${y}" stroke="var(--text-muted)" stroke-width="${thickness}"/>`;
       }
-      
+
       for (let i = 0; i < 6; i++) {
         const x = startX + (i * stringSpacing);
-        svg += `<line x1="${x}" y1="${startY}" x2="${x}" y2="${startY + (4 * fretSpacing)}" stroke="var(--text-main)" stroke-width="${2*scale}"/>`;
+        svg += `<line x1="${x}" y1="${startY}" x2="${x}" y2="${startY + (4 * fretSpacing)}" stroke="var(--text-main)" stroke-width="${2 * scale}"/>`;
       }
 
+      let hasBarre = false;
+      let minFret = -1;
+      let minStr = -1;
+      let maxStr = -1;
+
       if (frettedNotes.length >= 2) {
-        const minFret = Math.min(...frettedNotes.map(n => n.fret));
+        minFret = Math.min(...frettedNotes.map(n => n.fret));
         const notesOnMinFret = frettedNotes.filter(n => n.fret === minFret);
         if (notesOnMinFret.length >= 2) {
+          hasBarre = true;
           const strings = notesOnMinFret.map(n => n.string);
-          const maxStr = Math.max(...strings), minStr = Math.min(...strings);
+          maxStr = Math.max(...strings);
+          minStr = Math.min(...strings);
           const x1 = startX + ((6 - maxStr) * stringSpacing), x2 = startX + ((6 - minStr) * stringSpacing);
           const relativeFret = minFret - baseFret + 1;
           const y = startY + ((relativeFret - 1) * fretSpacing) + (fretSpacing / 2);
-          svg += `<rect x="${x1}" y="${y - 4.5*scale}" width="${x2 - x1}" height="${9*scale}" rx="${4.5*scale}" fill="var(--finger)" stroke="var(--text-main)" stroke-width="${1.5*scale}"/>`;
+          svg += `<rect x="${x1}" y="${y - 4.5 * scale}" width="${x2 - x1}" height="${9 * scale}" rx="${4.5 * scale}" fill="var(--finger)" stroke="var(--text-main)" stroke-width="${1.5 * scale}"/>`;
         }
       }
 
       notesArr.forEach(note => {
         const x = startX + ((6 - note.string) * stringSpacing);
         if (note.fret === -1) {
-          svg += `<text x="${x - 4.5*scale}" y="${startY - 6*scale}" font-size="${14*scale}" font-weight="900" font-family="sans-serif" fill="var(--text-main)">X</text>`;
+          svg += `<text x="${x - 4.5 * scale}" y="${startY - 6 * scale}" font-size="${14 * scale}" font-weight="900" font-family="sans-serif" fill="var(--text-main)">X</text>`;
         } else if (note.fret === 0) {
-          svg += `<text x="${x - 4.5*scale}" y="${startY - 6*scale}" font-size="${14*scale}" font-weight="900" font-family="sans-serif" fill="var(--text-main)">O</text>`;
+          svg += `<text x="${x - 4.5 * scale}" y="${startY - 6 * scale}" font-size="${14 * scale}" font-weight="900" font-family="sans-serif" fill="var(--text-main)">O</text>`;
         } else if (note.fret > 0) {
+          // Se esta nota está coberta pela pestana, não desenha o círculo individual para evitar "dupla camada"
+          if (hasBarre && note.fret === minFret && note.string >= minStr && note.string <= maxStr) {
+            return;
+          }
           const relativeFret = note.fret - baseFret + 1;
           const y = startY + ((relativeFret - 1) * fretSpacing) + (fretSpacing / 2);
-          svg += `<circle cx="${x}" cy="${y}" r="${5.5*scale}" fill="var(--finger)" stroke="var(--text-main)" stroke-width="${1.5*scale}"/>`;
+          svg += `<circle cx="${x}" cy="${y}" r="${5.5 * scale}" fill="var(--finger)" stroke="var(--text-main)" stroke-width="${1.5 * scale}"/>`;
         }
       });
       svg += `</svg>`;
@@ -553,7 +893,7 @@
     function simplifyChordName(name) {
       let [chordPart, bassPart] = name.split('/');
       let simplePart = chordPart;
-      
+
       const simplifications = [
         { regex: /13$/, rep: "7" },
         { regex: /11$/, rep: "7" },
@@ -590,7 +930,7 @@
           }
         }
       }
-      
+
       let match = simplePart.match(/^([A-G][b#]?)/);
       if (match) {
         let root = match[1];
@@ -612,7 +952,7 @@
       const reqChromas = chord.notes.map(n => Tonal.Note.chroma(n));
       const maxInversionAllowed = parseInt(document.getElementById("inversionFilter").value);
       const allowOpenStrings = document.getElementById("openStringsFilter")?.value === "true";
-      
+
       let requiredForVoicing = [...reqChromas];
       if (reqChromas.length >= 5) {
         if (chord.intervals.includes("5P")) {
@@ -633,8 +973,8 @@
 
       for (let startFret = 1; startFret <= 12; startFret++) {
         let stringOpts = tuning.map(str => {
-          let opts = [{ fret: -1 }]; 
-          
+          let opts = [{ fret: -1 }];
+
           if (allowOpenStrings) {
             let openMidi = str.midi;
             let openChroma = openMidi % 12;
@@ -653,35 +993,37 @@
         function build(sIdx, currentVoicing) {
           if (sIdx >= 6) {
             let played = currentVoicing.filter(n => n.fret !== -1);
-            if (played.length < 3) return; 
+            if (played.length < 3) return;
 
             let chromas = played.map(n => n.chroma);
-            if (!requiredForVoicing.every(c => chromas.includes(c))) return; 
-            
+            if (!requiredForVoicing.every(c => chromas.includes(c))) return;
+
             let bassChroma = played[0].chroma;
             if (chord.bass) {
               if (bassChroma !== Tonal.Note.chroma(chord.bass)) return;
             } else {
               let inversionLevel = reqChromas.indexOf(bassChroma);
-              if (inversionLevel > maxInversionAllowed) return; 
+              if (inversionLevel > maxInversionAllowed) return;
             }
 
             let fretted = played.filter(n => n.fret > 0);
             if (fretted.length > 0) {
               let minF = Math.min(...fretted.map(n => n.fret)), maxF = Math.max(...fretted.map(n => n.fret));
-              if (maxF - minF > (minF < 8 ? 3 : 4)) return; 
+              const maxSpan = parseInt(document.getElementById("spanFilter")?.value || "4");
+              const maxDiff = (maxSpan - 1) + (minF >= 8 ? 1 : 0);
+              if (maxF - minF > maxDiff) return;
               let notesOnMinFret = fretted.filter(n => n.fret === minF);
               if ((notesOnMinFret.length >= 2 ? 1 + (fretted.length - notesOnMinFret.length) : fretted.length) > 4) return;
             }
 
-            let pStrings = played.map(n => n.string).sort((a,b) => a - b);
+            let pStrings = played.map(n => n.string).sort((a, b) => a - b);
             let consecutiveMuted = 0;
             for (let s = pStrings[0]; s <= pStrings[pStrings.length - 1]; s++) {
               if (!pStrings.includes(s)) { if (++consecutiveMuted > 1) return; } else consecutiveMuted = 0;
             }
 
-            let pSorted = [...played].sort((a,b) => a.midi - b.midi);
-            if (pSorted.length >= 2 && pSorted[0].midi < 50 && (pSorted[1].midi - pSorted[0].midi) <= 2) return; 
+            let pSorted = [...played].sort((a, b) => a.midi - b.midi);
+            if (pSorted.length >= 2 && pSorted[0].midi < 50 && (pSorted[1].midi - pSorted[0].midi) <= 2) return;
 
             // Filtro de Registro (Grave, Médio, Agudo)
             const registerFilter = document.getElementById("registerFilter")?.value || "all";
@@ -716,7 +1058,7 @@
       const file = event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = function (e) {
         currentRawXML = e.target.result;
         processXML();
       };
@@ -730,57 +1072,57 @@
     function processXML() {
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(currentRawXML, "text/xml");
-      
+
       const workTitleNode = xmlDoc.querySelector("work-title");
       if (workTitleNode) globalTitle = workTitleNode.textContent;
       document.getElementById("scoreTitle").innerText = globalTitle;
 
       scoreData = [];
       const measures = xmlDoc.getElementsByTagName("measure");
-      const kindMap = { 
+      const kindMap = {
         // Triads
-        "major": "", 
-        "minor": "m", 
-        "augmented": "aug", 
+        "major": "",
+        "minor": "m",
+        "augmented": "aug",
         "diminished": "dim",
-        
+
         // Sevenths
-        "dominant": "7", 
-        "major-seventh": "7M", 
-        "minor-seventh": "m7", 
+        "dominant": "7",
+        "major-seventh": "7M",
+        "minor-seventh": "m7",
         "diminished-seventh": "dim7",
-        "half-diminished": "m7b5", 
+        "half-diminished": "m7b5",
         "major-minor": "mMaj7",
         "minor-major-seventh": "mMaj7",
-        
+
         // Sixths
         "major-sixth": "6",
         "minor-sixth": "m6",
-        
+
         // Ninths
         "dominant-ninth": "9",
         "major-ninth": "maj9",
         "minor-ninth": "m9",
-        
+
         // 11ths
         "dominant-11th": "11",
         "major-11th": "maj11",
         "minor-11th": "m11",
-        
+
         // 13ths
         "dominant-13th": "13",
         "major-13th": "maj13",
         "minor-13th": "m13",
-        
+
         // Suspended
         "suspended-second": "sus2",
         "suspended-fourth": "sus4",
         "dominant-suspended-fourth": "7sus4",
-        
+
         // Power/Others
         "power": "5",
         "pedal": "5",
-        
+
         // Altered / Extended
         "major-seventh-flat-five": "maj7b5",
         "minor-seventh-flat-five": "m7b5",
@@ -796,7 +1138,7 @@
 
       for (let i = 0; i < measures.length; i++) {
         const measureNode = measures[i];
-        
+
         const beatsNode = measureNode.querySelector("beats");
         if (beatsNode) currentBeats = parseInt(beatsNode.textContent);
         const beatTypeNode = measureNode.querySelector("beat-type");
@@ -820,6 +1162,36 @@
             if (rootAlter === "1") rootPart += "#";
 
             let suffix = kindMap[kind];
+            if (kindText) {
+              let cleanedText = kindText.replace(/[\(\)\/]/g, ""); // Remove parênteses e barras (ex: 7/4 vira 74)
+              if (cleanedText === "74") cleanedText = "7sus4";
+              if (cleanedText.match(/^\d+sus$/)) {
+                cleanedText += "4";
+              }
+              const testChord = rootPart + cleanedText;
+              if (!Tonal.Chord.get(testChord).empty) {
+                suffix = cleanedText;
+              }
+            }
+
+            // Verifica graus adicionados (<degree>) na partitura XML
+            const degrees = child.getElementsByTagName("degree");
+            let addedDegrees = [];
+            for (let d = 0; d < degrees.length; d++) {
+              const degVal = degrees[d].querySelector("degree-value")?.textContent;
+              const degType = degrees[d].querySelector("degree-type")?.textContent;
+              if (degType === "add" && degVal) {
+                addedDegrees.push(degVal);
+              }
+            }
+
+            if (addedDegrees.includes("7")) {
+              if (suffix === "sus4") suffix = "7sus4";
+              else if (suffix === "sus2") suffix = "7sus2";
+              else if (suffix === "") suffix = "7";
+              else if (suffix === "m") suffix = "m7";
+            }
+
             if (suffix === undefined) {
               if (kindText && /^[a-zA-Z0-9#b\+-\/()]+$/.test(kindText)) {
                 suffix = kindText.replace(/[\(\)]/g, "");
@@ -873,7 +1245,7 @@
       scoreData.forEach((measure, mIdx) => {
         const box = document.createElement("div");
         box.className = "measure-box";
-        
+
         const currentTimeSignature = `${measure.beats}\n${measure.beatType}`;
         let timeSignatureHTML = "";
 
@@ -881,7 +1253,7 @@
           timeSignatureHTML = `<div class="time-signature">${measure.beats}<br>${measure.beatType}</div>`;
           lastTimeSignature = currentTimeSignature;
         }
-        
+
         box.innerHTML = `
           <div class="measure-header">${measure.measureNum}</div>
           ${timeSignatureHTML}
@@ -892,14 +1264,14 @@
 
         measure.chords.forEach((chordData, cIdx) => {
           const selectedVoicing = chordData.options[chordData.selectedIndex];
-          
+
           let displayChord = chordData.chordName;
           const tonalChord = Tonal.Chord.get(chordData.chordName.split('/')[0]);
           if (!tonalChord.empty) {
-              let bassNoteStr = tonalChord.notes.find(n => Tonal.Note.chroma(n) === (selectedVoicing.bassMidi % 12));
-              if (bassNoteStr && Tonal.Note.chroma(bassNoteStr) !== Tonal.Note.chroma(tonalChord.tonic)) {
-                displayChord = `${chordData.chordName.split('/')[0]}/${bassNoteStr.charAt(0).toUpperCase() + bassNoteStr.slice(1)}`;
-              }
+            let bassNoteStr = tonalChord.notes.find(n => Tonal.Note.chroma(n) === (selectedVoicing.bassMidi % 12));
+            if (bassNoteStr && Tonal.Note.chroma(bassNoteStr) !== Tonal.Note.chroma(tonalChord.tonic)) {
+              displayChord = `${chordData.chordName.split('/')[0]}/${bassNoteStr.charAt(0).toUpperCase() + bassNoteStr.slice(1)}`;
+            }
           }
           displayChord = displayChord.replace(/maj7/g, "7M");
 
@@ -909,7 +1281,7 @@
           eventDiv.innerHTML = `
             <h4>${displayChord}</h4>
             <div onclick="playArpeggio(scoreData[${mIdx}].chords[${cIdx}].options[scoreData[${mIdx}].chords[${cIdx}].selectedIndex].notes)" style="cursor:pointer;" title="Ouvir">
-              ${createFretboardSVG(selectedVoicing.notes, 0.5)} </div>
+              ${createFretboardSVG(selectedVoicing.notes, diagramScale)} </div>
             <button class="change-btn data-html2canvas-ignore" onclick="openModal(${mIdx}, ${cIdx})">Mudar</button>
           `;
           chordsContainer.appendChild(eventDiv);
@@ -923,23 +1295,23 @@
       editingContext = { measureIdx: mIdx, chordIdx: cIdx };
       const chordData = scoreData[mIdx].chords[cIdx];
       document.getElementById("modalTitle").innerText = `Escolher posição: ${chordData.chordName.replace(/maj7/g, "7M")}`;
-      
+
       const optionsContainer = document.getElementById("modalOptions");
       optionsContainer.innerHTML = "";
 
       chordData.options.forEach((opt, optIndex) => {
         const card = document.createElement("div");
         card.className = `option-card ${optIndex === chordData.selectedIndex ? 'selected' : ''}`;
-        
+
         card.innerHTML = `
           <div style="font-size:0.85rem; font-weight:bold; margin-bottom:8px; color: #000;">Opção ${optIndex + 1}</div>
           ${createFretboardSVG(opt.notes, 1.0)} `;
-        
+
         card.onclick = () => {
           playArpeggio(opt.notes);
           scoreData[editingContext.measureIdx].chords[editingContext.chordIdx].selectedIndex = optIndex;
           closeModal();
-          renderScoreGrid(); 
+          renderScoreGrid();
         };
         optionsContainer.appendChild(card);
       });
@@ -949,25 +1321,65 @@
 
     function closeModal() { document.getElementById("optionsModal").style.display = "none"; }
 
-    function exportPDF() {
+    function exportImage() {
       const element = document.getElementById('printableScore');
       element.classList.add('pdf-print-mode');
-      
-      const opt = {
-        margin:       10,
-        filename:     `${globalTitle.replace(/\s+/g, '_')}_Arranjo.pdf`,
-        image:        { type: 'jpeg', quality: 1.0 },
-        html2canvas:  { scale: 3, useCORS: true }, 
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
-      };
-      
+      document.body.classList.add('pdf-body-print-mode');
+
+      const measuresPerLine = document.getElementById("measuresPerLine").value;
+      const windowWidth = (measuresPerLine === "8") ? 1040 : 720;
+
+      if (measuresPerLine === "8") {
+        element.classList.add('print-measures-8');
+      } else {
+        element.classList.add('print-measures-4');
+      }
+
       const btns = document.querySelectorAll('.change-btn');
       btns.forEach(b => b.style.display = 'none');
-      
-      html2pdf().set(opt).from(element).save().then(() => {
+
+      if (typeof html2canvas === "undefined") {
+        alert("Erro: A biblioteca de captura de imagem (html2canvas) não foi carregada corretamente. Verifique sua conexão com a internet.");
         btns.forEach(b => b.style.display = 'block');
         element.classList.remove('pdf-print-mode');
+        element.classList.remove('print-measures-4');
+        element.classList.remove('print-measures-8');
+        document.body.classList.remove('pdf-body-print-mode');
+        return;
+      }
+
+      html2canvas(element, {
+        scale: 3,
+        useCORS: true,
+        windowWidth: windowWidth,
+        scrollX: 0,
+        scrollY: 0
+      }).then(canvas => {
+        // Restaurar estado da página
+        btns.forEach(b => b.style.display = 'block');
+        element.classList.remove('pdf-print-mode');
+        element.classList.remove('print-measures-4');
+        element.classList.remove('print-measures-8');
+        document.body.classList.remove('pdf-body-print-mode');
+
+        try {
+          const imageURI = canvas.toDataURL("image/png");
+          const link = document.createElement("a");
+          link.href = imageURI;
+          link.download = `${globalTitle.replace(/\s+/g, '_')}_Arranjo.png`;
+          link.click();
+        } catch (err) {
+          console.error("Erro ao exportar imagem:", err);
+          alert("O navegador bloqueou a exportação automática da imagem devido a restrições de segurança de arquivos locais (Same-Origin Policy).\n\nPara resolver isso:\n1. Execute o arquivo usando um servidor local (ex: extensão Live Server do VS Code, ou Python: python -m http.server);\n2. Ou hospede o aplicativo online.");
+        }
+      }).catch(err => {
+        console.error("Erro no html2canvas:", err);
+        alert("Erro ao renderizar a imagem: " + err.message);
+        btns.forEach(b => b.style.display = 'block');
+        element.classList.remove('pdf-print-mode');
+        element.classList.remove('print-measures-4');
+        element.classList.remove('print-measures-8');
+        document.body.classList.remove('pdf-body-print-mode');
       });
     }
 
@@ -977,7 +1389,7 @@
         return;
       }
 
-      const selectedIndices = scoreData.map(measure => 
+      const selectedIndices = scoreData.map(measure =>
         measure.chords.map(chord => chord.selectedIndex)
       );
 
@@ -987,7 +1399,10 @@
         selectedIndices: selectedIndices,
         inversionFilter: document.getElementById("inversionFilter").value,
         openStringsFilter: document.getElementById("openStringsFilter").value,
-        registerFilter: document.getElementById("registerFilter").value
+        registerFilter: document.getElementById("registerFilter").value,
+        spanFilter: document.getElementById("spanFilter").value,
+        measuresPerLine: document.getElementById("measuresPerLine").value,
+        diagramScale: diagramScale
       };
 
       const jsonStr = JSON.stringify(projectData, null, 2);
@@ -1002,9 +1417,9 @@
     function handleProjectUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
-      
+
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = function (e) {
         try {
           const projectData = JSON.parse(e.target.result);
           if (!projectData.currentRawXML) {
@@ -1022,6 +1437,18 @@
           if (projectData.registerFilter) {
             document.getElementById("registerFilter").value = projectData.registerFilter;
           }
+          if (projectData.spanFilter) {
+            document.getElementById("spanFilter").value = projectData.spanFilter;
+          }
+          if (projectData.measuresPerLine) {
+            document.getElementById("measuresPerLine").value = projectData.measuresPerLine;
+            updateMeasuresPerLine(projectData.measuresPerLine);
+          }
+          if (projectData.diagramScale) {
+            diagramScale = parseFloat(projectData.diagramScale);
+            document.getElementById("diagramZoom").value = diagramScale;
+            document.getElementById("zoomVal").innerText = Math.round(diagramScale * 100) + "%";
+          }
 
           processXML();
 
@@ -1037,7 +1464,7 @@
             });
             renderScoreGrid();
           }
-          
+
           alert("Projeto carregado com sucesso!");
         } catch (err) {
           console.error(err);
@@ -1052,7 +1479,7 @@
       const defaultUrl = 'https://raw.githubusercontent.com/GlauberLASantiago/posi-cifra-flex/main/posi-cifra-flex-demo.musicxml';
       const grid = document.getElementById("scoreGrid");
       grid.innerHTML = '<p style="color: var(--text-muted); text-align: center; width: 100%;">Carregando arranjo de demonstração...</p>';
-      
+
       fetch(defaultUrl)
         .then(response => {
           if (!response.ok) throw new Error("Erro de rede");
@@ -1069,4 +1496,5 @@
     });
   </script>
 </body>
+
 </html>
