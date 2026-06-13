@@ -8,15 +8,17 @@ Aplicação web para gerar, editar e organizar cifras com posições alternativa
 
 ## Visão geral
 
-O **Posi-Cifra-Flex** permite:
 
-- importar arquivos MusicXML (`.xml`, `.musicxml` e `.mxl`);
-- criar projetos novos do zero;
-- visualizar e ouvir diagramas de acordes;
-- trocar automaticamente entre posições alternativas de um mesmo acorde;
-- editar cifras diretamente na grade;
-- filtrar posições por inversão, cordas soltas, registro e abertura;
-- exportar o arranjo como imagem pronta para impressão.
+📖 Como usar o app
+📖 Mini Tutorial
+Inicie um projeto: Carregue um arquivo no formato .xml ou .musicxml (exportado do MuseScore, Finale, Sibelius, etc.) usando o botão de upload, ou crie um projeto do zero clicando em "Novo" para definir o título, fórmula de compasso e quantidade inicial de compassos.
+Veja e ouça os diagramas e as notas: O app desenha automaticamente os diagramas de acordes (posições no braço do violão) no grid. Clique no diagrama para ouvir o acorde dedilhado em áudio sintetizado de alta fidelidade. A caixa de seleção "Visualizar Notas" (ativada por padrão) exibe as notas componentes do acorde (como Dó, Ré, Mi...) abaixo de cada diagrama.
+Selecione posições alternativas: Clique no botão "Mudar" sob qualquer acorde para abrir a galeria com todas as posições correspondentes encontradas e clique na desejada.
+Edite cifras e desfaça ações: Ative a caixa "Editar Cifras". Clique na cifra ou em "Editar" para digitar o acorde. O app corrige automaticamente o texto (minúsculas viram maiúsculas, o caractere 3 vira sustenido #, e o b vira bemol b), além de normalizar e validar musicalmente a cifra. Pressione Enter para salvar e avançar para o próximo compasso. Você pode desfazer ou refazer edições utilizando os botões "↶ Desfazer" e "↷ Refazer" (ou atalhos Ctrl+Z e Ctrl+Y).
+Ouça uma prévia em andamento: Clique no botão "Prévia: Tocar" para escutar o arranjo acompanhado por uma bateria de bossa nova. O controle de BPM ao lado permite ajustar o andamento entre 60 e 200 (o padrão é 130 BPM). O seletor de estilo permite alternar a prévia entre Ataque (notas simultâneas), Com Arpejo (notas dedilhadas rapidamente) ou Em Colcheia (notas arpejadas sustentadas no tempo de colcheia). O acorde atual é destacado visualmente com um fundo verde no grid enquanto soa.
+Gerencie a partitura: Adicione novas cifras com + Cifra, delete-as com o botão vermelho ×, ou aumente/diminua a quantidade total de compassos pelos botões + e - abaixo da partitura.
+Filtre posições: Configure o limite de inversão de baixos, permissão de cordas soltas, registro de altura (grave, médio ou agudo) e a abertura de casas para adequar os diagramas.
+Exporte o arranjo: Clique em "Exportar Imagem" para baixar os diagramas diagramados em páginas no formato retrato (A4), prontas para visualização ou impressão.
 
 ## Estrutura do repositório
 
