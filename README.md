@@ -2,6 +2,9 @@
 
 Aplicação web para gerar, editar e organizar cifras com posições alternativas de acordes no violão.
 
+<img width="832" height="707" alt="image" src="https://github.com/user-attachments/assets/507148bd-e911-44e0-b237-d34dcf23f8e0" />
+
+
 ## Visão geral
 
 O **Posi-Cifra-Flex** permite:
