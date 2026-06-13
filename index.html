@@ -344,6 +344,17 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+      padding: 4px;
+      border-radius: 8px;
+      border: 2px solid transparent;
+    }
+
+    .chord-event.playing {
+      background-color: rgba(131, 180, 128, 0.2) !important;
+      border-color: var(--finger) !important;
+      box-shadow: 0 0 10px rgba(131, 180, 128, 0.5) !important;
+      transform: scale(1.05);
     }
 
     .chord-event h4 {
@@ -673,7 +684,6 @@
         </div>
 
         <div class="control-group">
-          <label>Projeto</label>
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
             <button class="btn" style="background-color: #2e6f40;" onclick="openNewProjectModal()">Novo</button>
             <button class="btn" style="background-color: #5a5a5a;" onclick="saveProject()">Salvar</button>
@@ -686,31 +696,49 @@
         </div>
 
         <div class="control-group" style="min-width: 350px;">
-          <label>Modo de Edição</label>
           <div style="display: flex; align-items: center; margin-bottom: 12px; gap: 10px;">
             <input type="checkbox" id="editCifrasToggle" onchange="toggleEditMode()"
               style="width: 20px; height: 20px; cursor: pointer;">
             <label for="editCifrasToggle"
-              style="margin-left: 8px; cursor: pointer; color: var(--text-main); font-weight: normal; text-transform: none; font-size: 0.95rem;">Editar Cifras</label>
-            <button class="btn" id="undoBtn" onclick="undoAction()" style="padding: 3px 8px; font-size: 0.75rem; margin-left: 15px; background-color: #5a5a5a; line-height: 1;" title="Desfazer a última ação (Ctrl+Z)" disabled>↶ Desfazer</button>
-            <button class="btn" id="redoBtn" onclick="redoAction()" style="padding: 3px 8px; font-size: 0.75rem; background-color: #5a5a5a; line-height: 1;" title="Refazer a última ação (Ctrl+Y)" disabled>↷ Refazer</button>
+              style="margin-left: 8px; cursor: pointer; color: var(--text-main); font-weight: normal; text-transform: none; font-size: 0.95rem;">Editar
+              Cifras</label>
+            <button class="btn" id="undoBtn" onclick="undoAction()"
+              style="padding: 3px 8px; font-size: 0.75rem; margin-left: 15px; background-color: #5a5a5a; line-height: 1;"
+              title="Desfazer a última ação (Ctrl+Z)" disabled>↶ Desfazer</button>
+            <button class="btn" id="redoBtn" onclick="redoAction()"
+              style="padding: 3px 8px; font-size: 0.75rem; background-color: #5a5a5a; line-height: 1;"
+              title="Refazer a última ação (Ctrl+Y)" disabled>↷ Refazer</button>
+            <button class="btn" id="previewPlayBtn" onclick="togglePreviewPlay()"
+              style="padding: 3px 8px; font-size: 0.75rem; margin-left: 15px; background-color: #2e6f40; line-height: 1; font-weight: bold;"
+              title="Prévia">Prévia: Tocar</button>
+            <select id="previewMode" onchange="stopPreview()"
+              style="padding: 3px 8px; font-size: 0.75rem; margin-left: 8px; background-color: var(--bg-color); color: var(--text-main); border: 2px solid var(--border); border-radius: 4px; cursor: pointer; height: 26px; line-height: 1; vertical-align: middle;">
+              <option value="ataque" selected>Ataque</option>
+              <option value="arpejo">Com Arpejo</option>
+              <option value="colcheia">Em Colcheia</option>
+            </select>
+            <label for="previewTempo" style="margin-left: 10px; color: var(--text-muted); font-size: 0.85rem; font-weight: bold; text-transform: uppercase; vertical-align: middle;">BPM:</label>
+            <input type="number" id="previewTempo" min="60" max="200" value="130" onchange="onTempoChange(false)" oninput="onTempoChange(true)"
+              style="width: 55px; padding: 3px 6px; font-size: 0.75rem; margin-left: 4px; background-color: var(--bg-color); color: var(--text-main); border: 2px solid var(--border); border-radius: 4px; height: 26px; box-sizing: border-box; text-align: center; vertical-align: middle;">
           </div>
-          
+
           <div style="display: flex; align-items: flex-end; gap: 20px; flex-wrap: wrap;">
             <div style="display: flex; flex-direction: column; gap: 5px;">
               <label>Notas</label>
               <div style="display: flex; align-items: center; height: 30px;">
                 <input type="checkbox" id="viewNotesToggle" onchange="toggleViewNotes()"
-                  style="width: 20px; height: 20px; cursor: pointer;">
+                  style="width: 20px; height: 20px; cursor: pointer;" checked>
                 <label for="viewNotesToggle"
-                  style="margin-left: 8px; cursor: pointer; color: var(--text-main); font-weight: normal; text-transform: none; font-size: 0.95rem;">Visualizar Notas</label>
+                  style="margin-left: 8px; cursor: pointer; color: var(--text-main); font-weight: normal; text-transform: none; font-size: 0.95rem;">Visualizar
+                  Notas</label>
               </div>
             </div>
-            
+
             <div style="display: flex; flex-direction: column; gap: 5px; max-width: 150px; min-width: 120px;">
               <label>Zoom: <span id="zoomVal">80%</span></label>
               <input type="range" id="diagramZoom" min="0.4" max="1.5" step="0.05" value="0.8"
-                oninput="updateDiagramZoom(this.value)" style="cursor: pointer; width: 100%; height: 30px; margin: 0; box-sizing: border-box; vertical-align: middle;">
+                oninput="updateDiagramZoom(this.value)"
+                style="cursor: pointer; width: 100%; height: 30px; margin: 0; box-sizing: border-box; vertical-align: middle;">
             </div>
           </div>
         </div>
@@ -722,6 +750,7 @@
             <option value="8">8 compassos</option>
           </select>
         </div>
+
       </div>
 
       <!-- Segunda Linha: Filtros e Configurações -->
@@ -804,17 +833,18 @@
                 crie um projeto do zero clicando em <strong>"Novo"</strong> para definir o título, fórmula de compasso e
                 quantidade inicial de compassos.
               </li>
-              <li><strong>Veja e ouça os diagramas:</strong> O app desenha automaticamente os diagramas de acordes
+              <li><strong>Veja e ouça os diagramas e as notas:</strong> O app desenha automaticamente os diagramas de acordes
                 (posições no braço do violão) no grid. Clique no diagrama para ouvir o acorde dedilhado em áudio
-                sintetizado de alta fidelidade.</li>
+                sintetizado de alta fidelidade. A caixa de seleção <strong>"Visualizar Notas"</strong> (ativada por padrão) exibe as notas componentes do acorde (como Dó, Ré, Mi...) abaixo de cada diagrama.</li>
               <li><strong>Selecione posições alternativas:</strong> Clique no botão <strong>"Mudar"</strong> sob
                 qualquer acorde para abrir a galeria com todas as posições correspondentes encontradas e clique na
                 desejada.</li>
-              <li><strong>Edite cifras de forma inteligente:</strong> Ative a caixa <strong>"Editar Cifras"</strong>.
+              <li><strong>Edite cifras e desfaça ações:</strong> Ative a caixa <strong>"Editar Cifras"</strong>.
                 Clique na cifra ou em "Editar" para digitar o acorde. O app corrige automaticamente o texto (minúsculas
                 viram maiúsculas, o caractere <code>3</code> vira sustenido <code>#</code>, e o <code>b</code> vira
                 bemol <code>b</code>), além de normalizar e validar musicalmente a cifra. Pressione <code>Enter</code>
-                para salvar e avançar para o próximo compasso.</li>
+                para salvar e avançar para o próximo compasso. Você pode desfazer ou refazer edições utilizando os botões <strong>"↶ Desfazer"</strong> e <strong>"↷ Refazer"</strong> (ou atalhos <code>Ctrl+Z</code> e <code>Ctrl+Y</code>).</li>
+              <li><strong>Ouça uma prévia em andamento:</strong> Clique no botão <strong>"Prévia: Tocar"</strong> para escutar o arranjo acompanhado por uma bateria de bossa nova. O controle de BPM ao lado permite ajustar o andamento entre 60 e 200 (o padrão é 130 BPM). O seletor de estilo permite alternar a prévia entre <strong>Ataque</strong> (notas simultâneas), <strong>Com Arpejo</strong> (notas dedilhadas rapidamente) ou <strong>Em Colcheia</strong> (notas arpejadas sustentadas no tempo de colcheia). O acorde atual é destacado visualmente com um fundo verde no grid enquanto soa.</li>
               <li><strong>Gerencie a partitura:</strong> Adicione novas cifras com <code>+ Cifra</code>, delete-as com o
                 botão vermelho <code>&times;</code>, ou aumente/diminua a quantidade total de compassos pelos botões
                 <code>+</code> e <code>-</code> abaixo da partitura.
@@ -827,7 +857,7 @@
           </div>
 
           <div class="accordion-section">
-            <h3>🎸 Acordes Suportados (Biblioteca Ampliada)</h3>
+            <h3>🎸 Acordes Suportados</h3>
             <p>O <strong>Posi-Cifra-Flex</strong> suporta uma ampla gama de cifras, mapeando automaticamente do MusicXML
               e utilizando a biblioteca <em>Tonal.js</em>. Em acordes estendidos complexos (5+ vozes), o aplicativo
               realiza <strong>omit do 5º grau, 11ª ou 9ª</strong> para viabilizar posições tocáveis no violão, além de
@@ -992,6 +1022,300 @@
     let guitarInstrument = null;
     let diagramScale = 0.8;
 
+    // Estado da Prévia Musical
+    let previewPlaying = false;
+    let backingTrack85 = null;
+    let backingTrack130 = null;
+    let animationFrameId = null;
+    const scheduledChords = new Set();
+    let playlist = [];
+    let currentActiveChordEl = null;
+
+    function getTempoRatio() {
+      const tempoInput = document.getElementById("previewTempo");
+      const tempo = tempoInput ? parseInt(tempoInput.value) : 130;
+      return isNaN(tempo) ? 1.0 : (tempo / 130);
+    }
+
+    function getBackingTrackForTempo(tempo) {
+      if (tempo <= 120) {
+        if (!backingTrack85) {
+          let audioUrl = "https://github.com/GlauberLASantiago/posi-cifra-flex/blob/main/085-bossa2-bat.mp3";
+          if (audioUrl.includes("github.com") && audioUrl.includes("/blob/")) {
+            audioUrl = audioUrl.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/");
+          }
+          backingTrack85 = new Audio(audioUrl);
+          backingTrack85.crossOrigin = "anonymous";
+          backingTrack85.loop = true;
+        }
+        return { track: backingTrack85, originalBPM: 85 };
+      } else {
+        if (!backingTrack130) {
+          let audioUrl = "https://github.com/GlauberLASantiago/posi-cifra-flex/blob/main/130-bossa1-bat.mp3";
+          if (audioUrl.includes("github.com") && audioUrl.includes("/blob/")) {
+            audioUrl = audioUrl.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/");
+          }
+          backingTrack130 = new Audio(audioUrl);
+          backingTrack130.crossOrigin = "anonymous";
+          backingTrack130.loop = true;
+        }
+        return { track: backingTrack130, originalBPM: 130 };
+      }
+    }
+
+    function onTempoChange(isInput = false) {
+      const tempoInput = document.getElementById("previewTempo");
+      if (!tempoInput) return;
+      let val = parseInt(tempoInput.value);
+      if (isNaN(val)) return;
+
+      if (!isInput) {
+        if (val < 60) val = 60;
+        if (val > 200) val = 200;
+        tempoInput.value = val;
+      }
+
+      if (val >= 60 && val <= 200) {
+        if (previewPlaying) {
+          const currentInfo = getBackingTrackForTempo(val);
+          const newTrack = currentInfo.track;
+          const originalBPM = currentInfo.originalBPM;
+
+          let oldTrack = null;
+          let oldBPM = 85;
+          if (backingTrack85 && !backingTrack85.paused) {
+            oldTrack = backingTrack85;
+            oldBPM = 85;
+          } else if (backingTrack130 && !backingTrack130.paused) {
+            oldTrack = backingTrack130;
+            oldBPM = 130;
+          }
+
+          if (oldTrack && oldTrack !== newTrack) {
+            oldTrack.pause();
+            const beats = oldTrack.currentTime * (oldBPM / 60);
+            newTrack.currentTime = beats * (60 / originalBPM);
+            newTrack.playbackRate = val / originalBPM;
+            newTrack.play().catch(err => console.error("Error swapping track:", err));
+          } else if (oldTrack) {
+            oldTrack.playbackRate = val / originalBPM;
+          }
+        } else {
+          const { track, originalBPM } = getBackingTrackForTempo(val);
+          track.playbackRate = val / originalBPM;
+        }
+      }
+    }
+
+    function stopPreview() {
+      previewPlaying = false;
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+      if (backingTrack85) {
+        backingTrack85.pause();
+        backingTrack85.currentTime = 0;
+      }
+      if (backingTrack130) {
+        backingTrack130.pause();
+        backingTrack130.currentTime = 0;
+      }
+      if (guitarInstrument && typeof guitarInstrument.stop === "function") {
+        guitarInstrument.stop();
+      }
+      if (currentActiveChordEl) {
+        currentActiveChordEl.classList.remove("playing");
+        currentActiveChordEl = null;
+      }
+      document.querySelectorAll(".chord-event.playing").forEach(el => el.classList.remove("playing"));
+      const playBtn = document.getElementById("previewPlayBtn");
+      if (playBtn) {
+        playBtn.textContent = "Prévia: Tocar";
+        playBtn.style.backgroundColor = "#2e6f40";
+      }
+    }
+
+    function playChordAtTime(notesArr, targetTime, maxAllowedDuration) {
+      if (!guitarInstrument) return;
+      const playableNotes = notesArr.filter(n => n.fret !== -1).sort((a, b) => a.midi - b.midi);
+      if (playableNotes.length === 0) return;
+
+      const ratio = getTempoRatio();
+      const chordDuration = Math.min(2.0, maxAllowedDuration);
+      const chordDurationReal = chordDuration / ratio;
+      const mode = document.getElementById("previewMode")?.value || "ataque";
+
+      if (mode === "ataque") {
+        playableNotes.forEach((note) => {
+          guitarInstrument.play(note.midi, targetTime, { duration: Math.max(0.2, chordDurationReal), gain: 2.5 });
+        });
+      } else if (mode === "arpejo") {
+        const delay = 0.04;
+        playableNotes.forEach((note, index) => {
+          guitarInstrument.play(note.midi, targetTime + (index * delay), { duration: Math.max(0.2, chordDurationReal - (index * delay)), gain: 2.5 });
+        });
+      } else if (mode === "colcheia") {
+        const tempoInput = document.getElementById("previewTempo");
+        const tempo = tempoInput ? parseInt(tempoInput.value) : 130;
+        const colcheiaDelayReal = (60 / tempo) / 2;
+        const colcheiaDelayMedia = (60 / 130) / 2;
+        const count = Math.max(1, Math.floor(maxAllowedDuration / colcheiaDelayMedia));
+        for (let i = 0; i < count; i++) {
+          const note = playableNotes[i % playableNotes.length];
+          const noteTime = targetTime + (i * colcheiaDelayReal);
+          const noteDuration = Math.max(0.2, chordDurationReal - (i * colcheiaDelayReal));
+          guitarInstrument.play(note.midi, noteTime, { duration: noteDuration, gain: 2.5 });
+        }
+      }
+    }
+
+    function updateUIActiveChord(activeItem) {
+      if (currentActiveChordEl) {
+        currentActiveChordEl.classList.remove("playing");
+      }
+      if (activeItem) {
+        const selector = `.chord-event[data-measure-idx="${activeItem.measureIdx}"][data-chord-idx="${activeItem.chordIdx}"]`;
+        const activeEl = document.querySelector(selector);
+        if (activeEl) {
+          activeEl.classList.add("playing");
+          currentActiveChordEl = activeEl;
+        } else {
+          currentActiveChordEl = null;
+        }
+      } else {
+        currentActiveChordEl = null;
+      }
+    }
+
+    async function startPreview() {
+      if (audioCtx.state === 'suspended') {
+        await audioCtx.resume();
+      }
+      if (!guitarInstrument) {
+        alert("O áudio do Violão Nylon ainda está sendo carregado. Por favor, aguarde.");
+        return;
+      }
+
+      playlist = [];
+      let accumulatedBeats = 0;
+      scoreData.forEach((measure, mIdx) => {
+        const numChords = measure.chords.length;
+        if (numChords === 0) {
+          accumulatedBeats += measure.beats;
+        } else {
+          const beatsPerChord = measure.beats / numChords;
+          measure.chords.forEach((chord, cIdx) => {
+            playlist.push({
+              measureIdx: mIdx,
+              chordIdx: cIdx,
+              startTime: accumulatedBeats * (60 / 130),
+              duration: beatsPerChord * (60 / 130),
+              chordData: chord
+            });
+            accumulatedBeats += beatsPerChord;
+          });
+        }
+      });
+
+      const totalDuration = accumulatedBeats * (60 / 130);
+      if (playlist.length === 0) {
+        alert("Nenhuma cifra no projeto para tocar!");
+        return;
+      }
+
+      const tempoInput = document.getElementById("previewTempo");
+      const tempo = tempoInput ? parseInt(tempoInput.value) : 130;
+      const { track, originalBPM } = getBackingTrackForTempo(tempo);
+
+      if (backingTrack85) {
+        backingTrack85.pause();
+        backingTrack85.currentTime = 0;
+      }
+      if (backingTrack130) {
+        backingTrack130.pause();
+        backingTrack130.currentTime = 0;
+      }
+
+      track.currentTime = 0;
+      track.playbackRate = tempo / originalBPM;
+      scheduledChords.clear();
+
+      try {
+        await track.play();
+      } catch (err) {
+        console.error("Erro ao iniciar áudio da prévia:", err);
+        alert("Erro ao iniciar a faixa de acompanhamento. Verifique se há restrições de reprodução ou conexão de rede.");
+      }
+
+      previewPlaying = true;
+      const playBtn = document.getElementById("previewPlayBtn");
+      if (playBtn) {
+        playBtn.textContent = "Prévia: Parar";
+        playBtn.style.backgroundColor = "#c0392b";
+      }
+
+      function tick() {
+        if (!previewPlaying) return;
+
+        const currentTempoInput = document.getElementById("previewTempo");
+        const currentTempo = currentTempoInput ? parseInt(currentTempoInput.value) : 130;
+        const ratio130 = currentTempo / 130;
+        const currentInfo = getBackingTrackForTempo(currentTempo);
+        const currentTrack = currentInfo.track;
+        const originalBPM = currentInfo.originalBPM;
+
+        const playhead130 = currentTrack.currentTime * (originalBPM / 130) + 0.02 * ratio130;
+        const nowCtx = audioCtx.currentTime;
+
+        // 1. Audio scheduling: lookahead 150ms real (scaled to 130 BPM media seconds)
+        const lookaheadMedia = 0.15 * ratio130;
+        playlist.forEach((item, index) => {
+          if (!scheduledChords.has(index)) {
+            if (item.startTime >= playhead130 - (0.1 * ratio130) && item.startTime < playhead130 + lookaheadMedia) {
+              scheduledChords.add(index);
+              const delayMedia = Math.max(0, item.startTime - playhead130);
+              const delayReal = delayMedia / ratio130;
+              const targetTime = nowCtx + delayReal;
+              const selectedVoicing = item.chordData.options[item.chordData.selectedIndex];
+              if (selectedVoicing) {
+                playChordAtTime(selectedVoicing.notes, targetTime, item.duration);
+              }
+            }
+          }
+        });
+
+        // 2. UI update: active chord
+        let activeItem = null;
+        for (let i = 0; i < playlist.length; i++) {
+          const item = playlist[i];
+          if (playhead130 >= item.startTime && playhead130 < item.startTime + item.duration) {
+            activeItem = item;
+            break;
+          }
+        }
+        updateUIActiveChord(activeItem);
+
+        // 3. Loop/end check
+        if (playhead130 >= totalDuration) {
+          stopPreview();
+          return;
+        }
+
+        animationFrameId = requestAnimationFrame(tick);
+      }
+
+      animationFrameId = requestAnimationFrame(tick);
+    }
+
+    function togglePreviewPlay() {
+      if (previewPlaying) {
+        stopPreview();
+      } else {
+        startPreview();
+      }
+    }
+
     Soundfont.instrument(audioCtx, 'acoustic_guitar_nylon').then(function (instrument) {
       guitarInstrument = instrument;
       const statusBadge = document.getElementById("audioStatus");
@@ -1003,10 +1327,15 @@
       if (audioCtx.state === 'suspended') await audioCtx.resume();
       if (!guitarInstrument) return;
 
+      if (typeof guitarInstrument.stop === 'function') {
+        guitarInstrument.stop();
+      }
+
       const playableNotes = notesArr.filter(n => n.fret !== -1).sort((a, b) => a.midi - b.midi);
       const now = audioCtx.currentTime;
+      const delay = 0.04;
       playableNotes.forEach((note, index) => {
-        guitarInstrument.play(note.midi, now + (index * 0.15), { duration: 2, gain: 2.5 });
+        guitarInstrument.play(note.midi, now + (index * delay), { duration: Math.max(0.2, 2.0 - (index * delay)), gain: 2.5 });
       });
     }
 
@@ -1049,7 +1378,7 @@
 
       const rootNote = tonalChord.tonic;
       const notesWithoutRoot = tonalChord.notes.filter(n => Tonal.Note.chroma(n) !== Tonal.Note.chroma(rootNote));
-      
+
       const detected = Tonal.Chord.detect(notesWithoutRoot);
       if (detected && detected.length > 0) {
         return detected[0];
@@ -1307,10 +1636,10 @@
       } else if (rootFilter === "incluir") {
         const withRoot = findPlayableVoicings(chordName, false);
         const withoutRoot = findPlayableVoicings(chordName, true);
-        
+
         const combined = [...withRoot];
         const seenSigs = new Set(withRoot.map(v => v.notes.map(n => n.fret).join(',')));
-        
+
         withoutRoot.forEach(v => {
           const sig = v.notes.map(n => n.fret).join(',');
           if (!seenSigs.has(sig)) {
@@ -1325,12 +1654,14 @@
       if (options.length === 0) {
         isException = true;
         // Busca o rol de posições em geral para aquela cifragem (sem omissão de fundamental, sem restrições de filtros)
-        options = findPlayableVoicings(chordName, false, {
+        const rawOptions = findPlayableVoicings(chordName, false, {
           inversion: 3,
-          openStrings: true,
+          openStrings: false,
           span: 4,
           reg: "all"
         });
+        // Nos casos de exceção nunca utilize posições com notas abaixo do D3 (MIDI < 50)
+        options = rawOptions.filter(v => !v.notes.some(n => n.fret !== -1 && n.midi < 50));
       }
 
       return {
@@ -1508,7 +1839,7 @@
         chordToUse = recifrarAcorde(chordName);
       }
       const tonalChord = Tonal.Chord.get(chordToUse);
-      
+
       let candidates = [];
       if (!tonalChord.empty) {
         candidates = [...tonalChord.notes];
@@ -1548,6 +1879,7 @@
     let redoStack = [];
 
     function saveStateToHistory() {
+      stopPreview();
       const state = {
         scoreData: JSON.parse(JSON.stringify(scoreData)),
         globalTitle: globalTitle,
@@ -1562,32 +1894,34 @@
     }
 
     function undoAction() {
+      stopPreview();
       if (undoStack.length <= 1) return;
-      
+
       const currentState = undoStack.pop();
       redoStack.push(currentState);
-      
+
       const prevState = undoStack[undoStack.length - 1];
-      
+
       scoreData = JSON.parse(JSON.stringify(prevState.scoreData));
       globalTitle = prevState.globalTitle;
       currentRawXML = prevState.currentRawXML;
-      
+
       document.getElementById("scoreTitle").innerText = globalTitle;
       renderScoreGrid();
       updateUndoRedoButtons();
     }
 
     function redoAction() {
+      stopPreview();
       if (redoStack.length === 0) return;
-      
+
       const nextState = redoStack.pop();
       undoStack.push(nextState);
-      
+
       scoreData = JSON.parse(JSON.stringify(nextState.scoreData));
       globalTitle = nextState.globalTitle;
       currentRawXML = nextState.currentRawXML;
-      
+
       document.getElementById("scoreTitle").innerText = globalTitle;
       renderScoreGrid();
       updateUndoRedoButtons();
@@ -1596,14 +1930,14 @@
     function updateUndoRedoButtons() {
       const undoBtn = document.getElementById("undoBtn");
       const redoBtn = document.getElementById("redoBtn");
-      
+
       if (undoBtn) {
         const canUndo = undoStack.length > 1;
         undoBtn.disabled = !canUndo;
         undoBtn.style.opacity = canUndo ? "1" : "0.5";
         undoBtn.style.cursor = canUndo ? "pointer" : "not-allowed";
       }
-      
+
       if (redoBtn) {
         const canRedo = redoStack.length > 0;
         redoBtn.disabled = !canRedo;
@@ -1620,7 +1954,7 @@
         if (activeEl.id === 'cifraInput' && e.key === 'Enter') return;
         if (!e.ctrlKey) return;
       }
-      
+
       if (e.ctrlKey && e.key.toLowerCase() === 'z') {
         e.preventDefault();
         undoAction();
@@ -1825,6 +2159,7 @@
     }
 
     function handleXMLUpload(event) {
+      stopPreview();
       const file = event.target.files[0];
       if (!file) return;
 
@@ -1888,6 +2223,7 @@
     }
 
     function reprocessScore() {
+      stopPreview();
       scoreData.forEach(measure => {
         measure.chords.forEach(chord => {
           const resVoicings = getVoicingsForChord(chord.chordName);
@@ -2151,7 +2487,7 @@
 
           let displayChord = chordData.chordName;
           const rootFilter = document.getElementById("rootFilter")?.value || "manter";
-          
+
           let baseChord = chordData.chordName.split('/')[0];
           if (rootFilter === "recifrar") {
             baseChord = recifrarAcorde(chordData.chordName);
@@ -2172,6 +2508,8 @@
 
           const eventDiv = document.createElement("div");
           eventDiv.className = "chord-event";
+          eventDiv.dataset.measureIdx = mIdx;
+          eventDiv.dataset.chordIdx = cIdx;
 
           let fretboardSVG = "";
           let arpeggioClick = "";
@@ -2184,7 +2522,7 @@
 
           let chordHeader = "";
           let actionButtons = "";
-          let exceptionBadge = chordData.isException ? `<span style="font-size: 0.65rem; background-color: var(--accent); color: white; padding: 1px 4px; border-radius: 3px; margin-left: 4px; vertical-align: middle;">exceção</span>` : "";
+          let exceptionBadge = chordData.isException ? `<span class="exception-badge data-html2canvas-ignore" style="font-size: 0.65rem; background-color: var(--accent); color: white; padding: 1px 4px; border-radius: 3px; margin-left: 4px; vertical-align: middle;">exceção</span>` : "";
 
           if (isEditMode) {
             chordHeader = `<h4 onclick="openEditCifraModal(${mIdx}, ${cIdx})" style="cursor: pointer; text-decoration: underline dashed 1.5px var(--accent); margin: 0 0 4px 0;" title="Clique para editar cifra">${displayChord}${exceptionBadge}</h4>`;
@@ -2244,13 +2582,13 @@
     function openModal(mIdx, cIdx) {
       editingContext = { measureIdx: mIdx, chordIdx: cIdx };
       const chordData = scoreData[mIdx].chords[cIdx];
-      
+
       let displayTitle = chordData.chordName;
       const rootFilter = document.getElementById("rootFilter")?.value || "manter";
       if (rootFilter === "recifrar") {
         displayTitle = recifrarAcorde(chordData.chordName);
       }
-      
+
       document.getElementById("modalTitle").innerText = `Escolher posição: ${displayTitle.replace(/maj7/g, "7M")}`;
 
       const optionsContainer = document.getElementById("modalOptions");
@@ -2350,8 +2688,8 @@
             clonedBox.style.setProperty("width", (measuresPerLine === "8" ? "12.5%" : "25%"), "important");
             clonedBox.style.setProperty("flex-shrink", "1", "important");
 
-            // Oculta botões de interação no clone de impressão
-            const btns = clonedBox.querySelectorAll('.change-btn, .edit-cifra-btn, .delete-chord-btn, .add-chord-btn');
+            // Oculta botões de interação e badges de exceção no clone de impressão
+            const btns = clonedBox.querySelectorAll('.change-btn, .edit-cifra-btn, .delete-chord-btn, .add-chord-btn, .exception-badge');
             btns.forEach(b => b.style.display = 'none');
 
             // Garante Time Signature visível no início de cada página
