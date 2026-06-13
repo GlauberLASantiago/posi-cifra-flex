@@ -15,6 +15,7 @@
   <script src="https://cdn.jsdelivr.net/npm/soundfont-player@0.12.0/dist/soundfont-player.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
   <style>
     :root {
@@ -592,8 +593,8 @@
       <!-- Primeira Linha: Carregar, Salvar e Exportar -->
       <div class="controls-row">
         <div class="control-group">
-          <label>Arquivo MusicXML</label>
-          <input type="file" id="xmlUpload" accept=".xml,.musicxml" onchange="handleXMLUpload(event)">
+          <label>Arquivo MusicXML (.xml, .musicxml, .mxl)</label>
+          <input type="file" id="xmlUpload" accept=".xml,.musicxml,.mxl" onchange="handleXMLUpload(event)">
         </div>
 
         <div class="control-group">
@@ -772,6 +773,24 @@
         <button class="close-btn" onclick="closeModal()">&times;</button>
       </div>
       <div class="options-grid" id="modalOptions"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="exportModal">
+    <div class="modal-content" style="max-width: 900px;">
+      <div class="modal-header">
+        <h2>Imagem Exportada</h2>
+        <button class="close-btn" onclick="closeExportModal()">&times;</button>
+      </div>
+      <p style="color: var(--text-main); margin-bottom: 15px;">
+        Se a imagem não foi baixada automaticamente, clique com o botão direito nela abaixo e escolha <strong>"Salvar imagem como..."</strong> para salvar no seu computador.
+      </p>
+      <div style="text-align: center; background: #eee; padding: 20px; border-radius: 8px; overflow: auto; margin-bottom: 15px;">
+        <img id="exportPreview" style="max-width: 100%; max-height: 60vh; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.15);" alt="Visualização do Arranjo" />
+      </div>
+      <div style="text-align: right;">
+        <button class="btn" style="background-color: #5a5a5a;" onclick="closeExportModal()">Fechar</button>
+      </div>
     </div>
   </div>
 
@@ -1057,12 +1076,64 @@
     function handleXMLUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        currentRawXML = e.target.result;
-        processXML();
-      };
-      reader.readAsText(file);
+
+      const extension = file.name.split('.').pop().toLowerCase();
+      if (extension === 'mxl') {
+        if (typeof JSZip === "undefined") {
+          alert("Erro: A biblioteca JSZip não foi carregada. Verifique sua conexão com a internet.");
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = async function (e) {
+          try {
+            const zip = await JSZip.loadAsync(e.target.result);
+            
+            // Procurar container.xml para localizar o arquivo principal
+            let xmlPath = "";
+            const containerFile = zip.file("META-INF/container.xml");
+            if (containerFile) {
+              const containerText = await containerFile.async("string");
+              const parser = new DOMParser();
+              const containerXml = parser.parseFromString(containerText, "text/xml");
+              const rootfile = containerXml.querySelector("rootfile");
+              if (rootfile) {
+                xmlPath = rootfile.getAttribute("full-path");
+              }
+            }
+
+            // Fallback: pegar o primeiro arquivo com extensão .xml ou .musicxml
+            if (!xmlPath) {
+              const xmlFiles = Object.keys(zip.files).filter(name => 
+                (name.endsWith('.xml') || name.endsWith('.musicxml')) && !name.includes('container.xml')
+              );
+              if (xmlFiles.length > 0) {
+                xmlPath = xmlFiles[0];
+              }
+            }
+
+            if (!xmlPath) {
+              throw new Error("Nenhum arquivo XML válido encontrado dentro do arquivo MXL.");
+            }
+
+            const xmlContent = await zip.file(xmlPath).async("string");
+            currentRawXML = xmlContent;
+            processXML();
+          } catch (err) {
+            console.error("Erro ao descompactar MXL:", err);
+            alert("Erro ao processar o arquivo MXL comprimido: " + err.message);
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      } else {
+        // Leitura normal de XML / MUSICXML como texto
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          currentRawXML = e.target.result;
+          processXML();
+        };
+        reader.readAsText(file);
+      }
     }
 
     function reprocessScore() {
@@ -1321,6 +1392,8 @@
 
     function closeModal() { document.getElementById("optionsModal").style.display = "none"; }
 
+    function closeExportModal() { document.getElementById("exportModal").style.display = "none"; }
+
     function exportImage() {
       const element = document.getElementById('printableScore');
       element.classList.add('pdf-print-mode');
@@ -1363,11 +1436,24 @@
         document.body.classList.remove('pdf-body-print-mode');
 
         try {
-          const imageURI = canvas.toDataURL("image/png");
-          const link = document.createElement("a");
-          link.href = imageURI;
-          link.download = `${globalTitle.replace(/\s+/g, '_')}_Arranjo.png`;
-          link.click();
+          canvas.toBlob(function(blob) {
+            const url = URL.createObjectURL(blob);
+            
+            // Define o preview da imagem no modal
+            const previewImg = document.getElementById("exportPreview");
+            previewImg.src = url;
+            
+            // Tenta forçar o download automático adicionando o link temporariamente ao DOM
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `${globalTitle.replace(/\s+/g, '_')}_Arranjo.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Abre o modal de fallback com a prévia da imagem para o usuário poder salvar caso o download automático seja bloqueado
+            document.getElementById("exportModal").style.display = "flex";
+          }, "image/png");
         } catch (err) {
           console.error("Erro ao exportar imagem:", err);
           alert("O navegador bloqueou a exportação automática da imagem devido a restrições de segurança de arquivos locais (Same-Origin Policy).\n\nPara resolver isso:\n1. Execute o arquivo usando um servidor local (ex: extensão Live Server do VS Code, ou Python: python -m http.server);\n2. Ou hospede o aplicativo online.");
@@ -1408,10 +1494,13 @@
       const jsonStr = JSON.stringify(projectData, null, 2);
       const blob = new Blob([jsonStr], { type: "text/plain;charset=utf-8" });
       const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
+      const url = URL.createObjectURL(blob);
+      link.href = url;
       link.download = `${globalTitle.replace(/\s+/g, '_')}_projeto.txt`;
+      document.body.appendChild(link);
       link.click();
-      URL.revokeObjectURL(link.href);
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     }
 
     function handleProjectUpload(event) {
@@ -1480,10 +1569,17 @@
       const grid = document.getElementById("scoreGrid");
       grid.innerHTML = '<p style="color: var(--text-muted); text-align: center; width: 100%;">Carregando arranjo de demonstração...</p>';
 
-      fetch(defaultUrl)
-        .then(response => {
-          if (!response.ok) throw new Error("Erro de rede");
-          return response.text();
+      // Tenta primeiro carregar localmente. Se falhar (ex: CORS de arquivo local), tenta a URL remota do GitHub.
+      fetch('posi-cifra-flex-demo.musicxml')
+        .then(res => {
+          if (!res.ok) throw new Error();
+          return res.text();
+        })
+        .catch(() => {
+          return fetch(defaultUrl).then(response => {
+            if (!response.ok) throw new Error("Erro de rede");
+            return response.text();
+          });
         })
         .then(text => {
           currentRawXML = text;
