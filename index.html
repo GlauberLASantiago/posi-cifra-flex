@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Posi-Cifra-Flex (Posições alternativas para tocar acordes no violão)</title>
   <meta name="description"
-    content="Posi-Cifra-Flex: Encontre e selecione posições alternativas de acordes para tocar no violão. Importe arquivos MusicXML, visualize diagramas e exporte partituras e arranjos.">
+    content="Posi-Cifra-Flex: Encontre e selecione posições alternativas de acordes para tocar no violão. Importe arquivos MusicXML ou crie projetos novos, gerencie e edite cifras e posições.">
 
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎸</text></svg>">
@@ -649,8 +649,7 @@
     <div class="title-card">
       <h1>Posi-Cifra-Flex</h1>
       <p class="subtitle">
-        Posições alternativas para tocar acordes no violão. Importe um arquivo XML, gerencie posições e exporte o arranjo
-        diagramado.
+        Posições alternativas para tocar acordes no violão. Importe arquivos XML ou crie projetos novos, gerencie e edite cifras e posições.
         <span id="audioStatus" class="audio-status">Carregando Violão Nylon...</span>
       </p>
     </div>
@@ -677,8 +676,8 @@
         </div>
 
         <div class="control-group">
-          <label>Zoom dos Diagramas: <span id="zoomVal">50%</span></label>
-          <input type="range" id="diagramZoom" min="0.3" max="1.0" step="0.05" value="0.5" oninput="updateDiagramZoom(this.value)" style="cursor: pointer; width: 100%;">
+          <label>Zoom dos Diagramas: <span id="zoomVal">80%</span></label>
+          <input type="range" id="diagramZoom" min="0.4" max="1.5" step="0.05" value="0.8" oninput="updateDiagramZoom(this.value)" style="cursor: pointer; width: 100%;">
         </div>
 
         <div class="control-group">
@@ -752,18 +751,13 @@
           <div class="accordion-section">
             <h3>📖 Mini Tutorial</h3>
             <ol>
-              <li><strong>Importe a partitura:</strong> Carregue um arquivo no formato <code>.xml</code> ou
-                <code>.musicxml</code> (exportado do MuseScore, Finale, Sibelius, etc.) usando o botão de upload.</li>
-              <li><strong>Veja os diagramas:</strong> O aplicativo desenha automaticamente os diagramas de acordes
-                (posições de violão) no grid de compassos.</li>
-              <li><strong>Selecione posições alternativas:</strong> Clique no botão <strong>"Mudar"</strong> sob
-                qualquer acorde para abrir a galeria com todas as posições encontradas no braço do violão. Clique na
-                opção desejada para atualizar a cifra e o diagrama.</li>
-              <li><strong>Ouça o acorde:</strong> Clique no diagrama do acorde para ouvir um arpejo dedilhado em áudio
-                sintetizado de Violão Nylon de alta fidelidade.</li>
-              <li><strong>Filtre inversões e posições:</strong> Refine as posições configurando os filtros de limite de inversão, uso de cordas soltas, registro de altura (grave, médio ou agudo) e a abertura máxima de casas (3 ou 4 casas).</li>
-              <li><strong>Exporte para PDF:</strong> Clique em <strong>"Exportar PDF"</strong> para gerar um arquivo PDF
-                otimizado em formato A4 Retrato com quebras de página limpas.</li>
+              <li><strong>Inicie um projeto:</strong> Carregue um arquivo no formato <code>.xml</code> ou <code>.musicxml</code> (exportado do MuseScore, Finale, Sibelius, etc.) usando o botão de upload, ou crie um projeto do zero clicando em <strong>"Novo"</strong> para definir o título, fórmula de compasso e quantidade inicial de compassos.</li>
+              <li><strong>Veja e ouça os diagramas:</strong> O app desenha automaticamente os diagramas de acordes (posições no braço do violão) no grid. Clique no diagrama para ouvir o acorde dedilhado em áudio sintetizado de alta fidelidade.</li>
+              <li><strong>Selecione posições alternativas:</strong> Clique no botão <strong>"Mudar"</strong> sob qualquer acorde para abrir a galeria com todas as posições correspondentes encontradas e clique na desejada.</li>
+              <li><strong>Edite cifras de forma inteligente:</strong> Ative a caixa <strong>"Editar Cifras"</strong>. Clique na cifra ou em "Editar" para digitar o acorde. O app corrige automaticamente o texto (minúsculas viram maiúsculas, o caractere <code>3</code> vira sustenido <code>#</code>, e o <code>b</code> vira bemol <code>b</code>), além de normalizar e validar musicalmente a cifra. Pressione <code>Enter</code> para salvar e avançar para o próximo compasso.</li>
+              <li><strong>Gerencie a partitura:</strong> Adicione novas cifras com <code>+ Cifra</code>, delete-as com o botão vermelho <code>&times;</code>, ou aumente/diminua a quantidade total de compassos pelos botões <code>+</code> e <code>-</code> abaixo da partitura.</li>
+              <li><strong>Filtre posições:</strong> Configure o limite de inversão de baixos, permissão de cordas soltas, registro de altura (grave, médio ou agudo) e a abertura de casas para adequar os diagramas.</li>
+              <li><strong>Exporte o arranjo:</strong> Clique em <strong>"Exportar Imagem"</strong> para baixar os diagramas diagramados em páginas no formato retrato (A4), prontas para visualização ou impressão.</li>
             </ol>
           </div>
 
@@ -920,7 +914,7 @@
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     const audioCtx = new AudioContext();
     let guitarInstrument = null;
-    let diagramScale = 0.5;
+    let diagramScale = 0.8;
 
     Soundfont.instrument(audioCtx, 'acoustic_guitar_nylon').then(function (instrument) {
       guitarInstrument = instrument;
@@ -1202,9 +1196,8 @@
       "m": "m",
       "min": "m",
       "7": "7",
-      "7m": "7M",
-      "7m": "7M",
-      "7M": "7M",
+      "7m": "maj7",
+      "7M": "maj7",
       "maj7": "maj7",
       "m7": "m7",
       "min7": "m7",
