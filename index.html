@@ -16,6 +16,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.all.min.js"></script>
 
   <style>
     :root {
@@ -777,10 +778,11 @@
         <!-- Grupo de Importação/Exportação -->
         <div class="control-group" style="flex: 2; min-width: 320px;">
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <button class="btn" style="background-color: #2980b9; padding: 7px 12px; font-size: 0.85rem;" onclick="document.getElementById('xmlUpload').click()" title="Importar arquivo MusicXML (.xml, .musicxml, .mxl)">📥 Importar Cifra</button>
+            <button class="btn" style="background-color: #2980b9; padding: 7px 12px; font-size: 0.85rem;" onclick="document.getElementById('xmlUpload').click()" title="Importar arquivo MusicXML (.xml, .musicxml, .mxl)">📥 Imp. Cifra</button>
             <input type="file" id="xmlUpload" accept=".xml,.musicxml,.mxl" style="display:none;" onchange="handleXMLUpload(event)">
-            <button class="btn" style="background-color: #8e44ad; padding: 7px 12px; font-size: 0.85rem;" onclick="exportMusicXML()" title="Exportar cifra atual em formato MusicXML (.musicxml)">📤 Exportar Cifras</button>
-            <button class="btn btn-accent" style="padding: 7px 12px; font-size: 0.85rem;" onclick="exportImage()" title="Exportar diagramas de posições como imagem PNG">🖼️ Exportar posições</button>
+            <button class="btn" style="background-color: #8e44ad; padding: 7px 12px; font-size: 0.85rem;" onclick="exportMusicXML()" title="Exportar cifra atual em formato MusicXML (.musicxml)">📤 Exp. Cifra</button>
+            <button class="btn btn-accent" style="padding: 7px 12px; font-size: 0.85rem;" onclick="exportImage()" title="Exportar diagramas de posições como imagem PNG">🖼️ Exp. Posições</button>
+            <button class="btn" style="background-color: #27ae60; padding: 7px 12px; font-size: 0.85rem;" onclick="exportMP3()" title="Exportar o áudio do arranjo como arquivo MP3">🎵 Exp. MP3</button>
           </div>
         </div>
 
@@ -1125,6 +1127,25 @@
       </div>
     </div>
   </div>
+
+  <div class="modal-overlay" id="mp3ExportModal" style="display: none;">
+    <div class="modal-content" style="max-width: 400px; text-align: center; padding: 25px;">
+      <div class="modal-header" style="justify-content: center; border-bottom: none; padding-bottom: 0;">
+        <h2>Exportando Áudio MP3</h2>
+      </div>
+      <p style="color: var(--text-main); margin: 15px 0 20px 0; font-size: 0.9rem;">
+        Processando o arranjo e gerando o arquivo de áudio. Por favor, aguarde...
+      </p>
+      <div style="width: 100%; background: #333; height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 20px; border: 1px solid var(--border);">
+        <div id="mp3ProgressBar" style="width: 0%; height: 100%; background: var(--finger); transition: width 0.1s;"></div>
+      </div>
+      <div id="mp3ProgressText" style="font-size: 0.9rem; font-weight: bold; margin-bottom: 20px; color: var(--text-main);">0%</div>
+      <div style="text-align: center;">
+        <button class="btn" style="background-color: #c0392b; width: 100%; padding: 8px;" onclick="cancelMP3Export()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="newProjectModal">
     <div class="modal-content" style="max-width: 400px;">
       <div class="modal-header">
@@ -1247,17 +1268,26 @@
     const audioCtx = new AudioContext();
 
     // Create gain nodes for each channel to enable real-time volume mixing
+    const recordingMasterGain = audioCtx.createGain();
+    recordingMasterGain.gain.setValueAtTime(1.0, audioCtx.currentTime);
+
+    const speakerGainNode = audioCtx.createGain();
+    speakerGainNode.gain.setValueAtTime(1.0, audioCtx.currentTime);
+    speakerGainNode.connect(audioCtx.destination);
+
+    recordingMasterGain.connect(speakerGainNode);
+
     const drumsGainNode = audioCtx.createGain();
     drumsGainNode.gain.setValueAtTime(1.0, audioCtx.currentTime);
-    drumsGainNode.connect(audioCtx.destination);
+    drumsGainNode.connect(recordingMasterGain);
 
     const guitarGainNode = audioCtx.createGain();
     guitarGainNode.gain.setValueAtTime(1.0, audioCtx.currentTime);
-    guitarGainNode.connect(audioCtx.destination);
+    guitarGainNode.connect(recordingMasterGain);
 
     const bassGainNode = audioCtx.createGain();
     bassGainNode.gain.setValueAtTime(1.0, audioCtx.currentTime);
-    bassGainNode.connect(audioCtx.destination);
+    bassGainNode.connect(recordingMasterGain);
 
     let guitarInstrument = null;
     let bassInstrument = null;
@@ -1300,6 +1330,7 @@
     let previewCountIn = false;
     let audioBuffer85 = null;
     let audioBuffer130 = null;
+    let audioBufferValsa = null;
     let audioBufferFinal = null;
     let audioSourceNode = null;
     let backingTrackStartTime = 0;
@@ -1340,7 +1371,7 @@
       }
     }
 
-    let lastProjectWas44 = false;
+    let lastProjectWasNormal = false;
 
     function is44Project() {
       if (scoreData && scoreData.length > 0) {
@@ -1349,8 +1380,24 @@
       return false;
     }
 
+    function isValsaProject() {
+      if (scoreData && scoreData.length > 0) {
+        const beats = scoreData[0].beats;
+        const beatType = scoreData[0].beatType;
+        return (beats === 3 && beatType === 4) ||
+               (beats === 6 && beatType === 8) ||
+               (beats === 9 && beatType === 8) ||
+               (beats === 12 && beatType === 8);
+      }
+      return false;
+    }
+
+    function isNormalTempoProject() {
+      return is44Project() || isValsaProject();
+    }
+
     function getActualBPM(uiTempo) {
-      if (is44Project()) {
+      if (isNormalTempoProject()) {
         return uiTempo;
       } else {
         return uiTempo * (130 / 75);
@@ -1360,29 +1407,29 @@
     function adjustTempoForTimeSignature() {
       const tempoInput = document.getElementById("previewTempo");
       if (!tempoInput) return;
-      const is44 = is44Project();
+      const isNormal = isNormalTempoProject();
       
       let val = parseInt(tempoInput.value) || 75;
       
-      if (is44) {
+      if (isNormal) {
         tempoInput.min = 70;
         tempoInput.max = 200;
-        if (!lastProjectWas44) {
+        if (!lastProjectWasNormal) {
           val = Math.round(val * (130 / 75));
           if (val > 200) val = 200;
           if (val < 70) val = 70;
           tempoInput.value = val;
-          lastProjectWas44 = true;
+          lastProjectWasNormal = true;
         }
       } else {
         tempoInput.min = 40;
         tempoInput.max = 120;
-        if (lastProjectWas44) {
+        if (lastProjectWasNormal) {
           val = Math.round(val * (75 / 130));
           if (val < 40) val = 40;
           if (val > 120) val = 120;
           tempoInput.value = val;
-          lastProjectWas44 = false;
+          lastProjectWasNormal = false;
         }
       }
     }
@@ -1435,28 +1482,41 @@
     }
 
     async function ensureBackingTrackLoaded(tempo) {
-      const is85 = tempo <= 120;
-      if (is85 && !audioBuffer85) {
-        updatePlayButtonText("⏳");
-        let audioUrl = "https://github.com/GlauberLASantiago/posi-cifra-flex/blob/main/085-bossa2-bat.mp3";
-        if (audioUrl.includes("github.com") && audioUrl.includes("/blob/")) {
-          audioUrl = audioUrl.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/");
+      if (isValsaProject()) {
+        if (!audioBufferValsa) {
+          updatePlayButtonText("⏳");
+          let audioUrl = "https://github.com/GlauberLASantiago/posi-cifra-flex/blob/main/100-valsa-bat.mp3";
+          if (audioUrl.includes("github.com") && audioUrl.includes("/blob/")) {
+            audioUrl = audioUrl.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/");
+          }
+          const response = await fetch(audioUrl);
+          const arrayBuffer = await response.arrayBuffer();
+          audioBufferValsa = await audioCtx.decodeAudioData(arrayBuffer);
         }
-        const response = await fetch(audioUrl);
-        const arrayBuffer = await response.arrayBuffer();
-        audioBuffer85 = await audioCtx.decodeAudioData(arrayBuffer);
-      } else if (!is85 && !audioBuffer130) {
-        updatePlayButtonText("⏳");
-        let audioUrl = "https://github.com/GlauberLASantiago/posi-cifra-flex/blob/main/130-bossa1-bat.mp3";
-        if (audioUrl.includes("github.com") && audioUrl.includes("/blob/")) {
-          audioUrl = audioUrl.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/");
+      } else {
+        const is85 = tempo <= 120;
+        if (is85 && !audioBuffer85) {
+          updatePlayButtonText("⏳");
+          let audioUrl = "https://github.com/GlauberLASantiago/posi-cifra-flex/blob/main/085-bossa2-bat.mp3";
+          if (audioUrl.includes("github.com") && audioUrl.includes("/blob/")) {
+            audioUrl = audioUrl.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/");
+          }
+          const response = await fetch(audioUrl);
+          const arrayBuffer = await response.arrayBuffer();
+          audioBuffer85 = await audioCtx.decodeAudioData(arrayBuffer);
+        } else if (!is85 && !audioBuffer130) {
+          updatePlayButtonText("⏳");
+          let audioUrl = "https://github.com/GlauberLASantiago/posi-cifra-flex/blob/main/130-bossa1-bat.mp3";
+          if (audioUrl.includes("github.com") && audioUrl.includes("/blob/")) {
+            audioUrl = audioUrl.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/");
+          }
+          const response = await fetch(audioUrl);
+          const arrayBuffer = await response.arrayBuffer();
+          audioBuffer130 = await audioCtx.decodeAudioData(arrayBuffer);
         }
-        const response = await fetch(audioUrl);
-        const arrayBuffer = await response.arrayBuffer();
-        audioBuffer130 = await audioCtx.decodeAudioData(arrayBuffer);
       }
 
-      if (!audioBufferFinal) {
+      if (!audioBufferFinal && !isValsaProject()) {
         updatePlayButtonText("⏳");
         let audioUrl = "https://github.com/GlauberLASantiago/posi-cifra-flex/blob/main/bossa-final-bat.mp3";
         if (audioUrl.includes("github.com") && audioUrl.includes("/blob/")) {
@@ -1485,9 +1545,9 @@
       let val = parseInt(tempoInput.value);
       if (isNaN(val)) return;
 
-      const is44 = is44Project();
-      const minVal = is44 ? 70 : 40;
-      const maxVal = is44 ? 200 : 120;
+      const isNormal = isNormalTempoProject();
+      const minVal = isNormal ? 70 : 40;
+      const maxVal = isNormal ? 200 : 120;
 
       if (!isInput) {
         if (val < minVal) val = minVal;
@@ -1498,58 +1558,67 @@
       if (val >= minVal && val <= maxVal) {
         const actualVal = getActualBPM(val);
         if (previewPlaying) {
-          const is85_new = actualVal <= 120;
-          const is85_old = currentOriginalBPM === 85;
-
           const now = audioCtx.currentTime;
           const elapsedMediaActive = backingTrackElapsedBase + (now - backingTrackStartTime) * (currentBPMVal / currentOriginalBPM);
 
-          if (is85_new !== is85_old) {
-            ensureBackingTrackLoaded(actualVal).then(() => {
-              if (!previewPlaying) return;
-
-              const nowStart = audioCtx.currentTime;
-              const latestElapsedMediaActive = backingTrackElapsedBase + (nowStart - backingTrackStartTime) * (currentBPMVal / currentOriginalBPM);
-
-              let targetElapsedMedia = 0;
-              let newOriginalBPM = 130;
-              if (is85_new) {
-                targetElapsedMedia = latestElapsedMediaActive * (130 / 85);
-                newOriginalBPM = 85;
-              } else {
-                targetElapsedMedia = latestElapsedMediaActive * (85 / 130);
-                newOriginalBPM = 130;
-              }
-
-              if (audioSourceNode) {
-                try { audioSourceNode.stop(); } catch(e){}
-              }
-
-              const buffer = is85_new ? audioBuffer85 : audioBuffer130;
-              audioSourceNode = audioCtx.createBufferSource();
-              audioSourceNode.buffer = buffer;
-              audioSourceNode.loop = true;
-              audioSourceNode.connect(drumsGainNode);
-
-              backingTrackStartTime = nowStart;
-              backingTrackElapsedBase = targetElapsedMedia;
-              currentBPMVal = actualVal;
-              currentOriginalBPM = newOriginalBPM;
-
-              audioSourceNode.playbackRate.setValueAtTime(actualVal / newOriginalBPM, nowStart);
-              const offset = targetElapsedMedia % buffer.duration;
-              audioSourceNode.start(nowStart, offset);
-            }).catch(err => {
-              console.error("Error swapping and loading backing track:", err);
-              stopPreview();
-            });
-          } else {
+          if (isValsaProject()) {
             backingTrackElapsedBase = elapsedMediaActive;
             backingTrackStartTime = now;
             currentBPMVal = actualVal;
-
             if (audioSourceNode) {
-              audioSourceNode.playbackRate.setValueAtTime(actualVal / currentOriginalBPM, now);
+              audioSourceNode.playbackRate.setValueAtTime(actualVal / 100, now);
+            }
+          } else {
+            const is85_new = actualVal <= 120;
+            const is85_old = currentOriginalBPM === 85;
+
+            if (is85_new !== is85_old) {
+              ensureBackingTrackLoaded(actualVal).then(() => {
+                if (!previewPlaying) return;
+
+                const nowStart = audioCtx.currentTime;
+                const latestElapsedMediaActive = backingTrackElapsedBase + (nowStart - backingTrackStartTime) * (currentBPMVal / currentOriginalBPM);
+
+                let targetElapsedMedia = 0;
+                let newOriginalBPM = 130;
+                if (is85_new) {
+                  targetElapsedMedia = latestElapsedMediaActive * (130 / 85);
+                  newOriginalBPM = 85;
+                } else {
+                  targetElapsedMedia = latestElapsedMediaActive * (85 / 130);
+                  newOriginalBPM = 130;
+                }
+
+                if (audioSourceNode) {
+                  try { audioSourceNode.stop(); } catch(e){}
+                }
+
+                const buffer = is85_new ? audioBuffer85 : audioBuffer130;
+                audioSourceNode = audioCtx.createBufferSource();
+                audioSourceNode.buffer = buffer;
+                audioSourceNode.loop = true;
+                audioSourceNode.connect(drumsGainNode);
+
+                backingTrackStartTime = nowStart;
+                backingTrackElapsedBase = targetElapsedMedia;
+                currentBPMVal = actualVal;
+                currentOriginalBPM = newOriginalBPM;
+
+                audioSourceNode.playbackRate.setValueAtTime(actualVal / newOriginalBPM, nowStart);
+                const offset = targetElapsedMedia % buffer.duration;
+                audioSourceNode.start(nowStart, offset);
+              }).catch(err => {
+                console.error("Error swapping and loading backing track:", err);
+                stopPreview();
+              });
+            } else {
+              backingTrackElapsedBase = elapsedMediaActive;
+              backingTrackStartTime = now;
+              currentBPMVal = actualVal;
+
+              if (audioSourceNode) {
+                audioSourceNode.playbackRate.setValueAtTime(actualVal / currentOriginalBPM, now);
+              }
             }
           }
         }
@@ -1656,7 +1725,7 @@
           try { audioSourceNode.stop(targetTime); } catch(e){}
         }
 
-        if (audioBufferFinal) {
+        if (audioBufferFinal && !isValsaProject()) {
           const finalSource = audioCtx.createBufferSource();
           finalSource.buffer = audioBufferFinal;
           finalSource.connect(drumsGainNode);
@@ -1976,7 +2045,7 @@
         }
 
         const numChords = chordsToUse.length;
-        const measureBeatsScaled = is44Project() ? measure.beats : (measure.beats * 2);
+        const measureBeatsScaled = isNormalTempoProject() ? measure.beats : (measure.beats * 2);
         if (numChords === 0) {
           accumulatedBeats += measureBeatsScaled;
         } else {
@@ -2019,8 +2088,14 @@
         audioSourceNode = null;
       }
 
-      const originalBPM = actualBPM <= 120 ? 85 : 130;
-      const buffer = actualBPM <= 120 ? audioBuffer85 : audioBuffer130;
+      let originalBPM, buffer;
+      if (isValsaProject()) {
+        originalBPM = 100;
+        buffer = audioBufferValsa;
+      } else {
+        originalBPM = actualBPM <= 120 ? 85 : 130;
+        buffer = actualBPM <= 120 ? audioBuffer85 : audioBuffer130;
+      }
 
       audioSourceNode = audioCtx.createBufferSource();
       audioSourceNode.buffer = buffer;
@@ -2056,13 +2131,13 @@
       if (startMeasureIdx !== null && startMeasureIdx > 0 && startMeasureIdx < scoreData.length) {
         let startMeasureBeat = 0;
         for (let i = 0; i < startMeasureIdx; i++) {
-          startMeasureBeat += is44Project() ? scoreData[i].beats : (scoreData[i].beats * 2);
+          startMeasureBeat += isNormalTempoProject() ? scoreData[i].beats : (scoreData[i].beats * 2);
         }
         startMeasureTimeMedia = startMeasureBeat * (60 / 130);
       }
 
       backingTrackStartTime = now + startDelay + countInDurationReal;
-      backingTrackElapsedBase = startMeasureTimeMedia * (originalBPM / 130);
+      backingTrackElapsedBase = startMeasureTimeMedia * (130 / originalBPM);
       currentBPMVal = actualBPM;
       currentOriginalBPM = originalBPM;
 
@@ -2128,8 +2203,14 @@
             }
             scheduledChords.clear();
             
-            const buffer = currentTempo <= 120 ? audioBuffer85 : audioBuffer130;
-            const originalBPM = currentTempo <= 120 ? 85 : 130;
+            let buffer, originalBPM;
+            if (isValsaProject()) {
+              originalBPM = 100;
+              buffer = audioBufferValsa;
+            } else {
+              originalBPM = currentTempo <= 120 ? 85 : 130;
+              buffer = currentTempo <= 120 ? audioBuffer85 : audioBuffer130;
+            }
 
             audioSourceNode = audioCtx.createBufferSource();
             audioSourceNode.buffer = buffer;
@@ -2138,7 +2219,7 @@
 
             const now = audioCtx.currentTime;
             backingTrackStartTime = now;
-            backingTrackElapsedBase = startMeasureTimeMedia * (originalBPM / 130);
+            backingTrackElapsedBase = startMeasureTimeMedia * (130 / originalBPM);
             currentBPMVal = currentTempo;
             currentOriginalBPM = originalBPM;
 
@@ -4522,6 +4603,213 @@ e selecione este arquivo de texto.
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+    }
+
+    let mp3RecorderNode = null;
+    let isExportingMP3 = false;
+    let mp3Chunks = [];
+    let mp3Encoder = null;
+    let mp3OriginalCountIn = false;
+    let mp3OriginalStartMeasureIdx = null;
+
+    function getProjectDurationSeconds() {
+      let accumulatedBeats = 0;
+      scoreData.forEach((measure, mIdx) => {
+        let chordsToUse = measure.chords;
+        if (chordsToUse.length === 0 && mIdx > 0) {
+          for (let prevIdx = mIdx - 1; prevIdx >= 0; prevIdx--) {
+            if (scoreData[prevIdx].chords.length > 0) {
+              chordsToUse = scoreData[prevIdx].chords;
+              break;
+            }
+          }
+        }
+        const measureBeatsScaled = isNormalTempoProject() ? measure.beats : (measure.beats * 2);
+        accumulatedBeats += measureBeatsScaled;
+      });
+      const tempoInput = document.getElementById("previewTempo");
+      const tempo = tempoInput ? parseInt(tempoInput.value) : 75;
+      const actualBPM = getActualBPM(tempo);
+      return accumulatedBeats * (60 / actualBPM);
+    }
+
+    async function exportMP3() {
+      if (!scoreData || scoreData.length === 0 || scoreData.every(m => m.chords.length === 0)) {
+        await showCustomAlert("Exportar MP3", "Nenhuma cifra no projeto para exportar!");
+        return;
+      }
+
+      if (typeof lamejs === "undefined") {
+        await showCustomAlert("Erro", "O codificador de MP3 (lamejs) não foi carregado corretamente.");
+        return;
+      }
+
+      stopPreview();
+
+      isExportingMP3 = true;
+      mp3Chunks = [];
+
+      const modal = document.getElementById("mp3ExportModal");
+      const progressBar = document.getElementById("mp3ProgressBar");
+      const progressText = document.getElementById("mp3ProgressText");
+      if (modal) modal.style.display = "flex";
+      if (progressBar) progressBar.style.width = "0%";
+      if (progressText) progressText.innerText = "0%";
+
+      const durationSeconds = getProjectDurationSeconds() + 1.2; // 0.3s delay + 0.9s tail decay
+      let samplesProcessed = 0;
+
+      const sampleRate = audioCtx.sampleRate || 44100;
+      mp3Encoder = new lamejs.Mp3Encoder(2, sampleRate, 128);
+
+      mp3RecorderNode = audioCtx.createScriptProcessor(4096, 2, 2);
+
+      mp3RecorderNode.onaudioprocess = function (event) {
+        if (!isExportingMP3) return;
+
+        const left = event.inputBuffer.getChannelData(0);
+        const right = event.inputBuffer.getChannelData(1);
+
+        const leftInt16 = new Int16Array(left.length);
+        const rightInt16 = new Int16Array(right.length);
+
+        for (let i = 0; i < left.length; i++) {
+          const sLeft = Math.max(-1, Math.min(1, left[i]));
+          leftInt16[i] = sLeft < 0 ? sLeft * 0x8000 : sLeft * 0x7FFF;
+
+          const sRight = Math.max(-1, Math.min(1, right[i]));
+          rightInt16[i] = sRight < 0 ? sRight * 0x8000 : sRight * 0x7FFF;
+        }
+
+        const mp3buf = mp3Encoder.encodeBuffer(leftInt16, rightInt16);
+        if (mp3buf.length > 0) {
+          mp3Chunks.push(new Uint8Array(mp3buf));
+        }
+
+        samplesProcessed += left.length;
+        const elapsedSeconds = samplesProcessed / sampleRate;
+        const progress = Math.min(100, Math.round((elapsedSeconds / durationSeconds) * 100));
+
+        if (progressBar) progressBar.style.width = `${progress}%`;
+        if (progressText) progressText.innerText = `${progress}%`;
+
+        if (elapsedSeconds >= durationSeconds) {
+          finishMP3Export();
+        }
+      };
+
+      // Silencia alto-falante
+      speakerGainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+
+      // Conecta gravador
+      mp3RecorderNode.connect(audioCtx.destination);
+      recordingMasterGain.connect(mp3RecorderNode);
+
+      // Salva estado original
+      mp3OriginalCountIn = previewCountIn;
+      mp3OriginalStartMeasureIdx = startMeasureIdx;
+
+      // Configura playback limpo
+      previewCountIn = false;
+      startMeasureIdx = 0;
+
+      // Inicia o áudio
+      startPreview().then(() => {
+        const musicDuration = getProjectDurationSeconds();
+        const fadeOutStartTime = backingTrackStartTime + musicDuration;
+        const fadeOutDuration = 0.9;
+
+        try {
+          recordingMasterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+          recordingMasterGain.gain.setValueAtTime(1.0, audioCtx.currentTime);
+          recordingMasterGain.gain.setValueAtTime(1.0, fadeOutStartTime);
+          recordingMasterGain.gain.linearRampToValueAtTime(0.0, fadeOutStartTime + fadeOutDuration);
+        } catch (e) {
+          console.warn("Erro ao agendar fadeout de volume:", e);
+        }
+      }).catch(err => {
+        console.error("Erro ao reproduzir áudio para exportação MP3:", err);
+        cancelMP3Export();
+      });
+    }
+
+    function finishMP3Export() {
+      if (!isExportingMP3) return;
+      isExportingMP3 = false;
+
+      stopPreview();
+
+      if (mp3RecorderNode) {
+        mp3RecorderNode.disconnect();
+        mp3RecorderNode.onaudioprocess = null;
+        mp3RecorderNode = null;
+      }
+      recordingMasterGain.disconnect();
+      recordingMasterGain.connect(speakerGainNode);
+
+      try {
+        recordingMasterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+        recordingMasterGain.gain.setValueAtTime(1.0, audioCtx.currentTime);
+      } catch (e) {}
+
+      speakerGainNode.gain.setValueAtTime(1.0, audioCtx.currentTime);
+
+      previewCountIn = mp3OriginalCountIn;
+      startMeasureIdx = mp3OriginalStartMeasureIdx;
+
+      if (mp3Encoder) {
+        const finalBuffer = mp3Encoder.flush();
+        if (finalBuffer.length > 0) {
+          mp3Chunks.push(new Uint8Array(finalBuffer));
+        }
+        mp3Encoder = null;
+      }
+
+      const blob = new Blob(mp3Chunks, { type: 'audio/mp3' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${globalTitle.replace(/\s+/g, '_')}.mp3`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      closeMP3ExportModal();
+    }
+
+    function cancelMP3Export() {
+      if (!isExportingMP3) return;
+      isExportingMP3 = false;
+
+      stopPreview();
+
+      if (mp3RecorderNode) {
+        mp3RecorderNode.disconnect();
+        mp3RecorderNode.onaudioprocess = null;
+        mp3RecorderNode = null;
+      }
+      recordingMasterGain.disconnect();
+      recordingMasterGain.connect(speakerGainNode);
+
+      try {
+        recordingMasterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+        recordingMasterGain.gain.setValueAtTime(1.0, audioCtx.currentTime);
+      } catch (e) {}
+
+      speakerGainNode.gain.setValueAtTime(1.0, audioCtx.currentTime);
+
+      previewCountIn = mp3OriginalCountIn;
+      startMeasureIdx = mp3OriginalStartMeasureIdx;
+      mp3Encoder = null;
+      mp3Chunks = [];
+
+      closeMP3ExportModal();
+    }
+
+    function closeMP3ExportModal() {
+      const modal = document.getElementById("mp3ExportModal");
+      if (modal) modal.style.display = "none";
     }
 
     window.addEventListener('DOMContentLoaded', () => {
