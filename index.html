@@ -771,27 +771,33 @@
     </div>
 
     <div class="controls-bar">
-      <!-- Primeira Linha: Carregar, Salvar e Exportar -->
-      <div class="controls-row">
-        <div class="control-group">
-          <label>Arquivo MusicXML (.xml, .musicxml, .mxl)</label>
-          <input type="file" id="xmlUpload" accept=".xml,.musicxml,.mxl" onchange="handleXMLUpload(event)">
+      <!-- Primeira Linha: Operações de Arquivo e Projeto -->
+      <div class="controls-row" style="align-items: center;">
+        
+        <!-- Grupo de Gestão do Projeto -->
+        <div class="control-group" style="flex: 1; min-width: 250px;">
+          <label>&nbsp;</label>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn" style="background-color: #2e6f40; padding: 7px 12px; font-size: 0.85rem;" onclick="openNewProjectModal()" title="Criar um novo projeto do zero">📄 Novo</button>
+            <button class="btn" style="background-color: #4a4a4a; padding: 7px 12px; font-size: 0.85rem;" onclick="document.getElementById('projectUpload').click()" title="Carregar um projeto Posi-Cifra-Flex (.txt) salvo anteriormente">📂 Abrir</button>
+            <input type="file" id="projectUpload" accept=".txt" style="display:none;" onchange="handleProjectUpload(event)">
+            <button class="btn" style="background-color: #4a4a4a; padding: 7px 12px; font-size: 0.85rem;" onclick="saveProject()" title="Salvar o projeto atual em um arquivo .txt">💾 Salvar</button>
+          </div>
         </div>
 
-        <div class="control-group">
+        <!-- Grupo de Importação/Exportação -->
+        <div class="control-group" style="flex: 2; min-width: 320px;">
+          <label>&nbsp;</label>
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <button class="btn" style="background-color: #2e6f40;" onclick="openNewProjectModal()">Novo</button>
-            <button class="btn" style="background-color: #5a5a5a;" onclick="saveProject()">Salvar</button>
-            <button class="btn" style="background-color: #5a5a5a;"
-              onclick="document.getElementById('projectUpload').click()">Abrir</button>
-            <input type="file" id="projectUpload" accept=".txt" style="display:none;"
-              onchange="handleProjectUpload(event)">
-            <button class="btn btn-accent" onclick="exportImage()">Exportar Imagem</button>
+            <button class="btn" style="background-color: #2980b9; padding: 7px 12px; font-size: 0.85rem;" onclick="document.getElementById('xmlUpload').click()" title="Importar arquivo MusicXML (.xml, .musicxml, .mxl)">📥 Importar Cifra</button>
+            <input type="file" id="xmlUpload" accept=".xml,.musicxml,.mxl" style="display:none;" onchange="handleXMLUpload(event)">
+            <button class="btn" style="background-color: #8e44ad; padding: 7px 12px; font-size: 0.85rem;" onclick="exportMusicXML()" title="Exportar cifra atual em formato MusicXML (.musicxml)">📤 Exportar Cifras</button>
+            <button class="btn btn-accent" style="padding: 7px 12px; font-size: 0.85rem;" onclick="exportImage()" title="Exportar diagramas de posições como imagem PNG">🖼️ Exportar posições</button>
           </div>
         </div>
 
         <div class="control-group">
-          <label>Edição</label>
+          <label>&nbsp;</label>
           <div style="display: flex; align-items: center; gap: 8px; height: 30px;">
             <input type="checkbox" id="editCifrasToggle" onchange="toggleEditMode()"
               style="width: 18px; height: 18px; cursor: pointer;">
@@ -807,7 +813,7 @@
         </div>
 
         <div class="control-group" style="min-width: 320px;">
-          <label>Prévia & Acompanhamento</label>
+          <label>&nbsp;</label>
           <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-height: 30px;">
             <button class="btn" id="previewPlayBtn" onclick="togglePreviewPlay()"
               style="padding: 3px 8px; font-size: 0.75rem; background-color: #2e6f40; line-height: 1; font-weight: bold;"
@@ -967,7 +973,7 @@
             <h3>📖 Mini Tutorial</h3>
             <ol>
               <li><strong>Inicie um projeto:</strong> Carregue um arquivo no formato <code>.xml</code> ou
-                <code>.musicxml</code> (exportado do MuseScore, Finale, Sibelius, etc.) usando o botão de upload, ou
+                <code>.musicxml</code> (exportado do MuseScore, Finale, Sibelius, etc.) clicando em <strong>"Importar Cifra"</strong>, ou
                 crie um projeto do zero clicando em <strong>"Novo"</strong> para definir o título, fórmula de compasso e
                 quantidade inicial de compassos.
               </li>
@@ -986,8 +992,7 @@
               </li>
               <li><strong>Filtre posições:</strong> Configure o limite de inversão de baixos, permissão de cordas
                 soltas, registro de altura (grave, médio ou agudo), a abertura de casas e a filtragem de som limpo (Limpar som >C#3) para adequar os diagramas.</li>
-              <li><strong>Exporte o arranjo:</strong> Clique em <strong>"Exportar Imagem"</strong> para baixar os
-                diagramas diagramados em páginas no formato retrato (A4), prontas para visualização ou impressão.</li>
+              <li><strong>Exporte o arranjo:</strong> Clique em <strong>"Exportar posições"</strong> para salvar os diagramas como imagem PNG, ou em <strong>"Exportar Cifras"</strong> para salvar a cifra no formato MusicXML (.musicxml).</li>
             </ol>
           </div>
 
@@ -1132,7 +1137,7 @@
         <div class="control-group" style="flex: none;">
           <label for="newProjectTimeSig" style="color: var(--text-main); text-transform: none;">Tipo de Compasso
             (x/y)</label>
-          <input type="text" id="newProjectTimeSig" placeholder="Ex: 4/4, 3/4, 6/8" value="4/4"
+          <input type="text" id="newProjectTimeSig" placeholder="Ex: 4/4, 3/4, 6/8" value="2/4"
             style="border: 1px solid var(--border); background-color: var(--bg-color); color: var(--text-main); padding: 10px; border-radius: 6px; font-size: 1rem; width: 100%; box-sizing: border-box;">
         </div>
         <div class="control-group" style="flex: none;">
@@ -1835,7 +1840,7 @@
         } catch(e){}
       }
       if (!guitarInstrument || !bassInstrument) {
-        alert("Os instrumentos de áudio ainda estão sendo carregados. Por favor, aguarde.");
+        await showCustomAlert("Carregando Instrumentos", "Os instrumentos de áudio ainda estão sendo carregados. Por favor, aguarde.");
         return;
       }
 
@@ -1889,7 +1894,7 @@
 
       const totalDuration = accumulatedBeats * (60 / 130);
       if (playlist.length === 0) {
-        alert("Nenhuma cifra no projeto para tocar!");
+        await showCustomAlert("Aviso", "Nenhuma cifra no projeto para tocar!");
         return;
       }
 
@@ -1901,7 +1906,7 @@
         await ensureBackingTrackLoaded(actualBPM);
       } catch (err) {
         console.error("Erro ao carregar áudio da bateria:", err);
-        alert("Erro ao carregar a bateria de acompanhamento. Verifique sua conexão de rede.");
+        await showCustomAlert("Erro de Conexão", "Erro ao carregar a bateria de acompanhamento. Verifique sua conexão de rede.");
         updatePlayButtonText("▶");
         return;
       }
@@ -2884,7 +2889,7 @@
 
     function openNewProjectModal() {
       document.getElementById("newProjectTitle").value = "Minha Música";
-      document.getElementById("newProjectTimeSig").value = "4/4";
+      document.getElementById("newProjectTimeSig").value = "2/4";
       document.getElementById("newProjectMeasures").value = "16";
       document.getElementById("newProjectErrorMsg").style.display = "none";
       document.getElementById("newProjectModal").style.display = "flex";
@@ -4049,6 +4054,247 @@ e selecione este arquivo de texto.
       };
       reader.readAsText(file);
       event.target.value = "";
+    }
+
+    async function exportMusicXML() {
+      if (!scoreData || scoreData.length === 0) {
+        await showCustomAlert("Exportar MusicXML", "Nenhum compasso ativo no projeto para exportar!");
+        return;
+      }
+
+      const suffixToKind = {
+        "": { xmlKind: "major", text: "" },
+        "m": { xmlKind: "minor", text: "m" },
+        "7": { xmlKind: "dominant", text: "7" },
+        "M7": { xmlKind: "major-seventh", text: "M7" },
+        "7M": { xmlKind: "major-seventh", text: "7M" },
+        "maj7": { xmlKind: "major-seventh", text: "maj7" },
+        "m7": { xmlKind: "minor-seventh", text: "m7" },
+        "dim": { xmlKind: "diminished", text: "dim" },
+        "dim7": { xmlKind: "diminished-seventh", text: "dim7" },
+        "m7b5": { xmlKind: "half-diminished", text: "m7b5" },
+        "aug": { xmlKind: "augmented", text: "aug" },
+        "sus4": { xmlKind: "suspended-fourth", text: "sus4" },
+        "sus2": { xmlKind: "suspended-second", text: "sus2" },
+        "6": { xmlKind: "major-sixth", text: "6" },
+        "m6": { xmlKind: "minor-sixth", text: "m6" },
+        "9": { xmlKind: "dominant-ninth", text: "9" },
+        "m9": { xmlKind: "minor-ninth", text: "m9" },
+        "maj9": { xmlKind: "major-ninth", text: "maj9" },
+        "7sus4": { xmlKind: "dominant-suspended-fourth", text: "7sus4" },
+        "5": { xmlKind: "power", text: "5" },
+        "mMaj7": { xmlKind: "major-minor", text: "mMaj7" },
+        "add9": { xmlKind: "major", text: "add9" },
+        "7b9": { xmlKind: "dominant-flat-ninth", text: "7b9" },
+        "7#9": { xmlKind: "dominant-sharp-ninth", text: "7#9" },
+        "7b5": { xmlKind: "dominant-flat-five", text: "7b5" },
+        "7#5": { xmlKind: "dominant-sharp-five", text: "7#5" }
+      };
+
+      function getNoteTypeAndDotXML(duration) {
+        let type = "quarter";
+        let dot = "";
+        switch (duration) {
+          case 1:
+            type = "16th";
+            break;
+          case 2:
+            type = "eighth";
+            break;
+          case 3:
+            type = "eighth";
+            dot = "<dot/>";
+            break;
+          case 4:
+            type = "quarter";
+            break;
+          case 6:
+            type = "quarter";
+            dot = "<dot/>";
+            break;
+          case 8:
+            type = "half";
+            break;
+          case 12:
+            type = "half";
+            dot = "<dot/>";
+            break;
+          case 16:
+            type = "whole";
+            break;
+          default:
+            if (duration < 2) type = "16th";
+            else if (duration < 4) type = "eighth";
+            else if (duration < 8) type = "quarter";
+            else if (duration < 16) type = "half";
+            else type = "whole";
+            break;
+        }
+        return { type, dot };
+      }
+
+      function chordToMusicXMLHarmony(chordName) {
+        if (!chordName) return "";
+        const parts = chordName.split('/');
+        const chordPart = parts[0];
+        const bassPart = parts[1] || "";
+
+        const match = chordPart.match(/^([A-G])(#|b)?(.*)$/);
+        if (!match) return "";
+
+        const rootStep = match[1];
+        const rootAlterSym = match[2] || "";
+        const suffix = match[3] || "";
+
+        let rootAlter = "";
+        if (rootAlterSym === "#") rootAlter = "<root-alter>1</root-alter>";
+        else if (rootAlterSym === "b") rootAlter = "<root-alter>-1</root-alter>";
+
+        let kindInfo = suffixToKind[suffix] || { xmlKind: "other", text: suffix };
+        let kindTextAttr = kindInfo.text ? ` text="${kindInfo.text}"` : "";
+        let kindXML = `<kind${kindTextAttr}>${kindInfo.xmlKind}</kind>`;
+
+        let bassXML = "";
+        if (bassPart) {
+          const bassMatch = bassPart.match(/^([A-G])(#|b)?$/);
+          if (bassMatch) {
+            const bassStep = bassMatch[1];
+            const bassAlterSym = bassMatch[2] || "";
+            let bassAlter = "";
+            if (bassAlterSym === "#") bassAlter = "<bass-alter>1</bass-alter>";
+            else if (bassAlterSym === "b") bassAlter = "<bass-alter>-1</bass-alter>";
+            bassXML = `
+          <bass>
+            <bass-step>${bassStep}</bass-step>
+            ${bassAlter}
+          </bass>`;
+          }
+        }
+
+        return `
+        <harmony>
+          <root>
+            <root-step>${rootStep}</root-step>
+            ${rootAlter}
+          </root>
+          ${kindXML}
+          ${bassXML}
+        </harmony>`;
+      }
+
+      let partMeasuresXML = "";
+      let lastBeats = 0;
+      let lastBeatType = 0;
+
+      for (let mIdx = 0; mIdx < scoreData.length; mIdx++) {
+        const measure = scoreData[mIdx];
+        const totalDivisions = measure.beats * 4;
+
+        let chordsToUse = measure.chords;
+        if (chordsToUse.length === 0 && mIdx > 0) {
+          for (let prevIdx = mIdx - 1; prevIdx >= 0; prevIdx--) {
+            if (scoreData[prevIdx].chords.length > 0) {
+              chordsToUse = scoreData[prevIdx].chords;
+              break;
+            }
+          }
+        }
+
+        const numChords = chordsToUse.length;
+
+        let attr = "";
+        const timeSigChanged = (measure.beats !== lastBeats || measure.beatType !== lastBeatType);
+
+        if (mIdx === 0) {
+          attr = `
+          <attributes>
+            <divisions>4</divisions>
+            <key><fifths>0</fifths></key>
+            <time>
+              <beats>${measure.beats}</beats>
+              <beat-type>${measure.beatType}</beat-type>
+            </time>
+            <clef>
+              <sign>G</sign>
+              <line>2</line>
+            </clef>
+          </attributes>`;
+        } else if (timeSigChanged) {
+          attr = `
+          <attributes>
+            <time>
+              <beats>${measure.beats}</beats>
+              <beat-type>${measure.beatType}</beat-type>
+            </time>
+          </attributes>`;
+        }
+
+        lastBeats = measure.beats;
+        lastBeatType = measure.beatType;
+
+        let measureNotesXML = "";
+
+        if (numChords === 0) {
+          const rInfo = getNoteTypeAndDotXML(totalDivisions);
+          measureNotesXML = `
+          <note>
+            <rest/>
+            <duration>${totalDivisions}</duration>
+            <voice>1</voice>
+            <type>${rInfo.type}</type>
+            ${rInfo.dot ? "        " + rInfo.dot + "\n" : ""}</note>`;
+        } else {
+          for (let cIdx = 0; cIdx < numChords; cIdx++) {
+            const startDiv = Math.round((cIdx / numChords) * totalDivisions);
+            const endDiv = Math.round(((cIdx + 1) / numChords) * totalDivisions);
+            const chordDurDiv = endDiv - startDiv;
+
+            const chord = chordsToUse[cIdx];
+            const harmonyXML = chordToMusicXMLHarmony(chord.chordName);
+            const rInfo = getNoteTypeAndDotXML(chordDurDiv);
+
+            measureNotesXML += harmonyXML + `
+          <note>
+            <rest/>
+            <duration>${chordDurDiv}</duration>
+            <voice>1</voice>
+            <type>${rInfo.type}</type>
+            ${rInfo.dot ? "        " + rInfo.dot + "\n" : ""}</note>`;
+          }
+        }
+
+        partMeasuresXML += `
+        <measure number="${mIdx + 1}">${attr}
+          ${measureNotesXML.trim()}
+        </measure>`;
+      }
+
+      const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 4.0 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">
+<score-partwise version="4.0">
+  <work>
+    <work-title>${globalTitle}</work-title>
+  </work>
+  <part-list>
+    <score-part id="P1">
+      <part-name>Cifras</part-name>
+    </score-part>
+  </part-list>
+  
+  <part id="P1">
+    ${partMeasuresXML.trim()}
+  </part>
+</score-partwise>`;
+
+      const blob = new Blob([xmlContent], { type: "application/vnd.recordare.musicxml+xml;charset=utf-8" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.href = url;
+      link.download = `${globalTitle.replace(/\s+/g, '_')}.musicxml`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     }
 
     window.addEventListener('DOMContentLoaded', () => {
