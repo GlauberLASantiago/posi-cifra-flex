@@ -4081,14 +4081,16 @@ e selecione este arquivo de texto.
         "9": { xmlKind: "dominant-ninth", text: "9" },
         "m9": { xmlKind: "minor-ninth", text: "m9" },
         "maj9": { xmlKind: "major-ninth", text: "maj9" },
-        "7sus4": { xmlKind: "dominant-suspended-fourth", text: "7sus4" },
+        "7sus4": { xmlKind: "suspended-fourth", text: "7sus4", degrees: [{ value: 7, alter: 0, type: "add" }] },
         "5": { xmlKind: "power", text: "5" },
         "mMaj7": { xmlKind: "major-minor", text: "mMaj7" },
         "add9": { xmlKind: "major", text: "add9" },
-        "7b9": { xmlKind: "dominant-flat-ninth", text: "7b9" },
-        "7#9": { xmlKind: "dominant-sharp-ninth", text: "7#9" },
-        "7b5": { xmlKind: "dominant-flat-five", text: "7b5" },
-        "7#5": { xmlKind: "dominant-sharp-five", text: "7#5" }
+        "7b9": { xmlKind: "dominant", text: "7(b9)", degrees: [{ value: 9, alter: -1, type: "alter" }] },
+        "7#9": { xmlKind: "dominant", text: "7(#9)", degrees: [{ value: 9, alter: 1, type: "alter" }] },
+        "7b5": { xmlKind: "dominant", text: "7(b5)", degrees: [{ value: 5, alter: -1, type: "alter" }] },
+        "7#5": { xmlKind: "dominant", text: "7(#5)", degrees: [{ value: 5, alter: 1, type: "alter" }] },
+        "9b5": { xmlKind: "dominant-ninth", text: "9(b5)", degrees: [{ value: 5, alter: -1, type: "alter" }] },
+        "9#5": { xmlKind: "dominant-ninth", text: "9(#5)", degrees: [{ value: 5, alter: 1, type: "alter" }] }
       };
 
       function getNoteTypeAndDotXML(duration) {
@@ -4154,6 +4156,19 @@ e selecione este arquivo de texto.
         let kindTextAttr = kindInfo.text ? ` text="${kindInfo.text}"` : "";
         let kindXML = `<kind${kindTextAttr}>${kindInfo.xmlKind}</kind>`;
 
+        let degreesXML = "";
+        if (kindInfo.degrees) {
+          kindInfo.degrees.forEach(deg => {
+            let alterVal = deg.alter !== undefined ? deg.alter : 0;
+            degreesXML += `
+          <degree>
+            <degree-value>${deg.value}</degree-value>
+            <degree-alter>${alterVal}</degree-alter>
+            <degree-type>${deg.type}</degree-type>
+          </degree>`;
+          });
+        }
+
         let bassXML = "";
         if (bassPart) {
           const bassMatch = bassPart.match(/^([A-G])(#|b)?$/);
@@ -4178,7 +4193,7 @@ e selecione este arquivo de texto.
             ${rootAlter}
           </root>
           ${kindXML}
-          ${bassXML}
+          ${bassXML}${degreesXML}
         </harmony>`;
       }
 
