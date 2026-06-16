@@ -145,13 +145,13 @@
     .controls-bar {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 12px;
       align-items: stretch;
       background: var(--card-bg);
-      padding: 20px;
+      padding: 12px 20px;
       border-radius: 12px;
       border: 1px solid var(--border);
-      margin-bottom: 30px;
+      margin-bottom: 20px;
     }
 
     .controls-row {
@@ -774,20 +774,8 @@
       <!-- Primeira Linha: Operações de Arquivo e Projeto -->
       <div class="controls-row" style="align-items: center;">
         
-        <!-- Grupo de Gestão do Projeto -->
-        <div class="control-group" style="flex: 1; min-width: 250px;">
-          <label>&nbsp;</label>
-          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <button class="btn" style="background-color: #2e6f40; padding: 7px 12px; font-size: 0.85rem;" onclick="openNewProjectModal()" title="Criar um novo projeto do zero">📄 Novo</button>
-            <button class="btn" style="background-color: #4a4a4a; padding: 7px 12px; font-size: 0.85rem;" onclick="document.getElementById('projectUpload').click()" title="Carregar um projeto Posi-Cifra-Flex (.txt) salvo anteriormente">📂 Abrir</button>
-            <input type="file" id="projectUpload" accept=".txt" style="display:none;" onchange="handleProjectUpload(event)">
-            <button class="btn" style="background-color: #4a4a4a; padding: 7px 12px; font-size: 0.85rem;" onclick="saveProject()" title="Salvar o projeto atual em um arquivo .txt">💾 Salvar</button>
-          </div>
-        </div>
-
         <!-- Grupo de Importação/Exportação -->
         <div class="control-group" style="flex: 2; min-width: 320px;">
-          <label>&nbsp;</label>
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
             <button class="btn" style="background-color: #2980b9; padding: 7px 12px; font-size: 0.85rem;" onclick="document.getElementById('xmlUpload').click()" title="Importar arquivo MusicXML (.xml, .musicxml, .mxl)">📥 Importar Cifra</button>
             <input type="file" id="xmlUpload" accept=".xml,.musicxml,.mxl" style="display:none;" onchange="handleXMLUpload(event)">
@@ -796,24 +784,17 @@
           </div>
         </div>
 
-        <div class="control-group">
-          <label>&nbsp;</label>
-          <div style="display: flex; align-items: center; gap: 8px; height: 30px;">
-            <input type="checkbox" id="editCifrasToggle" onchange="toggleEditMode()"
-              style="width: 18px; height: 18px; cursor: pointer;">
-            <label for="editCifrasToggle"
-              style="margin-left: 5px; cursor: pointer; color: var(--text-main); font-weight: normal; text-transform: none; font-size: 0.9rem; white-space: nowrap;">Editar Cifras</label>
-            <button class="btn" id="undoBtn" onclick="undoAction()"
-              style="padding: 4px 12px; font-size: 0.95rem; margin-left: 5px; background-color: #5a5a5a; line-height: 1;"
-              title="Desfazer a última ação (Ctrl+Z)" disabled>↶</button>
-            <button class="btn" id="redoBtn" onclick="redoAction()"
-              style="padding: 4px 12px; font-size: 0.95rem; background-color: #5a5a5a; line-height: 1;"
-              title="Refazer a última ação (Ctrl+Y)" disabled>↷</button>
+        <!-- Grupo de Gestão do Projeto -->
+        <div class="control-group" style="flex: 1; min-width: 250px;">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn" style="background-color: #4a4a4a; padding: 7px 12px; font-size: 0.85rem;" onclick="saveProject()" title="Salvar o projeto atual em um arquivo .txt">💾 Salvar</button>
+            <button class="btn" style="background-color: #4a4a4a; padding: 7px 12px; font-size: 0.85rem;" onclick="document.getElementById('projectUpload').click()" title="Carregar um projeto Posi-Cifra-Flex (.txt) salvo anteriormente">📂 Abrir</button>
+            <input type="file" id="projectUpload" accept=".txt" style="display:none;" onchange="handleProjectUpload(event)">
+            <button class="btn" style="background-color: #2e6f40; padding: 7px 12px; font-size: 0.85rem;" onclick="openNewProjectModal()" title="Criar um novo projeto do zero">📄 Novo</button>
           </div>
         </div>
 
         <div class="control-group" style="min-width: 320px;">
-          <label>&nbsp;</label>
           <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-height: 30px;">
             <button class="btn" id="previewPlayBtn" onclick="togglePreviewPlay()"
               style="padding: 3px 8px; font-size: 0.75rem; background-color: #2e6f40; line-height: 1; font-weight: bold;"
@@ -840,7 +821,7 @@
               <option value="colcheia">Em Colcheia</option>
             </select>
             <label for="previewTempo" style="color: var(--text-muted); font-size: 0.8rem; font-weight: bold; text-transform: uppercase; vertical-align: middle; margin-left: 4px;">BPM:</label>
-            <input type="number" id="previewTempo" min="40" max="120" value="75" onchange="onTempoChange(false)" oninput="onTempoChange(true)"
+            <input type="number" id="previewTempo" min="40" max="200" value="75" onchange="onTempoChange(false)" oninput="onTempoChange(true)"
               style="width: 45px; padding: 3px 4px; font-size: 0.75rem; background-color: var(--bg-color); color: var(--text-main); border: 2px solid var(--border); border-radius: 4px; height: 26px; box-sizing: border-box; text-align: center; vertical-align: middle;">
 
             <div class="mini-mixer">
@@ -854,8 +835,7 @@
           </div>
         </div>
 
-        <div class="control-group">
-          <label>Visualização</label>
+        <div class="control-group" style="flex: none; min-width: 200px;">
           <div style="display: flex; align-items: center; gap: 15px; height: 30px;">
             <div style="display: flex; align-items: center;">
               <input type="checkbox" id="viewNotesToggle" onchange="toggleViewNotes()"
@@ -873,25 +853,35 @@
           </div>
         </div>
 
-        <div class="control-group">
-          <label>Compassos por Linha</label>
-          <select id="measuresPerLine" onchange="updateMeasuresPerLine(this.value)">
-            <option value="4" selected>4 compassos</option>
-            <option value="8">8 compassos</option>
+        <div class="control-group" style="flex: none; min-width: 170px; width: 170px;">
+          <select id="measuresPerLine" onchange="updateMeasuresPerLine(this.value)" style="width: 100%;">
+            <option value="4" selected>4 comp. por linha</option>
+            <option value="8">8 comp. por linha</option>
           </select>
+        </div>
+
+        <div class="control-group" style="flex: none; min-width: 220px; width: 220px;">
+          <div style="display: flex; align-items: center; gap: 8px; height: 30px;">
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <input type="checkbox" id="editCifrasToggle" onchange="toggleEditMode()"
+                style="width: 18px; height: 18px; cursor: pointer; margin: 0;">
+              <label for="editCifrasToggle"
+                style="cursor: pointer; color: var(--text-main); font-weight: normal; text-transform: none; font-size: 0.9rem; white-space: nowrap; margin: 0;">Editar Cifras</label>
+            </div>
+            <button class="btn" id="undoBtn" onclick="undoAction()"
+              style="padding: 4px 12px; font-size: 0.95rem; margin-left: 5px; background-color: #5a5a5a; line-height: 1;"
+              title="Desfazer a última ação (Ctrl+Z)" disabled>↶</button>
+            <button class="btn" id="redoBtn" onclick="redoAction()"
+              style="padding: 4px 12px; font-size: 0.95rem; background-color: #5a5a5a; line-height: 1;"
+              title="Refazer a última ação (Ctrl+Y)" disabled>↷</button>
+          </div>
         </div>
 
       </div>
 
       <!-- Segunda Linha: Filtros e Configurações -->
       <div class="controls-row">
-        <div class="control-group">
-          <label>Abertura Máxima</label>
-          <select id="spanFilter" onchange="reprocessScore()">
-            <option value="3" selected>3 casas</option>
-            <option value="4">4 casas</option>
-          </select>
-        </div>
+
 
         <div class="control-group">
           <label>Limitar Inversões</label>
@@ -922,7 +912,20 @@
             <option value="recifrar">Omitir recifrando</option>
           </select>
         </div>
-        <div class="control-group" style="display: flex; flex-direction: column; gap: 8px; justify-content: flex-end; min-width: 175px; flex: none; margin-bottom: 2px;">
+
+        <div class="control-group" style="min-width: 280px;">
+          <label>Transposição (Quartas / Quintas)</label>
+          <div style="display: flex; align-items: center; gap: 8px; height: 36px;">
+            <input type="range" id="transposeSlider" min="-6" max="6" value="0" step="1" oninput="onTransposeSliderChange(this.value)" style="flex: 1; cursor: pointer; height: 20px; vertical-align: middle; margin: 0;">
+            <span id="transposeLabel" style="font-size: 0.82rem; font-weight: bold; min-width: 140px; text-align: left; display: inline-block; color: var(--text-main); white-space: nowrap; user-select: none;">Tom Original</span>
+          </div>
+        </div>
+        <div class="control-group" style="display: flex; flex-direction: column; gap: 8px; justify-content: flex-end; min-width: 190px; flex: none; margin-bottom: 2px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="spanFilter" onchange="reprocessScore()" checked style="cursor: pointer; margin: 0; width: 16px; height: 16px;">
+            <label for="spanFilter"
+              style="cursor: pointer; color: var(--text-main); font-weight: normal; text-transform: none; font-size: 0.9rem; white-space: nowrap; margin: 0; user-select: none;">Abertura máx. (3 casas)</label>
+          </div>
           <div style="display: flex; align-items: center; gap: 8px;">
             <input type="checkbox" id="openStringsFilter" onchange="reprocessScore()" style="cursor: pointer; margin: 0; width: 16px; height: 16px;">
             <label for="openStringsFilter"
@@ -1259,6 +1262,37 @@
     let guitarInstrument = null;
     let bassInstrument = null;
     let diagramScale = 0.8;
+    let currentTransposeStep = 0;
+    const transposeIntervals = {
+      '-6': '5d',
+      '-5': '2m',
+      '-4': '6m',
+      '-3': '3m',
+      '-2': '7m',
+      '-1': '4P',
+      '0': '1P',
+      '1': '5P',
+      '2': '2M',
+      '3': '6M',
+      '4': '3M',
+      '5': '7M',
+      '6': '4A'
+    };
+    const transposeNames = {
+      '-6': 'C. Quartas -6',
+      '-5': 'C. Quartas -5',
+      '-4': 'C. Quartas -4',
+      '-3': 'C. Quartas -3',
+      '-2': 'C. Quartas -2',
+      '-1': 'C. Quartas -1',
+      '0': 'Tom Original',
+      '1': 'C. Quintas +1',
+      '2': 'C. Quintas +2',
+      '3': 'C. Quintas +3',
+      '4': 'C. Quintas +4',
+      '5': 'C. Quintas +5',
+      '6': 'C. Quintas +6'
+    };
 
     // Estado da Prévia Musical
     let previewPlaying = false;
@@ -1306,11 +1340,58 @@
       }
     }
 
+    let lastProjectWas44 = false;
+
+    function is44Project() {
+      if (scoreData && scoreData.length > 0) {
+        return scoreData[0].beats === 4 && scoreData[0].beatType === 4;
+      }
+      return false;
+    }
+
+    function getActualBPM(uiTempo) {
+      if (is44Project()) {
+        return uiTempo;
+      } else {
+        return uiTempo * (130 / 75);
+      }
+    }
+
+    function adjustTempoForTimeSignature() {
+      const tempoInput = document.getElementById("previewTempo");
+      if (!tempoInput) return;
+      const is44 = is44Project();
+      
+      let val = parseInt(tempoInput.value) || 75;
+      
+      if (is44) {
+        tempoInput.min = 70;
+        tempoInput.max = 200;
+        if (!lastProjectWas44) {
+          val = Math.round(val * (130 / 75));
+          if (val > 200) val = 200;
+          if (val < 70) val = 70;
+          tempoInput.value = val;
+          lastProjectWas44 = true;
+        }
+      } else {
+        tempoInput.min = 40;
+        tempoInput.max = 120;
+        if (lastProjectWas44) {
+          val = Math.round(val * (75 / 130));
+          if (val < 40) val = 40;
+          if (val > 120) val = 120;
+          tempoInput.value = val;
+          lastProjectWas44 = false;
+        }
+      }
+    }
+
     function getTempoRatio() {
       const tempoInput = document.getElementById("previewTempo");
       const uiTempo = tempoInput ? parseInt(tempoInput.value) : 75;
-      const tempo = isNaN(uiTempo) ? 130 : (uiTempo * (130 / 75));
-      return tempo / 130;
+      const actualVal = isNaN(uiTempo) ? 130 : getActualBPM(uiTempo);
+      return actualVal / 130;
     }
 
     function togglePreviewLoop() {
@@ -1404,14 +1485,18 @@
       let val = parseInt(tempoInput.value);
       if (isNaN(val)) return;
 
+      const is44 = is44Project();
+      const minVal = is44 ? 70 : 40;
+      const maxVal = is44 ? 200 : 120;
+
       if (!isInput) {
-        if (val < 40) val = 40;
-        if (val > 120) val = 120;
+        if (val < minVal) val = minVal;
+        if (val > maxVal) val = maxVal;
         tempoInput.value = val;
       }
 
-      if (val >= 40 && val <= 120) {
-        const actualVal = val * (130 / 75);
+      if (val >= minVal && val <= maxVal) {
+        const actualVal = getActualBPM(val);
         if (previewPlaying) {
           const is85_new = actualVal <= 120;
           const is85_old = currentOriginalBPM === 85;
@@ -1521,11 +1606,20 @@
       const mode = document.getElementById("previewMode")?.value || "ataque";
 
       if (isFinalChord) {
-        // Baixo do contrabaixo (fundamental sustentada com fadeout)
+        // Baixo do contrabaixo (fundamental ou inversão sustentada com fadeout)
         if (bassInstrument && chordName) {
-          const baseChordName = chordName.split('/')[0];
-          const match = baseChordName.match(/^[A-G](?:#|##|b|bb)?/);
-          const rootNoteStr = match ? match[0] : "";
+          const parts = chordName.split('/');
+          const baseChordName = parts[0];
+          const bassPart = parts[1];
+          let rootNoteStr = "";
+          if (bassPart) {
+            const match = bassPart.match(/^[A-G](?:#|##|b|bb)?/);
+            if (match) rootNoteStr = match[0];
+          }
+          if (!rootNoteStr) {
+            const match = baseChordName.match(/^[A-G](?:#|##|b|bb)?/);
+            if (match) rootNoteStr = match[0];
+          }
           if (rootNoteStr) {
             let bassMidi = Tonal.Note.midi(rootNoteStr + "2");
             if (bassMidi && !isNaN(bassMidi)) {
@@ -1575,9 +1669,18 @@
 
       // Acompanhamento de Contrabaixo (Sempre Ativo)
       if (bassInstrument && chordName) {
-        const baseChordName = chordName.split('/')[0];
-        const match = baseChordName.match(/^[A-G](?:#|##|b|bb)?/);
-        const rootNoteStr = match ? match[0] : "";
+        const parts = chordName.split('/');
+        const baseChordName = parts[0];
+        const bassPart = parts[1];
+        let rootNoteStr = "";
+        if (bassPart) {
+          const match = bassPart.match(/^[A-G](?:#|##|b|bb)?/);
+          if (match) rootNoteStr = match[0];
+        }
+        if (!rootNoteStr) {
+          const match = baseChordName.match(/^[A-G](?:#|##|b|bb)?/);
+          if (match) rootNoteStr = match[0];
+        }
         if (rootNoteStr) {
           let bassMidi = Tonal.Note.midi(rootNoteStr + "2");
           if (bassMidi && !isNaN(bassMidi)) {
@@ -1591,7 +1694,7 @@
 
             const tempoInput = document.getElementById("previewTempo");
             const uiTempo = tempoInput ? parseInt(tempoInput.value) : 75;
-            const tempo = uiTempo * (130 / 75);
+            const tempo = getActualBPM(uiTempo);
             const beatDuration = 60 / tempo;
             const maxDurationBeats = maxAllowedDuration / (60 / 130);
 
@@ -1622,7 +1725,7 @@
       if (mode === "bossa") {
         const tempoInput = document.getElementById("previewTempo");
         const uiTempo = tempoInput ? parseInt(tempoInput.value) : 75;
-        const tempo = uiTempo * (130 / 75);
+        const tempo = getActualBPM(uiTempo);
         const beatDuration = 60 / tempo;
         const bassNote = playableNotes[0];
         const remainingNotes = playableNotes.slice(1);
@@ -1739,7 +1842,7 @@
       } else if (mode === "cancao") {
         const tempoInput = document.getElementById("previewTempo");
         const uiTempo = tempoInput ? parseInt(tempoInput.value) : 75;
-        const tempo = uiTempo * (130 / 75);
+        const tempo = getActualBPM(uiTempo);
         const beatDuration = 60 / tempo;
         const bassNote = playableNotes[0];
         const remainingNotes = playableNotes.slice(1);
@@ -1788,7 +1891,7 @@
       } else if (mode === "colcheia") {
         const tempoInput = document.getElementById("previewTempo");
         const uiTempo = tempoInput ? parseInt(tempoInput.value) : 75;
-        const tempo = uiTempo * (130 / 75);
+        const tempo = getActualBPM(uiTempo);
         const colcheiaDelayReal = (60 / tempo) / 2;
         const colcheiaDelayMedia = (60 / 130) / 2;
         const count = Math.max(1, Math.floor(maxAllowedDuration / colcheiaDelayMedia));
@@ -1873,7 +1976,7 @@
         }
 
         const numChords = chordsToUse.length;
-        const measureBeatsScaled = measure.beats * 2; // Dobrado para mudar os acordes na metade da velocidade
+        const measureBeatsScaled = is44Project() ? measure.beats : (measure.beats * 2);
         if (numChords === 0) {
           accumulatedBeats += measureBeatsScaled;
         } else {
@@ -1900,7 +2003,7 @@
 
       const tempoInput = document.getElementById("previewTempo");
       const tempo = tempoInput ? parseInt(tempoInput.value) : 75;
-      const actualBPM = tempo * (130 / 75);
+      const actualBPM = getActualBPM(tempo);
 
       try {
         await ensureBackingTrackLoaded(actualBPM);
@@ -1953,7 +2056,7 @@
       if (startMeasureIdx !== null && startMeasureIdx > 0 && startMeasureIdx < scoreData.length) {
         let startMeasureBeat = 0;
         for (let i = 0; i < startMeasureIdx; i++) {
-          startMeasureBeat += scoreData[i].beats * 2;
+          startMeasureBeat += is44Project() ? scoreData[i].beats : (scoreData[i].beats * 2);
         }
         startMeasureTimeMedia = startMeasureBeat * (60 / 130);
       }
@@ -1973,7 +2076,7 @@
         if (!previewPlaying) return;
 
         const currentTempoInput = document.getElementById("previewTempo");
-        const currentTempo = currentTempoInput ? parseInt(currentTempoInput.value) * (130 / 75) : 130;
+        const currentTempo = currentTempoInput ? getActualBPM(parseInt(currentTempoInput.value)) : 130;
         const ratio130 = currentTempo / 130;
         const nowCtx = audioCtx.currentTime;
 
@@ -2132,6 +2235,45 @@
     function updateDiagramZoom(val) {
       diagramScale = parseFloat(val);
       document.getElementById("zoomVal").innerText = Math.round(diagramScale * 100) + "%";
+      renderScoreGrid();
+    }
+
+    function updateTransposeLabel() {
+      const step = document.getElementById("transposeSlider").value;
+      document.getElementById("transposeLabel").innerText = transposeNames[step];
+    }
+
+    function onTransposeSliderChange(val) {
+      updateTransposeLabel();
+      transposeProject(val);
+    }
+
+    function transposeProject(step) {
+      currentTransposeStep = parseInt(step);
+      const iv = transposeIntervals[currentTransposeStep];
+      
+      scoreData.forEach(measure => {
+        measure.chords.forEach(chord => {
+          if (!chord.originalChordName) {
+            chord.originalChordName = chord.chordName;
+          }
+          
+          if (iv === '1P') {
+            chord.chordName = chord.originalChordName;
+          } else {
+            chord.chordName = Tonal.Chord.transpose(chord.originalChordName, iv);
+          }
+          
+          const resVoicings = getVoicingsForChord(chord.chordName);
+          chord.options = resVoicings.options;
+          chord.isException = resVoicings.isException;
+          
+          if (chord.selectedIndex >= resVoicings.options.length) {
+            chord.selectedIndex = 0;
+          }
+        });
+      });
+      
       renderScoreGrid();
     }
 
@@ -2314,7 +2456,8 @@
       const maxInversionAllowed = overrides.inversion !== undefined ? overrides.inversion : parseInt(document.getElementById("inversionFilter").value);
       const allowOpenStrings = overrides.openStrings !== undefined ? overrides.openStrings : (document.getElementById("openStringsFilter")?.checked === true);
       const forceCleanSound = overrides.cleanSound !== undefined ? overrides.cleanSound : (document.getElementById("cleanSoundFilter")?.checked === true);
-      const spanVal = overrides.span !== undefined ? overrides.span : parseInt(document.getElementById("spanFilter")?.value || "4");
+      const isSpan3 = overrides.span !== undefined ? (overrides.span === 3) : (document.getElementById("spanFilter")?.checked === true);
+      const spanVal = isSpan3 ? 3 : 4;
       const regFilter = overrides.reg !== undefined ? overrides.reg : (document.getElementById("registerFilter")?.value || "all");
 
       let requiredForVoicing = [...reqChromas];
@@ -2947,9 +3090,16 @@
       }
 
       closeNewProjectModal();
+      currentTransposeStep = 0;
+      const slider = document.getElementById("transposeSlider");
+      if (slider) {
+        slider.value = 0;
+        updateTransposeLabel();
+      }
       undoStack = [];
       redoStack = [];
       saveStateToHistory();
+      adjustTempoForTimeSignature();
       renderScoreGrid();
     }
 
@@ -2995,8 +3145,16 @@
       const adjustedChordName = result.adjusted;
       const resVoicings = getVoicingsForChord(adjustedChordName);
 
+      let originalChordName = adjustedChordName;
+      if (currentTransposeStep !== 0) {
+        const iv = transposeIntervals[currentTransposeStep];
+        const rev = iv.startsWith('-') ? iv.slice(1) : '-' + iv;
+        originalChordName = Tonal.Chord.transpose(adjustedChordName, rev);
+      }
+
       const chordObj = {
         chordName: adjustedChordName,
+        originalChordName: originalChordName,
         options: resVoicings.options,
         isException: resVoicings.isException,
         selectedIndex: 0
@@ -3447,6 +3605,7 @@
             if (resVoicings.options.length > 0) {
               measureChords.push({
                 chordName: chordName,
+                originalChordName: chordName,
                 options: resVoicings.options,
                 isException: resVoicings.isException,
                 selectedIndex: 0
@@ -3462,9 +3621,16 @@
           chords: measureChords
         });
       }
+      currentTransposeStep = 0;
+      const slider = document.getElementById("transposeSlider");
+      if (slider) {
+        slider.value = 0;
+        updateTransposeLabel();
+      }
       undoStack = [];
       redoStack = [];
       saveStateToHistory();
+      adjustTempoForTimeSignature();
       renderScoreGrid();
     }
 
@@ -3937,12 +4103,13 @@
         globalTitle: globalTitle,
         currentRawXML: currentRawXML,
         scoreData: scoreData,
+        currentTransposeStep: currentTransposeStep,
         rootFilter: document.getElementById("rootFilter").value,
         inversionFilter: document.getElementById("inversionFilter").value,
         openStringsFilter: document.getElementById("openStringsFilter").checked,
         cleanSoundFilter: document.getElementById("cleanSoundFilter").checked,
         registerFilter: document.getElementById("registerFilter").value,
-        spanFilter: document.getElementById("spanFilter").value,
+        spanFilter: document.getElementById("spanFilter").checked,
         measuresPerLine: document.getElementById("measuresPerLine").value,
         diagramScale: diagramScale
       };
@@ -4006,8 +4173,9 @@ e selecione este arquivo de texto.
           if (projectData.registerFilter) {
             document.getElementById("registerFilter").value = projectData.registerFilter;
           }
-          if (projectData.spanFilter) {
-            document.getElementById("spanFilter").value = projectData.spanFilter;
+          if (projectData.spanFilter !== undefined) {
+            const isSpan3 = (projectData.spanFilter === true || projectData.spanFilter === "true" || projectData.spanFilter === 3 || projectData.spanFilter === "3");
+            document.getElementById("spanFilter").checked = isSpan3;
           }
           if (projectData.measuresPerLine) {
             document.getElementById("measuresPerLine").value = projectData.measuresPerLine;
@@ -4021,10 +4189,22 @@ e selecione este arquivo de texto.
 
           if (projectData.scoreData) {
             scoreData = projectData.scoreData;
+            scoreData.forEach(m => {
+              m.chords.forEach(c => {
+                if (!c.originalChordName) c.originalChordName = c.chordName;
+              });
+            });
+            currentTransposeStep = projectData.currentTransposeStep !== undefined ? parseInt(projectData.currentTransposeStep) : 0;
+            const slider = document.getElementById("transposeSlider");
+            if (slider) {
+              slider.value = currentTransposeStep;
+              updateTransposeLabel();
+            }
             clearMeasureSelection();
             undoStack = [];
             redoStack = [];
             saveStateToHistory();
+            adjustTempoForTimeSignature();
             renderScoreGrid();
           } else {
             // Suporte retroativo para arquivos do formato antigo
