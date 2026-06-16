@@ -361,6 +361,13 @@
       transform: scale(1.05);
     }
 
+    .measure-box.selected {
+      background-color: rgba(131, 180, 128, 0.15) !important;
+      border: 2px solid var(--finger) !important;
+      box-sizing: border-box;
+      box-shadow: 0 0 8px rgba(131, 180, 128, 0.4) !important;
+    }
+
     .chord-event h4 {
       margin: 0 0 4px 0;
       font-size: 0.95rem;
@@ -734,6 +741,21 @@
       transform: scale(1.3);
       background: #ffb5b8;
     }
+
+    /* Destaca o compasso vazio quando está sendo reproduzido repetindo o anterior */
+    .measure-box.playing-simile {
+      background-color: rgba(131, 180, 128, 0.25) !important;
+      border: 2px solid var(--finger) !important;
+      box-shadow: 0 0 12px rgba(131, 180, 128, 0.6) !important;
+    }
+    .measure-box.playing-simile .simile-mark span {
+      color: #1b4d22 !important; /* Verde escuro para contraste no fundo claro */
+      opacity: 0.95 !important;
+      text-shadow: 0 0 8px rgba(131, 180, 128, 0.6);
+      transform: scale(1.15);
+      display: inline-block;
+      transition: transform 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+    }
   </style>
 </head>
 
@@ -894,12 +916,17 @@
             <option value="recifrar">Omitir recifrando</option>
           </select>
         </div>
-        <div class="control-group">
-          <label>Cordas Soltas</label>
-          <select id="openStringsFilter" onchange="reprocessScore()">
-            <option value="false" selected>Ignorar Cordas Soltas</option>
-            <option value="true">Permitir Cordas Soltas</option>
-          </select>
+        <div class="control-group" style="display: flex; flex-direction: column; gap: 8px; justify-content: flex-end; min-width: 175px; flex: none; margin-bottom: 2px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="openStringsFilter" onchange="reprocessScore()" style="cursor: pointer; margin: 0; width: 16px; height: 16px;">
+            <label for="openStringsFilter"
+              style="cursor: pointer; color: var(--text-main); font-weight: normal; text-transform: none; font-size: 0.9rem; white-space: nowrap; margin: 0; user-select: none;">Permitir cordas soltas</label>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="cleanSoundFilter" onchange="reprocessScore()" checked style="cursor: pointer; margin: 0; width: 16px; height: 16px;">
+            <label for="cleanSoundFilter"
+              style="cursor: pointer; color: var(--text-main); font-weight: normal; text-transform: none; font-size: 0.9rem; white-space: nowrap; margin: 0; user-select: none;">Limpar som (>C#3)</label>
+          </div>
         </div>
       </div>
     </div>
@@ -912,14 +939,23 @@
         <p style="color: var(--text-muted); text-align: center; width: 100%;">Aguardando upload do MusicXML...</p>
       </div>
       <div id="editMeasuresBox" class="data-html2canvas-ignore"
-        style="display: none; margin-top: 20px; justify-content: center; align-items: center; gap: 12px; border-top: 1.5px dashed var(--border); padding-top: 15px;">
-        <span style="font-weight: bold; color: var(--text-main);">Quantidade de Compassos:</span>
-        <button class="btn" style="background-color: #c0392b; padding: 4px 12px; font-size: 0.95rem; font-weight: bold;"
-          onclick="decrementMeasures()">-</button>
-        <span id="editMeasuresCount"
-          style="font-weight: 900; font-size: 1.25rem; min-width: 40px; text-align: center; color: var(--text-main);">16</span>
-        <button class="btn" style="background-color: #2e6f40; padding: 4px 12px; font-size: 0.95rem; font-weight: bold;"
-          onclick="incrementMeasures()">+</button>
+        style="display: none; margin-top: 20px; justify-content: center; align-items: center; gap: 20px; border-top: 1.5px dashed var(--border); padding-top: 15px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span style="font-weight: bold; color: var(--text-main);">Quantidade de Compassos:</span>
+          <button class="btn" style="background-color: #c0392b; padding: 4px 12px; font-size: 0.95rem; font-weight: bold;"
+            onclick="decrementMeasures()">-</button>
+          <span id="editMeasuresCount"
+            style="font-weight: 900; font-size: 1.25rem; min-width: 40px; text-align: center; color: var(--text-main);">16</span>
+          <button class="btn" style="background-color: #2e6f40; padding: 4px 12px; font-size: 0.95rem; font-weight: bold;"
+            onclick="incrementMeasures()">+</button>
+        </div>
+        <div id="selectedMeasureActions" style="display: none; align-items: center; gap: 10px; border-left: 1.5px solid var(--border); padding-left: 20px;">
+          <span style="font-weight: bold; color: var(--text-muted); font-size: 0.9rem;">Compasso <span id="selectedMeasureActionNum">1</span>:</span>
+          <button class="btn" style="background-color: #34495e; padding: 4px 10px; font-size: 0.85rem;" onclick="copySelectedMeasure()" title="Copiar compasso selecionado (Ctrl+C)">Copiar</button>
+          <button class="btn" id="pasteMeasureBtn" style="background-color: #34495e; padding: 4px 10px; font-size: 0.85rem; opacity: 0.5; cursor: not-allowed;" onclick="pasteToSelectedMeasure()" title="Colar compasso copiado (Ctrl+V)" disabled>Colar</button>
+          <button class="btn" style="background-color: #2e6f40; padding: 4px 10px; font-size: 0.85rem;" onclick="insertMeasureAtSelected()" title="Inserir novo compasso após o selecionado (Insert)">Inserir</button>
+          <button class="btn" style="background-color: #c0392b; padding: 4px 10px; font-size: 0.85rem;" onclick="deleteMeasureAtSelected()" title="Excluir compasso selecionado (Delete)">Excluir</button>
+        </div>
       </div>
     </div>
 
@@ -941,21 +977,41 @@
               <li><strong>Selecione posições alternativas:</strong> Clique no botão <strong>"Mudar"</strong> sob
                 qualquer acorde para abrir a galeria com todas as posições correspondentes encontradas e clique na
                 desejada.</li>
-              <li><strong>Edite cifras e desfaça ações:</strong> Ative a caixa <strong>"Editar Cifras"</strong>.
-                Clique na cifra ou em "Editar" para digitar o acorde. O app corrige automaticamente o texto (minúsculas
-                viram maiúsculas, o caractere <code>3</code> vira sustenido <code>#</code>, e o <code>b</code> vira
-                bemol <code>b</code>), além de normalizar e validar musicalmente a cifra. Pressione <code>Enter</code>
-                para salvar e avançar para o próximo compasso. Você pode desfazer ou refazer edições utilizando os botões de seta (<strong>"↶"</strong> e <strong>"↷"</strong>) ou atalhos <code>Ctrl+Z</code> e <code>Ctrl+Y</code>.</li>
+              <li><strong>Edite cifras, gerencie compassos e desfaça ações:</strong> Ative a caixa <strong>"Editar Cifras"</strong>. Clique na cifra ou em "Editar" para digitar o acorde. O app corrige automaticamente o texto (minúsculas viram maiúsculas, o caractere <code>3</code> vira sustenido <code>#</code>, e o <code>b</code> vira bemol <code>b</code>), além de normalizar e validar musicalmente a cifra. Pressione <code>Enter</code> para salvar e avançar para o próximo compasso. Você também pode copiar, colar, inserir ou excluir compassos selecionados utilizando a barra de ferramentas inferior ou as teclas de atalho. Utilize os botões de seta (<strong>"↶"</strong> e <strong>"↷"</strong>) ou os atalhos <code>Ctrl+Z</code> e <code>Ctrl+Y</code> para desfazer/refazer suas edições.</li>
+              <li><strong>Selecione múltiplos compassos:</strong> Clique em um compasso para selecioná-lo (ele ficará destacado com borda verde e fundo claro). Para selecionar um intervalo contíguo, mantenha pressionada a tecla <code>Shift</code> e clique em outro compasso (ou utilize as teclas <code>Shift + Seta Esquerda/Direita</code>). Os compassos selecionados podem ser copiados, colados ou excluídos em lote.</li>
               <li><strong>Ouça uma prévia em andamento:</strong> Clique no botão <strong>"▶"</strong> para escutar o arranjo acompanhado por uma bateria e contrabaixo de bossa nova (o baixo toca sempre junto por padrão). Os botões de controle adicionais permitem ativar o loop (botão <strong>"🔁"</strong>) e a contagem rítmica de entrada de 8 batidas (botão de metrônomo). O controle de BPM permite ajustar o andamento entre 40 e 120 (o padrão é 75 BPM). Você pode regular e equilibrar os volumes da bateria, do violão e do contrabaixo individualmente a qualquer momento deslizando os controles <strong>"Bat."</strong>, <strong>"Viol."</strong> e <strong>"Bx."</strong> do mini-mixer inline. O seletor de estilo permite alternar a prévia entre <strong>Canção</strong> (com colcheia, semínima e colcheia), <strong>Bossa</strong> (estilo de 2 compassos sincopados com variações aleatórias), <strong>Ataque</strong> (notas simultâneas), <strong>Com Arpejo</strong> (notas dedilhadas rapidamente) ou <strong>Em Colcheia</strong> (notas arpejadas sustentadas no tempo de colcheia). O acorde atual é destacado visualmente com um fundo verde no grid enquanto soa.</li>
               <li><strong>Gerencie a partitura:</strong> Adicione novas cifras com <code>+ Cifra</code>, delete-as com o
                 botão vermelho <code>&times;</code>, ou aumente/diminua a quantidade total de compassos pelos botões
                 <code>+</code> e <code>-</code> abaixo da partitura.
               </li>
               <li><strong>Filtre posições:</strong> Configure o limite de inversão de baixos, permissão de cordas
-                soltas, registro de altura (grave, médio ou agudo) e a abertura de casas para adequar os diagramas.</li>
+                soltas, registro de altura (grave, médio ou agudo), a abertura de casas e a filtragem de som limpo (Limpar som >C#3) para adequar os diagramas.</li>
               <li><strong>Exporte o arranjo:</strong> Clique em <strong>"Exportar Imagem"</strong> para baixar os
                 diagramas diagramados em páginas no formato retrato (A4), prontas para visualização ou impressão.</li>
             </ol>
+          </div>
+
+          <div class="accordion-section">
+            <h3>⌨️ Atalhos de Teclado (QWERTY)</h3>
+            <ul style="padding-left: 20px; list-style-type: none; margin: 0;">
+              <li style="margin-bottom: 8px;"><strong>Gerais (Visualização e Controle):</strong></li>
+              <ul style="padding-left: 15px; margin-bottom: 12px; list-style-type: circle;">
+                <li style="margin-bottom: 4px;"><code>Espaço</code>: Iniciar / Pausar a reprodução do áudio (prévia).</li>
+                <li style="margin-bottom: 4px;"><code>Seta Esquerda</code> / <code>Seta Direita</code>: Navegar e selecionar o compasso anterior / seguinte.</li>
+                <li style="margin-bottom: 4px;"><code>Shift + Seta Esquerda</code> / <code>Shift + Seta Direita</code>: Selecionar um intervalo de múltiplos compassos.</li>
+                <li style="margin-bottom: 4px;"><code>Ctrl + Z</code>: Desfazer a última ação.</li>
+                <li style="margin-bottom: 4px;"><code>Ctrl + Y</code>: Refazer a última ação desfeita.</li>
+                <li style="margin-bottom: 4px;"><code>Ctrl + S</code>: Salvar o projeto atual em um arquivo de texto.</li>
+                <li style="margin-bottom: 4px;"><code>Ctrl + O</code>: Abrir/carregar um arquivo de projeto salvo.</li>
+              </ul>
+              <li style="margin-bottom: 8px;"><strong>Exclusivos do Modo de Edição (com "Editar Cifras" ativo):</strong></li>
+              <ul style="padding-left: 15px; list-style-type: circle;">
+                <li style="margin-bottom: 4px;"><code>Ctrl + C</code>: Copiar o(s) compasso(s) selecionado(s).</li>
+                <li style="margin-bottom: 4px;"><code>Ctrl + V</code>: Colar o(s) compasso(s) copiado(s) a partir do compasso inicial selecionado.</li>
+                <li style="margin-bottom: 4px;"><code>Insert</code> ou <code>Ctrl + I</code>: Inserir um novo compasso vazio logo após o compasso selecionado.</li>
+                <li style="margin-bottom: 4px;"><code>Delete</code>: Excluir todos os compassos selecionados no momento.</li>
+              </ul>
+            </ul>
           </div>
 
           <div class="accordion-section">
@@ -1116,7 +1172,67 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="customAlertModal">
+    <div class="modal-content" style="max-width: 400px; text-align: center; padding: 25px;">
+      <h2 id="customAlertTitle" style="margin-top: 0; color: var(--text-main); font-size: 1.4rem;">Aviso</h2>
+      <p id="customAlertMessage" style="color: var(--text-muted); font-size: 1rem; margin: 15px 0 25px 0; line-height: 1.4;"></p>
+      <div style="display: flex; justify-content: center;">
+        <button class="btn btn-accent" id="customAlertOkBtn" style="min-width: 120px;">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="customConfirmModal">
+    <div class="modal-content" style="max-width: 400px; text-align: center; padding: 25px;">
+      <h2 id="customConfirmTitle" style="margin-top: 0; color: var(--text-main); font-size: 1.4rem;">Confirmar</h2>
+      <p id="customConfirmMessage" style="color: var(--text-muted); font-size: 1rem; margin: 15px 0 25px 0; line-height: 1.4;"></p>
+      <div style="display: flex; justify-content: center; gap: 12px;">
+        <button class="btn" id="customConfirmCancelBtn" style="background-color: #7f8c8d; min-width: 110px;">Cancelar</button>
+        <button class="btn" id="customConfirmYesBtn" style="background-color: #c0392b; min-width: 110px;">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
   <script>
+    function showCustomAlert(title, message) {
+      return new Promise((resolve) => {
+        document.getElementById("customAlertTitle").innerText = title;
+        document.getElementById("customAlertMessage").innerText = message;
+        const modal = document.getElementById("customAlertModal");
+        modal.style.display = "flex";
+        
+        const okBtn = document.getElementById("customAlertOkBtn");
+        okBtn.onclick = () => {
+          modal.style.display = "none";
+          resolve();
+        };
+      });
+    }
+
+    function showCustomConfirm(title, message, yesBgColor = "#c0392b", yesText = "Confirmar") {
+      return new Promise((resolve) => {
+        document.getElementById("customConfirmTitle").innerText = title;
+        document.getElementById("customConfirmMessage").innerText = message;
+        const modal = document.getElementById("customConfirmModal");
+        modal.style.display = "flex";
+        
+        const yesBtn = document.getElementById("customConfirmYesBtn");
+        yesBtn.style.backgroundColor = yesBgColor;
+        yesBtn.textContent = yesText;
+        
+        const cancelBtn = document.getElementById("customConfirmCancelBtn");
+        
+        yesBtn.onclick = () => {
+          modal.style.display = "none";
+          resolve(true);
+        };
+        cancelBtn.onclick = () => {
+          modal.style.display = "none";
+          resolve(false);
+        };
+      });
+    }
+
     const tuning = [{ string: 6, midi: 40 }, { string: 5, midi: 45 }, { string: 4, midi: 50 }, { string: 3, midi: 55 }, { string: 2, midi: 59 }, { string: 1, midi: 64 }];
 
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -1145,6 +1261,7 @@
     let previewCountIn = false;
     let audioBuffer85 = null;
     let audioBuffer130 = null;
+    let audioBufferFinal = null;
     let audioSourceNode = null;
     let backingTrackStartTime = 0;
     let backingTrackElapsedBase = 0;
@@ -1155,6 +1272,11 @@
     let playlist = [];
     let bossaVariations = [];
     let currentActiveChordEl = null;
+    let currentActiveMeasureEl = null;
+    let copiedChords = null;
+    const selectedMeasureIndices = new Set();
+    let selectionAnchor = null;
+    let selectionActiveEnd = null;
 
     let volumeDrums = 1.0;
     let volumeGuitar = 1.0;
@@ -1246,6 +1368,21 @@
         const response = await fetch(audioUrl);
         const arrayBuffer = await response.arrayBuffer();
         audioBuffer130 = await audioCtx.decodeAudioData(arrayBuffer);
+      }
+
+      if (!audioBufferFinal) {
+        updatePlayButtonText("⏳");
+        let audioUrl = "https://github.com/GlauberLASantiago/posi-cifra-flex/blob/main/bossa-final-bat.mp3";
+        if (audioUrl.includes("github.com") && audioUrl.includes("/blob/")) {
+          audioUrl = audioUrl.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/");
+        }
+        try {
+          const response = await fetch(audioUrl);
+          const arrayBuffer = await response.arrayBuffer();
+          audioBufferFinal = await audioCtx.decodeAudioData(arrayBuffer);
+        } catch (err) {
+          console.warn("Could not load bossa-final-bat.mp3, falling back to standard fadeout.", err);
+        }
       }
     }
 
@@ -1345,11 +1482,22 @@
       if (bassInstrument && typeof bassInstrument.stop === "function") {
         bassInstrument.stop();
       }
+      if (bassGainNode) {
+        try {
+          bassGainNode.gain.cancelScheduledValues(audioCtx.currentTime);
+          bassGainNode.gain.setValueAtTime(volumeBass, audioCtx.currentTime);
+        } catch(e){}
+      }
       if (currentActiveChordEl) {
         currentActiveChordEl.classList.remove("playing");
         currentActiveChordEl = null;
       }
+      if (currentActiveMeasureEl) {
+        currentActiveMeasureEl.classList.remove("playing-simile");
+        currentActiveMeasureEl = null;
+      }
       document.querySelectorAll(".chord-event.playing").forEach(el => el.classList.remove("playing"));
+      document.querySelectorAll(".measure-box.playing-simile").forEach(el => el.classList.remove("playing-simile"));
       const playBtn = document.getElementById("previewPlayBtn");
       if (playBtn) {
         playBtn.textContent = "▶";
@@ -1357,7 +1505,7 @@
       }
     }
 
-    function playChordAtTime(notesArr, targetTime, maxAllowedDuration, nextNotesArr = null, startBeat = 0, chordName = "") {
+    function playChordAtTime(notesArr, targetTime, maxAllowedDuration, nextNotesArr = null, startBeat = 0, chordName = "", isFinalChord = false) {
       if (!guitarInstrument) return;
       const playableNotes = notesArr.filter(n => n.fret !== -1).sort((a, b) => a.midi - b.midi);
       if (playableNotes.length === 0) return;
@@ -1366,6 +1514,59 @@
       const chordDuration = Math.min(2.0, maxAllowedDuration);
       const chordDurationReal = chordDuration / ratio;
       const mode = document.getElementById("previewMode")?.value || "ataque";
+
+      if (isFinalChord) {
+        // Baixo do contrabaixo (fundamental sustentada com fadeout)
+        if (bassInstrument && chordName) {
+          const baseChordName = chordName.split('/')[0];
+          const match = baseChordName.match(/^[A-G](?:#|##|b|bb)?/);
+          const rootNoteStr = match ? match[0] : "";
+          if (rootNoteStr) {
+            let bassMidi = Tonal.Note.midi(rootNoteStr + "2");
+            if (bassMidi && !isNaN(bassMidi)) {
+              while (bassMidi > 40) bassMidi -= 12;
+              while (bassMidi < 28) bassMidi += 12;
+              
+              // Toca a fundamental por 4.5 segundos
+              bassInstrument.play(bassMidi, targetTime, { duration: 4.5, gain: 2.2 });
+              
+              // Automatiza o fadeout do bassGainNode:
+              // Mantém o volume normal até targetTime + 2.0 segundos, depois faz o fadeout até 0.0 em targetTime + 3.8 segundos.
+              if (bassGainNode) {
+                try {
+                  bassGainNode.gain.cancelScheduledValues(targetTime);
+                  bassGainNode.gain.setValueAtTime(volumeBass, targetTime);
+                  bassGainNode.gain.setValueAtTime(volumeBass, targetTime + 2.0);
+                  bassGainNode.gain.linearRampToValueAtTime(0.0, targetTime + 3.8);
+                } catch (err) {
+                  console.warn("Could not schedule bass fadeout automation:", err);
+                }
+              }
+            }
+          }
+        }
+
+        // Violão: arpejo rápido sustentado
+        const delay = 0.03; // ~30ms de atraso entre as notas para criar o efeito de dedilhado rápido (arpejo)
+        playableNotes.forEach((note, idx) => {
+          guitarInstrument.play(note.midi, targetTime + (idx * delay), { duration: 6.0, gain: 2.5 });
+        });
+
+        // Parar backing track em loop e tocar bossa-final-bat.mp3
+        if (audioSourceNode) {
+          try { audioSourceNode.stop(targetTime); } catch(e){}
+        }
+
+        if (audioBufferFinal) {
+          const finalSource = audioCtx.createBufferSource();
+          finalSource.buffer = audioBufferFinal;
+          finalSource.connect(drumsGainNode);
+          finalSource.start(targetTime);
+          audioSourceNode = finalSource; // atribui para poder interromper caso o usuário clique em Stop
+        }
+
+        return; // interrompe a execução das levadas normais
+      }
 
       // Acompanhamento de Contrabaixo (Sempre Ativo)
       if (bassInstrument && chordName) {
@@ -1427,51 +1628,71 @@
 
         for (let m = startMeasure; m <= endMeasure; m++) {
           const isSecondMeasure = (m % 2 === 1);
-          const useAltB = bossaVariations[m] || false;
+          const variation = bossaVariations[m] !== undefined ? bossaVariations[m] : 0;
 
           let events = [];
           if (!isSecondMeasure) {
             // 1º Compasso (Ímpar)
-            if (!useAltB) {
-              // Alt A (Original)
+            // variation 0 e 2 usam Alt A. variation 1 e 3 usam Alt B.
+            if (variation % 2 === 0) {
+              // Alt A (Classical João Gilberto 1)
               events = [
-                { offset: 0.0, isBass: true,  isRemaining: true,  bassDur: 2.0, remDur: 1.0, useNext: false },
-                { offset: 1.0, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 1.0, useNext: false },
-                { offset: 2.0, isBass: true,  isRemaining: false, bassDur: 0.5, remDur: 0.0, useNext: false },
-                { offset: 2.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 1.0, useNext: false },
-                { offset: 3.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 0.5, useNext: true  }
+                { offset: 0.0, isBass: true,  isRemaining: true,  bassDur: 1.5, remDur: 2.0, bassGain: 2.8, remGain: 2.5, useNext: false },
+                { offset: 1.0, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 2.0, bassGain: 0.0, remGain: 1.9, useNext: false },
+                { offset: 2.0, isBass: true,  isRemaining: false, bassDur: 1.5, remDur: 0.0, bassGain: 2.4, remGain: 0.0, useNext: false },
+                { offset: 2.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 2.0, bassGain: 0.0, remGain: 2.6, useNext: false },
+                { offset: 3.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 2.0, bassGain: 0.0, remGain: 2.2, useNext: true  }
               ];
             } else {
-              // Alt B
+              // Alt B (Alternative syncopated bass/chord pattern)
               events = [
-                { offset: 0.0, isBass: true,  isRemaining: true,  bassDur: 1.5, remDur: 1.0, useNext: false },
-                { offset: 1.0, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 1.0, useNext: false },
-                { offset: 1.5, isBass: true,  isRemaining: false, bassDur: 0.5, remDur: 0.0, useNext: false },
-                { offset: 2.0, isBass: true,  isRemaining: false, bassDur: 2.0, remDur: 0.0, useNext: false },
-                { offset: 2.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 1.0, useNext: false },
-                { offset: 3.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 0.5, useNext: true  }
+                { offset: 0.0, isBass: true,  isRemaining: true,  bassDur: 1.0, remDur: 2.0, bassGain: 2.8, remGain: 2.5, useNext: false },
+                { offset: 1.0, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 2.0, bassGain: 0.0, remGain: 1.9, useNext: false },
+                { offset: 1.5, isBass: true,  isRemaining: false, bassDur: 0.5, remDur: 0.0, bassGain: 2.2, remGain: 0.0, useNext: false },
+                { offset: 2.0, isBass: true,  isRemaining: false, bassDur: 1.5, remDur: 0.0, bassGain: 2.4, remGain: 0.0, useNext: false },
+                { offset: 2.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 2.0, bassGain: 0.0, remGain: 2.6, useNext: false },
+                { offset: 3.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 2.0, bassGain: 0.0, remGain: 2.2, useNext: true  }
               ];
             }
           } else {
-            // 2º Compasso (Par)
-            if (!useAltB) {
-              // Alt A (Original)
+            // 2º Compasso (Par) - 4 variedades para os dois últimos ataques
+            if (variation === 0) {
+              // Variedade 1: Tempo 3.0 e Tempo 4.0 (offset 2.0 e 3.0)
               events = [
-                { offset: 0.0, isBass: true,  isRemaining: false, bassDur: 0.5, remDur: 0.0, useNext: false },
-                { offset: 0.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 1.0, useNext: false },
-                { offset: 1.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 0.5, useNext: false },
-                { offset: 2.0, isBass: true,  isRemaining: false, bassDur: 2.0, remDur: 0.0, useNext: false },
-                { offset: 3.0, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 1.0, useNext: false }
+                { offset: 0.0, isBass: true,  isRemaining: false, bassDur: 0.5, remDur: 0.0, bassGain: 2.0, remGain: 0.0, useNext: false },
+                { offset: 0.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 2.0, bassGain: 0.0, remGain: 2.6, useNext: false },
+                { offset: 1.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 2.0, bassGain: 0.0, remGain: 1.8, useNext: false },
+                { offset: 2.0, isBass: true,  isRemaining: true,  bassDur: 1.5, remDur: 2.0, bassGain: 2.8, remGain: 1.7, useNext: false },
+                { offset: 3.0, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 2.0, bassGain: 0.0, remGain: 1.7, useNext: false }
+              ];
+            } else if (variation === 1) {
+              // Variedade 2: Tempo 3.5 e Tempo 4.0 (offset 2.5 e 3.0)
+              events = [
+                { offset: 0.0, isBass: true,  isRemaining: false, bassDur: 0.5, remDur: 0.0, bassGain: 2.0, remGain: 0.0, useNext: false },
+                { offset: 0.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 2.0, bassGain: 0.0, remGain: 2.6, useNext: false },
+                { offset: 1.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 2.0, bassGain: 0.0, remGain: 1.8, useNext: false },
+                { offset: 2.0, isBass: true,  isRemaining: false, bassDur: 1.5, remDur: 0.0, bassGain: 2.8, remGain: 0.0, useNext: false },
+                { offset: 2.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 2.0, bassGain: 0.0, remGain: 2.2, useNext: false },
+                { offset: 3.0, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 2.0, bassGain: 0.0, remGain: 1.7, useNext: false },
+                { offset: 4.0, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 2.0, bassGain: 0.0, remGain: 2.2, useNext: true  }
+              ];
+            } else if (variation === 2) {
+              // Variedade 3: Tempo 4.0 (offset 3.0) apenas
+              events = [
+                { offset: 0.0, isBass: true,  isRemaining: false, bassDur: 0.5, remDur: 0.0, bassGain: 2.0, remGain: 0.0, useNext: false },
+                { offset: 0.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 2.0, bassGain: 0.0, remGain: 2.6, useNext: false },
+                { offset: 1.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 2.0, bassGain: 0.0, remGain: 1.8, useNext: false },
+                { offset: 2.0, isBass: true,  isRemaining: false, bassDur: 1.5, remDur: 0.0, bassGain: 2.8, remGain: 0.0, useNext: false },
+                { offset: 3.0, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 2.0, bassGain: 0.0, remGain: 1.7, useNext: false }
               ];
             } else {
-              // Alt B
+              // Variedade 4: Tempo 3.0 (offset 2.0) apenas
               events = [
-                { offset: 0.0, isBass: true,  isRemaining: false, bassDur: 0.5, remDur: 0.0, useNext: false },
-                { offset: 0.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 1.0, useNext: false },
-                { offset: 1.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 0.5, useNext: false },
-                { offset: 2.0, isBass: true,  isRemaining: false, bassDur: 2.0, remDur: 0.0, useNext: false },
-                { offset: 3.0, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 1.0, useNext: false },
-                { offset: 4.0, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 1.0, useNext: true  }
+                { offset: 0.0, isBass: true,  isRemaining: false, bassDur: 0.5, remDur: 0.0, bassGain: 2.0, remGain: 0.0, useNext: false },
+                { offset: 0.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 2.0, bassGain: 0.0, remGain: 2.6, useNext: false },
+                { offset: 1.5, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 2.0, bassGain: 0.0, remGain: 1.8, useNext: false },
+                { offset: 2.0, isBass: true,  isRemaining: true,  bassDur: 2.0, remDur: 2.0, bassGain: 2.8, remGain: 1.7, useNext: false },
+                { offset: 4.0, isBass: false, isRemaining: true,  bassDur: 0.0, remDur: 2.0, bassGain: 0.0, remGain: 2.2, useNext: true  }
               ];
             }
           }
@@ -1485,7 +1706,7 @@
 
             if (event.isBass) {
               const bassDurationReal = Math.max(0.1, Math.min(event.bassDur, maxDurationBeats - offsetBeats) * beatDuration);
-              guitarInstrument.play(bassNote.midi, eventTime, { duration: bassDurationReal, gain: 2.5 });
+              guitarInstrument.play(bassNote.midi, eventTime, { duration: bassDurationReal, gain: event.bassGain });
             }
 
             if (event.isRemaining) {
@@ -1503,8 +1724,9 @@
               const currentRemainingNotes = notesToUse.slice(1);
               const notesToPlay = currentRemainingNotes.length > 0 ? currentRemainingNotes : [currentBassNote];
 
+              // Toca todas as notas do bloco/dedilhado simultaneamente
               notesToPlay.forEach(note => {
-                guitarInstrument.play(note.midi, eventTime, { duration: remainingDurationReal, gain: 2.5 });
+                guitarInstrument.play(note.midi, eventTime, { duration: remainingDurationReal, gain: event.remGain });
               });
             }
           });
@@ -1577,7 +1799,13 @@
     function updateUIActiveChord(activeItem) {
       if (currentActiveChordEl) {
         currentActiveChordEl.classList.remove("playing");
+        currentActiveChordEl = null;
       }
+      if (currentActiveMeasureEl) {
+        currentActiveMeasureEl.classList.remove("playing-simile");
+        currentActiveMeasureEl = null;
+      }
+
       if (activeItem) {
         const selector = `.chord-event[data-measure-idx="${activeItem.measureIdx}"][data-chord-idx="${activeItem.chordIdx}"]`;
         const activeEl = document.querySelector(selector);
@@ -1585,16 +1813,26 @@
           activeEl.classList.add("playing");
           currentActiveChordEl = activeEl;
         } else {
-          currentActiveChordEl = null;
+          // Se não houver elemento de acorde para o compasso ativo, o compasso está vazio e tocando como repetição
+          const boxes = document.querySelectorAll("#scoreGrid .measure-box");
+          const measureBox = boxes[activeItem.measureIdx];
+          if (measureBox && measureBox.querySelector(".simile-mark")) {
+            measureBox.classList.add("playing-simile");
+            currentActiveMeasureEl = measureBox;
+          }
         }
-      } else {
-        currentActiveChordEl = null;
       }
     }
 
     async function startPreview() {
       if (audioCtx.state === 'suspended') {
         await audioCtx.resume();
+      }
+      if (bassGainNode) {
+        try {
+          bassGainNode.gain.cancelScheduledValues(audioCtx.currentTime);
+          bassGainNode.gain.setValueAtTime(volumeBass, audioCtx.currentTime);
+        } catch(e){}
       }
       if (!guitarInstrument || !bassInstrument) {
         alert("Os instrumentos de áudio ainda estão sendo carregados. Por favor, aguarde.");
@@ -1604,17 +1842,38 @@
       playlist = [];
       bossaVariations = [];
       for (let i = 0; i < 2000; i++) {
-        bossaVariations.push(Math.random() < 0.5);
+        const rand = Math.random();
+        if (rand < 0.32) {
+          bossaVariations.push(0); // Variedade 1 (32%)
+        } else if (rand < 0.64) {
+          bossaVariations.push(1); // Variedade 2 (32%)
+        } else if (rand < 0.96) {
+          bossaVariations.push(2); // Variedade 3 (32%)
+        } else {
+          bossaVariations.push(3); // Variedade 4 (Muito Rara - 4%)
+        }
       }
       let accumulatedBeats = 0;
       scoreData.forEach((measure, mIdx) => {
-        const numChords = measure.chords.length;
+        let chordsToUse = measure.chords;
+
+        // Se o compasso atual estiver vazio e não for o primeiro, busca o último compasso com cifras
+        if (chordsToUse.length === 0 && mIdx > 0) {
+          for (let prevIdx = mIdx - 1; prevIdx >= 0; prevIdx--) {
+            if (scoreData[prevIdx].chords.length > 0) {
+              chordsToUse = scoreData[prevIdx].chords;
+              break;
+            }
+          }
+        }
+
+        const numChords = chordsToUse.length;
         const measureBeatsScaled = measure.beats * 2; // Dobrado para mudar os acordes na metade da velocidade
         if (numChords === 0) {
           accumulatedBeats += measureBeatsScaled;
         } else {
           const beatsPerChord = measureBeatsScaled / numChords;
-          measure.chords.forEach((chord, cIdx) => {
+          chordsToUse.forEach((chord, cIdx) => {
             playlist.push({
               measureIdx: mIdx,
               chordIdx: cIdx,
@@ -1685,13 +1944,23 @@
         playClickSound(now + startDelay + 7 * beatDuration, l); // Beat 2
       }
 
+      let startMeasureTimeMedia = 0;
+      if (startMeasureIdx !== null && startMeasureIdx > 0 && startMeasureIdx < scoreData.length) {
+        let startMeasureBeat = 0;
+        for (let i = 0; i < startMeasureIdx; i++) {
+          startMeasureBeat += scoreData[i].beats * 2;
+        }
+        startMeasureTimeMedia = startMeasureBeat * (60 / 130);
+      }
+
       backingTrackStartTime = now + startDelay + countInDurationReal;
-      backingTrackElapsedBase = 0;
+      backingTrackElapsedBase = startMeasureTimeMedia * (originalBPM / 130);
       currentBPMVal = actualBPM;
       currentOriginalBPM = originalBPM;
 
       audioSourceNode.playbackRate.setValueAtTime(actualBPM / originalBPM, backingTrackStartTime);
-      audioSourceNode.start(backingTrackStartTime);
+      const offset = backingTrackElapsedBase % buffer.duration;
+      audioSourceNode.start(backingTrackStartTime, offset);
 
       scheduledChords.clear();
 
@@ -1723,7 +1992,8 @@
               if (selectedVoicing) {
                 const nextItem = playlist[index + 1];
                 const nextNotes = nextItem?.chordData?.options[nextItem.chordData.selectedIndex]?.notes || null;
-                playChordAtTime(selectedVoicing.notes, targetTime, item.duration, nextNotes, item.startBeat, item.chordData.chordName);
+                const isFinal = (index === playlist.length - 1) && !previewLoop;
+                playChordAtTime(selectedVoicing.notes, targetTime, item.duration, nextNotes, item.startBeat, item.chordData.chordName, isFinal);
               }
             }
           }
@@ -1760,14 +2030,43 @@
 
             const now = audioCtx.currentTime;
             backingTrackStartTime = now;
-            backingTrackElapsedBase = 0;
+            backingTrackElapsedBase = startMeasureTimeMedia * (originalBPM / 130);
             currentBPMVal = currentTempo;
             currentOriginalBPM = originalBPM;
 
             audioSourceNode.playbackRate.setValueAtTime(currentTempo / originalBPM, now);
-            audioSourceNode.start(now);
+            const offset = backingTrackElapsedBase % buffer.duration;
+            audioSourceNode.start(now, offset);
           } else {
-            stopPreview();
+            // Se for o final da música sem loop, paramos o tick imediatamente
+            // mas deixamos as notas do acorde final e a bateria final soarem/decaírem.
+            previewPlaying = false;
+            if (animationFrameId) {
+              cancelAnimationFrame(animationFrameId);
+              animationFrameId = null;
+            }
+            const playBtn = document.getElementById("previewPlayBtn");
+            if (playBtn) {
+              playBtn.textContent = "▶";
+              playBtn.style.backgroundColor = "#2e6f40";
+            }
+            // Limpeza completa agendada após 6 segundos (tempo suficiente para o final decair)
+            setTimeout(() => {
+              if (!previewPlaying) {
+                if (audioSourceNode) {
+                  try { audioSourceNode.stop(); } catch(e){}
+                  audioSourceNode = null;
+                }
+                if (guitarInstrument && typeof guitarInstrument.stop === "function") {
+                  guitarInstrument.stop();
+                }
+                if (bassInstrument && typeof bassInstrument.stop === "function") {
+                  bassInstrument.stop();
+                }
+                document.querySelectorAll(".chord-event.playing").forEach(el => el.classList.remove("playing"));
+                document.querySelectorAll(".measure-box.playing-simile").forEach(el => el.classList.remove("playing-simile"));
+              }
+            }, 6000);
             return;
           }
         }
@@ -2008,7 +2307,8 @@
         reqChromas = reqChromas.filter(c => c !== rootChroma);
       }
       const maxInversionAllowed = overrides.inversion !== undefined ? overrides.inversion : parseInt(document.getElementById("inversionFilter").value);
-      const allowOpenStrings = overrides.openStrings !== undefined ? overrides.openStrings : (document.getElementById("openStringsFilter")?.value === "true");
+      const allowOpenStrings = overrides.openStrings !== undefined ? overrides.openStrings : (document.getElementById("openStringsFilter")?.checked === true);
+      const forceCleanSound = overrides.cleanSound !== undefined ? overrides.cleanSound : (document.getElementById("cleanSoundFilter")?.checked === true);
       const spanVal = overrides.span !== undefined ? overrides.span : parseInt(document.getElementById("spanFilter")?.value || "4");
       const regFilter = overrides.reg !== undefined ? overrides.reg : (document.getElementById("registerFilter")?.value || "all");
 
@@ -2082,6 +2382,17 @@
               if (!pStrings.includes(s)) { if (++consecutiveMuted > 1) return; } else consecutiveMuted = 0;
             }
 
+            if (forceCleanSound) {
+              // played está ordenado de string 6 para string 1 (do grave para o agudo)
+              // played[0] é o baixo (primeiro elemento). As notas agudas são played.slice(1).
+              if (played.length > 1) {
+                const agudoNotes = played.slice(1);
+                if (agudoNotes.some(n => n.midi <= 49)) {
+                  return; // Descarta se qualquer nota aguda for C#3 (49) ou inferior
+                }
+              }
+            }
+
             let pSorted = [...played].sort((a, b) => a.midi - b.midi);
             if (pSorted.length >= 2 && pSorted[0].midi < 50 && (pSorted[1].midi - pSorted[0].midi) <= 2) return;
 
@@ -2143,6 +2454,7 @@
         const rawOptions = findPlayableVoicings(chordName, false, {
           inversion: 3,
           openStrings: false,
+          cleanSound: false,
           span: 4,
           reg: "all"
         });
@@ -2157,6 +2469,7 @@
     }
 
     let scoreData = [];
+    let startMeasureIdx = null; // Índice do compasso selecionado para início de reprodução
     let currentRawXML = null;
     let globalTitle = "Arranjo Importado";
     let editingContext = { measureIdx: null, chordIdx: null };
@@ -2436,18 +2749,136 @@
       // Evita disparar se o usuário estiver digitando no input da cifra ou outro input
       const activeEl = document.activeElement;
       if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'SELECT' || activeEl.tagName === 'TEXTAREA')) {
-        // Deixa prosseguir caso não seja Ctrl+Z / Ctrl+Y
+        // Deixa prosseguir caso não seja Ctrl+Z / Ctrl+Y ou outro atalho com Ctrl
         if (activeEl.id === 'cifraInput' && e.key === 'Enter') return;
         if (!e.ctrlKey) return;
       }
 
+      // Ctrl + Z: Desfazer
       if (e.ctrlKey && e.key.toLowerCase() === 'z') {
         e.preventDefault();
         undoAction();
       }
+      // Ctrl + Y: Refazer
       if (e.ctrlKey && e.key.toLowerCase() === 'y') {
         e.preventDefault();
         redoAction();
+      }
+      // Ctrl + S: Salvar projeto
+      if (e.ctrlKey && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        saveProject();
+      }
+      // Ctrl + O: Abrir projeto
+      if (e.ctrlKey && e.key.toLowerCase() === 'o') {
+        e.preventDefault();
+        const uploadNode = document.getElementById('projectUpload');
+        if (uploadNode) {
+          uploadNode.click();
+        }
+      }
+      // Espaço: Reproduzir / Pausar
+      if (e.code === 'Space' || e.key === ' ') {
+        e.preventDefault();
+        togglePreviewPlay();
+      }
+      // Seta Esquerda: Selecionar compasso anterior
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        if (scoreData.length > 0) {
+          if (selectionAnchor === null) {
+            selectionAnchor = scoreData.length - 1;
+            selectionActiveEnd = selectionAnchor;
+          } else {
+            selectionActiveEnd = Math.max(0, selectionActiveEnd - 1);
+          }
+          
+          if (e.shiftKey) {
+            selectedMeasureIndices.clear();
+            const start = Math.min(selectionAnchor, selectionActiveEnd);
+            const end = Math.max(selectionAnchor, selectionActiveEnd);
+            for (let i = start; i <= end; i++) selectedMeasureIndices.add(i);
+          } else {
+            selectionAnchor = selectionActiveEnd;
+            selectedMeasureIndices.clear();
+            selectedMeasureIndices.add(selectionActiveEnd);
+          }
+          
+          startMeasureIdx = (selectedMeasureIndices.size > 0) ? Math.min(...selectedMeasureIndices) : null;
+          updateMeasureSelectionUI();
+        }
+      }
+      // Seta Direita: Selecionar compasso seguinte
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        if (scoreData.length > 0) {
+          if (selectionAnchor === null) {
+            selectionAnchor = 0;
+            selectionActiveEnd = selectionAnchor;
+          } else {
+            selectionActiveEnd = Math.min(scoreData.length - 1, selectionActiveEnd + 1);
+          }
+          
+          if (e.shiftKey) {
+            selectedMeasureIndices.clear();
+            const start = Math.min(selectionAnchor, selectionActiveEnd);
+            const end = Math.max(selectionAnchor, selectionActiveEnd);
+            for (let i = start; i <= end; i++) selectedMeasureIndices.add(i);
+          } else {
+            selectionAnchor = selectionActiveEnd;
+            selectedMeasureIndices.clear();
+            selectedMeasureIndices.add(selectionActiveEnd);
+          }
+          
+          startMeasureIdx = (selectedMeasureIndices.size > 0) ? Math.min(...selectedMeasureIndices) : null;
+          updateMeasureSelectionUI();
+        }
+      }
+
+      // Teclas de atalho para edição de compassos (somente se o modo de edição estiver ativo)
+      const editToggle = document.getElementById("editCifrasToggle");
+      const isEdit = editToggle ? editToggle.checked : false;
+      if (isEdit) {
+        // Ctrl + C: Copiar compasso
+        if (e.ctrlKey && e.key.toLowerCase() === 'c') {
+          const activeEl = document.activeElement;
+          if (!activeEl || (activeEl.tagName !== 'INPUT' && activeEl.tagName !== 'TEXTAREA')) {
+            if (startMeasureIdx !== null) {
+              e.preventDefault();
+              copySelectedMeasure();
+            }
+          }
+        }
+        // Ctrl + V: Colar compasso
+        if (e.ctrlKey && e.key.toLowerCase() === 'v') {
+          const activeEl = document.activeElement;
+          if (!activeEl || (activeEl.tagName !== 'INPUT' && activeEl.tagName !== 'TEXTAREA')) {
+            if (startMeasureIdx !== null && copiedChords) {
+              e.preventDefault();
+              pasteToSelectedMeasure();
+            }
+          }
+        }
+        // Insert / Ctrl + I: Inserir compasso
+        if (e.key === 'Insert' || (e.ctrlKey && e.key.toLowerCase() === 'i')) {
+          const activeEl = document.activeElement;
+          if (!activeEl || (activeEl.tagName !== 'INPUT' && activeEl.tagName !== 'TEXTAREA' && activeEl.tagName !== 'SELECT')) {
+            if (startMeasureIdx !== null) {
+              e.preventDefault();
+              insertMeasureAtSelected();
+            }
+          }
+        }
+        // Delete: Excluir compasso selecionado
+        if (e.key === 'Delete') {
+          const activeEl = document.activeElement;
+          if (!activeEl || (activeEl.tagName !== 'INPUT' && activeEl.tagName !== 'TEXTAREA' && activeEl.tagName !== 'SELECT')) {
+            if (startMeasureIdx !== null) {
+              e.preventDefault();
+              deleteMeasureAtSelected();
+            }
+          }
+        }
       }
     });
 
@@ -2500,6 +2931,7 @@
       currentRawXML = null;
 
       scoreData = [];
+      clearMeasureSelection();
       for (let i = 1; i <= measuresCount; i++) {
         scoreData.push({
           measureNum: i,
@@ -2543,7 +2975,7 @@
       document.getElementById("editCifraModal").style.display = "none";
     }
 
-    function saveCifraEdits(goToNext = false) {
+    async function saveCifraEdits(goToNext = false) {
       const input = document.getElementById("cifraInput").value;
       const result = adjustAndValidateCifra(input);
       if (!result.valid) {
@@ -2577,7 +3009,7 @@
       renderScoreGrid();
 
       if (resVoicings.options.length === 0) {
-        alert(`Aviso: O acorde "${adjustedChordName}" foi salvo, mas nenhuma posição de violão foi encontrada com os filtros atuais. Experimente ajustar os filtros (ex: habilitar cordas soltas ou aumentar a abertura máxima).`);
+        await showCustomAlert("Aviso", `O acorde "${adjustedChordName}" foi salvo, mas nenhuma posição de violão foi encontrada com os filtros atuais. Experimente ajustar os filtros (ex: habilitar cordas soltas ou aumentar a abertura máxima).`);
       }
 
       if (goToNext) {
@@ -2599,12 +3031,104 @@
       }
     }
 
-    function deleteChord(mIdx, cIdx) {
-      if (confirm(`Deseja excluir a cifra "${scoreData[mIdx].chords[cIdx].chordName}"?`)) {
+    async function deleteChord(mIdx, cIdx) {
+      const confirmed = await showCustomConfirm("Excluir Cifra", `Deseja excluir a cifra "${scoreData[mIdx].chords[cIdx].chordName}"?`);
+      if (confirmed) {
         scoreData[mIdx].chords.splice(cIdx, 1);
         saveStateToHistory();
         renderScoreGrid();
       }
+    }
+
+    function clearMeasureSelection() {
+      selectedMeasureIndices.clear();
+      selectionAnchor = null;
+      selectionActiveEnd = null;
+      startMeasureIdx = null;
+    }
+
+    function copySelectedMeasure() {
+      if (selectedMeasureIndices.size === 0) return;
+      const sortedIndices = [...selectedMeasureIndices].sort((a, b) => a - b);
+      copiedChords = sortedIndices.map(idx => JSON.parse(JSON.stringify(scoreData[idx].chords)));
+      
+      const pasteBtn = document.getElementById("pasteMeasureBtn");
+      if (pasteBtn) {
+        pasteBtn.disabled = false;
+        pasteBtn.style.opacity = "1";
+        pasteBtn.style.cursor = "pointer";
+      }
+    }
+
+    function pasteToSelectedMeasure() {
+      if (selectedMeasureIndices.size === 0 || !copiedChords || copiedChords.length === 0) return;
+      
+      saveStateToHistory();
+      const targetStartIdx = Math.min(...selectedMeasureIndices);
+      copiedChords.forEach((chords, i) => {
+        const targetIdx = targetStartIdx + i;
+        if (targetIdx < scoreData.length) {
+          scoreData[targetIdx].chords = JSON.parse(JSON.stringify(chords));
+        }
+      });
+      
+      renderScoreGrid();
+    }
+
+    function insertMeasureAtSelected() {
+      if (selectedMeasureIndices.size === 0) return;
+      
+      saveStateToHistory();
+      const maxIdx = Math.max(...selectedMeasureIndices);
+      const currentMeasure = scoreData[maxIdx];
+      const newMeasure = {
+        measureNum: 0,
+        beats: currentMeasure.beats,
+        beatType: currentMeasure.beatType,
+        chords: []
+      };
+      
+      scoreData.splice(maxIdx + 1, 0, newMeasure);
+      
+      scoreData.forEach((m, idx) => {
+        m.measureNum = idx + 1;
+      });
+      
+      selectedMeasureIndices.clear();
+      selectedMeasureIndices.add(maxIdx + 1);
+      selectionAnchor = maxIdx + 1;
+      selectionActiveEnd = maxIdx + 1;
+      startMeasureIdx = maxIdx + 1;
+      renderScoreGrid();
+    }
+
+    async function deleteMeasureAtSelected() {
+      if (selectedMeasureIndices.size === 0) return;
+      if (scoreData.length - selectedMeasureIndices.size < 1) {
+        await showCustomAlert("Aviso", "A partitura deve conter pelo menos 1 compasso!");
+        return;
+      }
+      
+      const hasChords = [...selectedMeasureIndices].some(idx => scoreData[idx].chords.length > 0);
+      if (hasChords) {
+        const confirmed = await showCustomConfirm("Remover Compassos", "Os compassos selecionados contêm cifras. Deseja realmente removê-los?");
+        if (!confirmed) {
+          return;
+        }
+      }
+      
+      saveStateToHistory();
+      const sortedIndicesDesc = [...selectedMeasureIndices].sort((a, b) => b - a);
+      sortedIndicesDesc.forEach(idx => {
+        scoreData.splice(idx, 1);
+      });
+      
+      scoreData.forEach((m, idx) => {
+        m.measureNum = idx + 1;
+      });
+      
+      clearMeasureSelection();
+      renderScoreGrid();
     }
 
     function incrementMeasures() {
@@ -2627,15 +3151,15 @@
       renderScoreGrid();
     }
 
-    function decrementMeasures() {
+    async function decrementMeasures() {
       if (scoreData.length <= 1) {
-        alert("A partitura deve conter pelo menos 1 compasso!");
+        await showCustomAlert("Aviso", "A partitura deve conter pelo menos 1 compasso!");
         return;
       }
 
       const lastMeasure = scoreData[scoreData.length - 1];
       if (lastMeasure.chords.length > 0) {
-        const confirmDelete = confirm(`O último compasso (${lastMeasure.measureNum}) contém cifras. Deseja realmente removê-lo?`);
+        const confirmDelete = await showCustomConfirm("Remover Compasso", `O último compasso (${lastMeasure.measureNum}) contém cifras. Deseja realmente removê-lo?`);
         if (!confirmDelete) return;
       }
 
@@ -2644,7 +3168,7 @@
       renderScoreGrid();
     }
 
-    function handleXMLUpload(event) {
+    async function handleXMLUpload(event) {
       stopPreview();
       const file = event.target.files[0];
       if (!file) return;
@@ -2652,7 +3176,7 @@
       const extension = file.name.split('.').pop().toLowerCase();
       if (extension === 'mxl') {
         if (typeof JSZip === "undefined") {
-          alert("Erro: A biblioteca JSZip não foi carregada. Verifique sua conexão com a internet.");
+          await showCustomAlert("Erro de Dependência", "A biblioteca JSZip não foi carregada. Verifique sua conexão com a internet.");
           return;
         }
 
@@ -2693,7 +3217,7 @@
             processXML();
           } catch (err) {
             console.error("Erro ao descompactar MXL:", err);
-            alert("Erro ao processar o arquivo MXL comprimido: " + err.message);
+            await showCustomAlert("Erro", "Erro ao processar o arquivo MXL comprimido: " + err.message);
           }
         };
         reader.readAsArrayBuffer(file);
@@ -2732,6 +3256,7 @@
       document.getElementById("scoreTitle").innerText = globalTitle;
 
       scoreData = [];
+      clearMeasureSelection();
       const measures = xmlDoc.getElementsByTagName("measure");
       const kindMap = {
         // Triads
@@ -2951,6 +3476,33 @@
       scoreData.forEach((measure, mIdx) => {
         const box = document.createElement("div");
         box.className = "measure-box";
+        box.onclick = (e) => {
+          if (e.target.closest('button, input, select, a, .change-btn, .delete-chord-btn, .add-chord-btn')) {
+            return;
+          }
+          if (e.shiftKey && selectionAnchor !== null) {
+            selectionActiveEnd = mIdx;
+            selectedMeasureIndices.clear();
+            const start = Math.min(selectionAnchor, selectionActiveEnd);
+            const end = Math.max(selectionAnchor, selectionActiveEnd);
+            for (let i = start; i <= end; i++) {
+              selectedMeasureIndices.add(i);
+            }
+          } else {
+            selectionAnchor = mIdx;
+            selectionActiveEnd = mIdx;
+            if (selectedMeasureIndices.has(mIdx) && selectedMeasureIndices.size === 1) {
+              selectedMeasureIndices.clear();
+              selectionAnchor = null;
+              selectionActiveEnd = null;
+            } else {
+              selectedMeasureIndices.clear();
+              selectedMeasureIndices.add(mIdx);
+            }
+          }
+          startMeasureIdx = (selectedMeasureIndices.size > 0) ? Math.min(...selectedMeasureIndices) : null;
+          updateMeasureSelectionUI();
+        };
 
         const currentTimeSignature = `${measure.beats}\n${measure.beatType}`;
         let timeSignatureHTML = "";
@@ -3001,7 +3553,7 @@
           let arpeggioClick = "";
           if (selectedVoicing) {
             fretboardSVG = createFretboardSVG(selectedVoicing.notes, diagramScale);
-            arpeggioClick = `onclick="playArpeggio(scoreData[${mIdx}].chords[${cIdx}].options[scoreData[${mIdx}].chords[${cIdx}].selectedIndex].notes)" style="cursor:pointer;" title="Ouvir"`;
+            arpeggioClick = `onclick="if(event.shiftKey) return; playArpeggio(scoreData[${mIdx}].chords[${cIdx}].options[scoreData[${mIdx}].chords[${cIdx}].selectedIndex].notes)" style="cursor:pointer;" title="Ouvir"`;
           } else {
             fretboardSVG = `<div style="font-size:0.75rem; color:#c0392b; border: 1.5px dashed #c0392b; padding: 12px 6px; text-align:center; border-radius:4px; margin: 4px 0; width: ${85 * diagramScale}px; box-sizing: border-box;">Sem digitação</div>`;
           }
@@ -3011,7 +3563,7 @@
           let exceptionBadge = chordData.isException ? `<span class="exception-badge data-html2canvas-ignore" style="font-size: 0.65rem; background-color: var(--accent); color: white; padding: 1px 4px; border-radius: 3px; margin-left: 4px; vertical-align: middle;">exceção</span>` : "";
 
           if (isEditMode) {
-            chordHeader = `<h4 onclick="openEditCifraModal(${mIdx}, ${cIdx})" style="cursor: pointer; text-decoration: underline dashed 1.5px var(--accent); margin: 0 0 4px 0;" title="Clique para editar cifra">${displayChord}${exceptionBadge}</h4>`;
+            chordHeader = `<h4 onclick="if(event.shiftKey) return; openEditCifraModal(${mIdx}, ${cIdx})" style="cursor: pointer; text-decoration: underline dashed 1.5px var(--accent); margin: 0 0 4px 0;" title="Clique para editar cifra">${displayChord}${exceptionBadge}</h4>`;
             actionButtons = `
               <div style="display: flex; gap: 4px; margin-top: 6px;">
                 <button class="change-btn data-html2canvas-ignore" onclick="openEditCifraModal(${mIdx}, ${cIdx})">Editar</button>
@@ -3046,8 +3598,24 @@
           const addBtn = document.createElement("button");
           addBtn.className = "add-chord-btn data-html2canvas-ignore";
           addBtn.innerHTML = "+ Cifra";
-          addBtn.onclick = () => openEditCifraModal(mIdx, null);
+          addBtn.onclick = (e) => { if (e.shiftKey) return; openEditCifraModal(mIdx, null); };
           chordsContainer.appendChild(addBtn);
+        }
+
+        if (mIdx > 0 && measure.chords.length === 0) {
+          const simileEl = document.createElement("div");
+          simileEl.className = "simile-mark";
+          simileEl.innerHTML = `<span style="font-size: 2.2rem; font-weight: bold; color: var(--text-muted); opacity: 0.35; user-select: none;" title="Repetir compasso anterior">%</span>`;
+          simileEl.style.display = "flex";
+          simileEl.style.alignItems = "center";
+          simileEl.style.justifyContent = "center";
+          simileEl.style.height = "100%";
+          simileEl.style.width = "100%";
+          simileEl.style.position = "absolute";
+          simileEl.style.top = "0";
+          simileEl.style.left = "0";
+          simileEl.style.pointerEvents = "none";
+          box.appendChild(simileEl);
         }
 
         grid.appendChild(box);
@@ -3059,8 +3627,85 @@
         if (isEditMode && scoreData.length > 0) {
           editMeasuresBox.style.display = "flex";
           document.getElementById("editMeasuresCount").innerText = scoreData.length;
+          
+          const actionsDiv = document.getElementById("selectedMeasureActions");
+          if (actionsDiv) {
+            if (selectedMeasureIndices.size > 0) {
+              actionsDiv.style.display = "flex";
+              const numSpan = document.getElementById("selectedMeasureActionNum");
+              if (numSpan) {
+                if (selectedMeasureIndices.size === 1) {
+                  numSpan.innerText = Math.min(...selectedMeasureIndices) + 1;
+                } else {
+                  const sorted = [...selectedMeasureIndices].sort((a, b) => a - b);
+                  numSpan.innerText = `${sorted[0] + 1}-${sorted[sorted.length - 1] + 1}`;
+                }
+              }
+              
+              const pasteBtn = document.getElementById("pasteMeasureBtn");
+              if (pasteBtn) {
+                if (copiedChords && copiedChords.length > 0) {
+                  pasteBtn.disabled = false;
+                  pasteBtn.style.opacity = "1";
+                  pasteBtn.style.cursor = "pointer";
+                } else {
+                  pasteBtn.disabled = true;
+                  pasteBtn.style.opacity = "0.5";
+                  pasteBtn.style.cursor = "not-allowed";
+                }
+              }
+            } else {
+              actionsDiv.style.display = "none";
+            }
+          }
         } else {
           editMeasuresBox.style.display = "none";
+        }
+      }
+      updateMeasureSelectionUI();
+    }
+
+    function updateMeasureSelectionUI() {
+      const boxes = document.querySelectorAll("#scoreGrid .measure-box");
+      boxes.forEach((box, idx) => {
+        if (selectedMeasureIndices.has(idx)) {
+          box.classList.add("selected");
+        } else {
+          box.classList.remove("selected");
+        }
+      });
+
+      // Atualiza a barra de ações do compasso dinamicamente no modo de edição
+      const editToggle = document.getElementById("editCifrasToggle");
+      const isEdit = editToggle ? editToggle.checked : false;
+      const actionsDiv = document.getElementById("selectedMeasureActions");
+      if (actionsDiv) {
+        if (isEdit && selectedMeasureIndices.size > 0) {
+          actionsDiv.style.display = "flex";
+          const numSpan = document.getElementById("selectedMeasureActionNum");
+          if (numSpan) {
+            if (selectedMeasureIndices.size === 1) {
+              numSpan.innerText = Math.min(...selectedMeasureIndices) + 1;
+            } else {
+              const sorted = [...selectedMeasureIndices].sort((a, b) => a - b);
+              numSpan.innerText = `${sorted[0] + 1}-${sorted[sorted.length - 1] + 1}`;
+            }
+          }
+          
+          const pasteBtn = document.getElementById("pasteMeasureBtn");
+          if (pasteBtn) {
+            if (copiedChords && copiedChords.length > 0) {
+              pasteBtn.disabled = false;
+              pasteBtn.style.opacity = "1";
+              pasteBtn.style.cursor = "pointer";
+            } else {
+              pasteBtn.disabled = true;
+              pasteBtn.style.opacity = "0.5";
+              pasteBtn.style.cursor = "not-allowed";
+            }
+          }
+        } else {
+          actionsDiv.style.display = "none";
         }
       }
     }
@@ -3113,9 +3758,9 @@
 
     function closeExportModal() { document.getElementById("exportModal").style.display = "none"; }
 
-    function exportImage() {
+    async function exportImage() {
       if (scoreData.length === 0) {
-        alert("Nenhum projeto ativo para exportar!");
+        await showCustomAlert("Exportar Imagem", "Nenhum projeto ativo para exportar!");
         return;
       }
 
@@ -3210,7 +3855,7 @@
       }
 
       if (typeof html2canvas === "undefined") {
-        alert("Erro: A biblioteca de captura de imagem (html2canvas) não foi carregada corretamente. Verifique sua conexão com a internet.");
+        await showCustomAlert("Erro", "Erro: A biblioteca de captura de imagem (html2canvas) não foi carregada corretamente. Verifique sua conexão com a internet.");
         document.body.removeChild(tempWrapper);
         return;
       }
@@ -3270,16 +3915,16 @@
         });
 
         document.getElementById("exportModal").style.display = "flex";
-      }).catch(err => {
+      }).catch(async (err) => {
         console.error("Erro no html2canvas:", err);
-        alert("Erro ao renderizar a imagem: " + err.message);
+        await showCustomAlert("Erro", "Erro ao renderizar a imagem: " + err.message);
         if (tempWrapper.parentNode) document.body.removeChild(tempWrapper);
       });
     }
 
-    function saveProject() {
+    async function saveProject() {
       if (scoreData.length === 0) {
-        alert("Nenhum projeto ativo para salvar!");
+        await showCustomAlert("Salvar Projeto", "Nenhum projeto ativo para salvar!");
         return;
       }
 
@@ -3289,7 +3934,8 @@
         scoreData: scoreData,
         rootFilter: document.getElementById("rootFilter").value,
         inversionFilter: document.getElementById("inversionFilter").value,
-        openStringsFilter: document.getElementById("openStringsFilter").value,
+        openStringsFilter: document.getElementById("openStringsFilter").checked,
+        cleanSoundFilter: document.getElementById("cleanSoundFilter").checked,
         registerFilter: document.getElementById("registerFilter").value,
         spanFilter: document.getElementById("spanFilter").value,
         measuresPerLine: document.getElementById("measuresPerLine").value,
@@ -3323,7 +3969,7 @@ e selecione este arquivo de texto.
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = function (e) {
+      reader.onload = async function (e) {
         try {
           let fileContent = e.target.result;
           const jsonStart = fileContent.indexOf('{');
@@ -3332,7 +3978,7 @@ e selecione este arquivo de texto.
           }
           const projectData = JSON.parse(fileContent);
           if (!projectData.scoreData && !projectData.currentRawXML) {
-            alert("Arquivo inválido. Certifique-se de que é um projeto do Posi-Cifra-Flex.");
+            await showCustomAlert("Erro de Carregamento", "Arquivo inválido. Certifique-se de que é um projeto do Posi-Cifra-Flex.");
             return;
           }
 
@@ -3346,8 +3992,11 @@ e selecione este arquivo de texto.
           if (projectData.inversionFilter) {
             document.getElementById("inversionFilter").value = projectData.inversionFilter;
           }
-          if (projectData.openStringsFilter) {
-            document.getElementById("openStringsFilter").value = projectData.openStringsFilter;
+          if (projectData.openStringsFilter !== undefined) {
+            document.getElementById("openStringsFilter").checked = (projectData.openStringsFilter === true || projectData.openStringsFilter === "true");
+          }
+          if (projectData.cleanSoundFilter !== undefined) {
+            document.getElementById("cleanSoundFilter").checked = (projectData.cleanSoundFilter === true || projectData.cleanSoundFilter === "true");
           }
           if (projectData.registerFilter) {
             document.getElementById("registerFilter").value = projectData.registerFilter;
@@ -3367,6 +4016,7 @@ e selecione este arquivo de texto.
 
           if (projectData.scoreData) {
             scoreData = projectData.scoreData;
+            clearMeasureSelection();
             undoStack = [];
             redoStack = [];
             saveStateToHistory();
@@ -3391,10 +4041,10 @@ e selecione este arquivo de texto.
             }
           }
 
-          alert("Projeto carregado com sucesso!");
+          await showCustomAlert("Projeto Carregado", "Projeto carregado com sucesso!");
         } catch (err) {
           console.error(err);
-          alert("Erro ao ler o arquivo de projeto. Verifique se o formato está correto.");
+          await showCustomAlert("Erro", "Erro ao ler o arquivo de projeto. Verifique se o formato está correto.");
         }
       };
       reader.readAsText(file);
