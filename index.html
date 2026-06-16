@@ -773,7 +773,7 @@
     <div class="controls-bar">
       <!-- Primeira Linha: Operações de Arquivo e Projeto -->
       <div class="controls-row" style="align-items: center;">
-        
+
         <!-- Grupo de Importação/Exportação -->
         <div class="control-group" style="flex: 2; min-width: 320px;">
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
@@ -785,7 +785,7 @@
         </div>
 
         <!-- Grupo de Gestão do Projeto -->
-        <div class="control-group" style="flex: 1; min-width: 250px;">
+        <div class="control-group" style="flex: 1; min-width: 250px; margin-right: -10px;">
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
             <button class="btn" style="background-color: #4a4a4a; padding: 7px 12px; font-size: 0.85rem;" onclick="saveProject()" title="Salvar o projeto atual em um arquivo .txt">💾 Salvar</button>
             <button class="btn" style="background-color: #4a4a4a; padding: 7px 12px; font-size: 0.85rem;" onclick="document.getElementById('projectUpload').click()" title="Carregar um projeto Posi-Cifra-Flex (.txt) salvo anteriormente">📂 Abrir</button>
@@ -794,6 +794,7 @@
           </div>
         </div>
 
+        <!-- Controles de Play e Mixer -->
         <div class="control-group" style="min-width: 320px;">
           <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-height: 30px;">
             <button class="btn" id="previewPlayBtn" onclick="togglePreviewPlay()"
@@ -822,7 +823,7 @@
             </select>
             <label for="previewTempo" style="color: var(--text-muted); font-size: 0.8rem; font-weight: bold; text-transform: uppercase; vertical-align: middle; margin-left: 4px;">BPM:</label>
             <input type="number" id="previewTempo" min="40" max="200" value="75" onchange="onTempoChange(false)" oninput="onTempoChange(true)"
-              style="width: 45px; padding: 3px 4px; font-size: 0.75rem; background-color: var(--bg-color); color: var(--text-main); border: 2px solid var(--border); border-radius: 4px; height: 26px; box-sizing: border-box; text-align: center; vertical-align: middle;">
+              style="width: 55px; padding: 3px 4px; font-size: 0.75rem; background-color: var(--bg-color); color: var(--text-main); border: 2px solid var(--border); border-radius: 4px; height: 26px; box-sizing: border-box; text-align: center; vertical-align: middle;">
 
             <div class="mini-mixer">
               <span title="Vol Bateria" style="margin-left: 0;">Bat.</span>
@@ -909,7 +910,6 @@
             <option value="manter" selected>Manter</option>
             <option value="incluir">Incluir omissão</option>
             <option value="omitir">Omitir</option>
-            <option value="recifrar">Omitir recifrando</option>
           </select>
         </div>
 
@@ -3096,6 +3096,10 @@
         slider.value = 0;
         updateTransposeLabel();
       }
+      const editToggle = document.getElementById("editCifrasToggle");
+      if (editToggle) {
+        editToggle.checked = true;
+      }
       undoStack = [];
       redoStack = [];
       saveStateToHistory();
@@ -3702,16 +3706,44 @@
             baseChord = recifrarAcorde(chordData.chordName);
           }
 
-          const tonalChord = Tonal.Chord.get(baseChord);
-          if (!tonalChord.empty) {
-            let bassNoteStr = tonalChord.notes.find(n => Tonal.Note.chroma(n) === ((selectedVoicing ? selectedVoicing.bassMidi : 0) % 12));
-            if (bassNoteStr && Tonal.Note.chroma(bassNoteStr) !== Tonal.Note.chroma(tonalChord.tonic)) {
-              displayChord = `${baseChord}/${bassNoteStr.charAt(0).toUpperCase() + bassNoteStr.slice(1)}`;
-            } else {
-              displayChord = baseChord;
+          if (selectedVoicing && rootFilter !== "omitir") {
+            const playedBassChroma = selectedVoicing.bassMidi % 12;
+            const tonalChord = Tonal.Chord.get(baseChord);
+            let foundDisplay = false;
+
+            if (chordData.chordName.includes('/')) {
+              const parts = chordData.chordName.split('/');
+              const nameBass = parts[1];
+              if (Tonal.Note.chroma(nameBass) === playedBassChroma) {
+                displayChord = `${baseChord}/${nameBass.charAt(0).toUpperCase() + nameBass.slice(1)}`;
+                foundDisplay = true;
+              }
+            }
+
+            if (!foundDisplay) {
+              if (!tonalChord.empty) {
+                if (Tonal.Note.chroma(tonalChord.tonic) === playedBassChroma) {
+                  displayChord = baseChord;
+                } else {
+                  const bassNoteStr = tonalChord.notes.find(n => Tonal.Note.chroma(n) === playedBassChroma);
+                  if (bassNoteStr) {
+                    displayChord = `${baseChord}/${bassNoteStr.charAt(0).toUpperCase() + bassNoteStr.slice(1)}`;
+                  } else {
+                    // Fallback: format from MIDI
+                    const midiNoteName = Tonal.Note.pitchClass(Tonal.Note.fromMidi(selectedVoicing.bassMidi));
+                    if (midiNoteName) {
+                      displayChord = `${baseChord}/${midiNoteName.charAt(0).toUpperCase() + midiNoteName.slice(1)}`;
+                    } else {
+                      displayChord = baseChord;
+                    }
+                  }
+                }
+              } else {
+                displayChord = baseChord;
+              }
             }
           } else {
-            displayChord = baseChord;
+            displayChord = chordData.chordName;
           }
           displayChord = displayChord.replace(/maj7/g, "7M");
 
