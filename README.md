@@ -6,6 +6,8 @@ Acesse o aplicativo online em: [glauberlasantiago.github.io/posi-cifra-flex/](ht
 
 O projeto é executado inteiramente no navegador de forma independente, combinando bibliotecas de teoria musical e processamento de áudio em tempo real.
 
+<img width="1215" height="801" alt="image" src="https://github.com/user-attachments/assets/0eb0ca8a-efd9-4540-8432-69a99324b9d0" />
+
 
 ---
 
