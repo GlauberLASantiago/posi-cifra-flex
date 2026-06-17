@@ -2696,9 +2696,9 @@
       // Se não encontrou nenhuma digitação sob os filtros ativos, aplica o comportamento de Exceção
       if (options.length === 0) {
         isException = true;
-        // Busca o rol de posições em geral para aquela cifragem (sem omissão de fundamental, sem restrições de filtros)
-        const rawOptions = findPlayableVoicings(chordName, false, {
-          inversion: 3,
+        // Busca o rol de posições em geral para aquela cifragem respeitando a preferência de omissão de fundamental, sem outras restrições de filtros
+        const rawOptions = findPlayableVoicings(chordName, omitRoot, {
+          inversion: (document.getElementById("inversionFilter")?.value === "0" ? 0 : 3),
           openStrings: false,
           cleanSound: false,
           span: 4,
