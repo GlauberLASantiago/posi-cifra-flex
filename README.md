@@ -2,10 +2,10 @@
 
 **Posi-Cifra-Flex** é uma ferramenta web interativa projetada para músicos, arranjadores e estudantes de violão. Ela permite visualizar, criar e personalizar posições (diagramas/voicings) alternativas de acordes no braço do violão a partir de partituras e cifras importadas ou criadas do zero.
 
-<img width="1215" height="791" alt="image" src="https://github.com/user-attachments/assets/ce199b5d-0a4e-4a8a-80f6-201949fab0a8" />
-
+Acesse o aplicativo online em: [glauberlasantiago.github.io/posi-cifra-flex/](https://glauberlasantiago.github.io/posi-cifra-flex/)
 
 O projeto é executado inteiramente no navegador de forma independente, combinando bibliotecas de teoria musical e processamento de áudio em tempo real.
+
 
 ---
 
@@ -37,9 +37,10 @@ O projeto é executado inteiramente no navegador de forma independente, combinan
   - Correção e validação musical automática (exemplos: `3` vira `#`, minúsculas são normalizadas, etc.).
 
 - **Exportação Multiformato:**
-  - **Exp. Posições (Imagem PNG):** Exporta os diagramas de acordes de todo o arranjo.
+  - **Exp. Posições (Imagem PNG):** Exporta os diagramas de acordes de todo o arranjo como imagem.
   - **Exp. Cifra (MusicXML):** Exporta a estrutura rítmica e de cifras para edição no MuseScore, Finale ou Sibelius.
   - **Exp. MP3 (Áudio):** Exporta o áudio em tempo real diretamente para arquivo MP3 de alta fidelidade com decaimento natural de 2 segundos ao final e fadeout ultra-curto (50ms) para evitar estalos de áudio.
+  - **Exp. HTML (Clone Autônomo):** Exporta o aplicativo inteiro como um arquivo HTML único e autônomo, contendo o projeto/arranjo atual integrado. Ao ser aberto, ele carrega exatamente as mesmas cifras, posições personalizadas e configurações de filtros do projeto ativo no momento da exportação.
 
 ---
 
