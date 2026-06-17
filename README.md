@@ -1,77 +1,79 @@
-# Posi-Cifra-Flex
+# 🎸 Posi-Cifra-Flex
 
-Aplicação web para gerar, editar e organizar cifras com posições alternativas de acordes no violão.
+**Posi-Cifra-Flex** é uma ferramenta web interativa projetada para músicos, arranjadores e estudantes de violão. Ela permite visualizar, criar e personalizar posições (diagramas/voicings) alternativas de acordes no braço do violão a partir de partituras e cifras importadas ou criadas do zero.
 
-<img width="1248" height="927" alt="image" src="https://github.com/user-attachments/assets/0573c5dc-cc2a-4a7d-bd06-0b8c89cac240" />
+O projeto é executado inteiramente no navegador de forma independente, combinando bibliotecas de teoria musical e processamento de áudio em tempo real.
 
+---
 
+## 🌟 Principais Recursos
 
+- **Visualização Dinâmica de Diagramas (SVG):**
+  - Geração automática e precisa de diagramas com afinação padrão de violão.
+  - Exibição opcional das notas constituintes do acorde (Dó, Ré, Mi, etc.).
+  - Pestanas (barre) desenhadas com alinhamento perfeito e extrapolação visual proporcional.
+  
+- **Controle Avançado de Filtros de Posições:**
+  - **Limitar Inversões:** Escolha limitar a busca ao *Estado Fundamental* ou permita inversões (1ª, 2ª ou 3ª inversão livre).
+  - **Omitir Cordas Soltas:** Evita posições que utilizem cordas soltas para favorecer shapes móveis/transportáveis.
+  - **Abertura Máxima (3 ou 4 casas):** Enfraquece/enrijece o limite físico de abertura da mão, aplicando uma tolerância dinâmica de $+1$ casa a partir da casa 8 e regras de segurança para evitar shapes desconfortáveis (proíbe casa 4 na nota mais grave, exceto em escadas contíguas).
+  - **Limpar Som:** Filtra e remove notas agudas na região sub-grave (abaixo de Dó#3) para garantir clareza sonora.
+  - **Juntar Bloco:** Filtra os diagramas para exibir apenas posições onde as três notas mais agudas estejam dispostas em cordas contíguas.
+  - **Modo de Exceção Inteligente:** Se nenhum acorde atender aos filtros rigorosos, o app busca um shape genérico de contingência sem desconfigurar as prioridades de fundamental e inversão do usuário.
 
-## Visão geral
+- **Prévia e Acompanhamento de Áudio em Tempo Real:**
+  - Sintetizador integrado de violão de nylon e contrabaixo elétrico.
+  - **Bateria de Bossa Nova:** Acompanhamento automático em compasso binário/quaternário ($2/4$, $4/4$).
+  - **Bateria de Valsa:** Acompanhamento rítmico dedicado para compassos ternários e compostos ($3/4$, $6/8$, $9/8$, $12/8$) utilizando o arquivo `100-valsa-bat.mp3`.
+  - Mixer inline para controle de volumes individuais (**Bat.**, **Viol.**, **Bx.**) e seletor de estilos de execução (*Bossa*, *Canção*, *Ataque*, *Com Arpejo*, *Em Colcheia*).
+  - Metrônomo inteligente com contagem rítmica (8 batidas) ativo apenas quando a música inicia a partir do compasso 1.
 
+- **Gerenciamento de Compassos e Edição de Cifras:**
+  - Ferramentas de edição avançada: copiar, colar, inserir e excluir compassos em lote (seleção múltipla usando `Shift`).
+  - Histórico de ações com suporte completo para **Desfazer / Refazer** (`Ctrl+Z` / `Ctrl+Y`).
+  - Correção e validação musical automática (exemplos: `3` vira `#`, minúsculas são normalizadas, etc.).
 
-📖 Como usar o app
+- **Exportação Multiformato:**
+  - **Exp. Posições (Imagem PNG):** Exporta os diagramas de acordes de todo o arranjo.
+  - **Exp. Cifra (MusicXML):** Exporta a estrutura rítmica e de cifras para edição no MuseScore, Finale ou Sibelius.
+  - **Exp. MP3 (Áudio):** Exporta o áudio em tempo real diretamente para arquivo MP3 de alta fidelidade com decaimento natural de 2 segundos ao final e fadeout ultra-curto (50ms) para evitar estalos de áudio.
 
-📖 Mini Tutorial
+---
 
-Inicie um projeto: Carregue um arquivo no formato .xml ou .musicxml (exportado do MuseScore, Finale, Sibelius, etc.) usando o botão de upload, ou crie um projeto do zero clicando em "Novo" para definir o título, fórmula de compasso e quantidade inicial de compassos.
-Veja e ouça os diagramas e as notas: O app desenha automaticamente os diagramas de acordes (posições no braço do violão) no grid. Clique no diagrama para ouvir o acorde dedilhado em áudio sintetizado de alta fidelidade. A caixa de seleção "Visualizar Notas" (ativada por padrão) exibe as notas componentes do acorde (como Dó, Ré, Mi...) abaixo de cada diagrama.
+## 🛠️ Tecnologias Utilizadas
 
-Selecione posições alternativas: Clique no botão "Mudar" sob qualquer acorde para abrir a galeria com todas as posições correspondentes encontradas e clique na desejada.
+O projeto utiliza bibliotecas consagradas carregadas via CDN:
+- [Tonal.js](https://github.com/tonaljs/tonal) - Manipulação de teoria musical, acordes e escalas.
+- [Soundfont-Player](https://github.com/danigb/soundfont-player) - Carregamento e reprodução de instrumentos MIDI sintetizados.
+- [lamejs](https://github.com/zhuker/lamejs) - Codificação de áudio em formato MP3 diretamente no navegador.
+- [JSZip](https://github.com/Stuk/jszip) - Empacotamento de arquivos.
+- [html2canvas](https://github.com/niklasvh/html2canvas) & [html2pdf](https://github.com/eKoopmans/html2pdf.js) - Captura e renderização gráfica de páginas da web.
 
-Edite cifras e desfaça ações: Ative a caixa "Editar Cifras". Clique na cifra ou em "Editar" para digitar o acorde. O app corrige automaticamente o texto (minúsculas viram maiúsculas, o caractere 3 vira sustenido #, e o b vira bemol b), além de normalizar e validar musicalmente a cifra. Pressione Enter para salvar e avançar para o próximo compasso. Você pode desfazer ou refazer edições utilizando os botões "↶ Desfazer" e "↷ Refazer" (ou atalhos Ctrl+Z e Ctrl+Y).
+---
 
-Ouça uma prévia em andamento: Clique no botão "Prévia: Tocar" para escutar o arranjo acompanhado por uma bateria de bossa nova. O controle de BPM ao lado permite ajustar o andamento entre 60 e 200 (o padrão é 130 BPM). O seletor de estilo permite alternar a prévia entre Ataque (notas simultâneas), Com Arpejo (notas dedilhadas rapidamente) ou Em Colcheia (notas arpejadas sustentadas no tempo de colcheia). O acorde atual é destacado visualmente com um fundo verde no grid enquanto soa.
+## ⌨️ Atalhos de Teclado (QWERTY)
 
-Gerencie a partitura: Adicione novas cifras com + Cifra, delete-as com o botão vermelho ×, ou aumente/diminua a quantidade total de compassos pelos botões + e - abaixo da partitura.
+- `Espaço`: Iniciar / Pausar a reprodução (prévia).
+- `Seta Esquerda` / `Seta Direita`: Selecionar compasso anterior / seguinte.
+- `Shift + Seta Esquerda/Direita`: Selecionar múltiplos compassos contíguos.
+- `Ctrl + Z`: Desfazer última alteração.
+- `Ctrl + Y`: Refazer última alteração desfeita.
+- `Ctrl + S`: Salvar o projeto atual em arquivo de texto próprio.
+- `Ctrl + O`: Carregar/abrir um projeto de texto salvo.
+- `Delete` / `Backspace` (no modo de edição): Excluir cifras selecionadas.
+- `Tab` / `Shift + Tab` (no modal de edição): Ir para a cifra seguinte / anterior.
+- `Enter` (no modal de edição): Salvar a cifra atual.
 
-Filtre posições: Configure o limite de inversão de baixos, permissão de cordas soltas, registro de altura (grave, médio ou agudo) e a abertura de casas para adequar os diagramas.
+---
 
-Exporte o arranjo: Clique em "Exportar Imagem" para baixar os diagramas diagramados em páginas no formato retrato (A4), prontas para visualização ou impressão.
+## 🚀 Como Executar Localmente
 
-## Estrutura do repositório
+Como o **Posi-Cifra-Flex** é uma aplicação estática (Serverless / Front-end puro), basta baixar o código fonte e abrir o arquivo `index.html` em seu navegador de preferência.
 
-- `index.html`: aplicação principal (HTML, CSS e JavaScript em um único arquivo);
-- `posi-cifra-flex-demo.musicxml`: exemplo de partitura para teste;
-- `violoes.png`: imagem de fundo da interface.
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/GlauberLASantiago/posi-cifra-flex.git
+   ```
+2. Abra o arquivo `index.html` diretamente (clique duplo) ou utilize um servidor local de desenvolvimento (ex: *Live Server* no VS Code ou `npx serve .`).
 
-## Como executar
-
-Como é uma aplicação estática, basta abrir o arquivo `index.html` em um navegador moderno.
-
-### Opção 1 — abertura direta
-
-1. Acesse a pasta raiz do projeto.
-2. Abra o arquivo `index.html` no navegador.
-
-### Opção 2 — servidor local (recomendado)
-
-No diretório do projeto:
-
-```bash
-python3 -m http.server 8000
-```
-
-Depois, abra `http://localhost:8000`.
-
-## Fluxo de uso rápido
-
-1. Clique em **Novo** para iniciar um projeto ou carregue um arquivo MusicXML.
-2. Ajuste os filtros de voicing conforme necessário.
-3. Ative **Editar Cifras** para alterar acordes diretamente.
-4. Use **Mudar** para selecionar posições alternativas.
-5. Clique em **Exportar Imagem** para gerar páginas do arranjo.
-
-## Dependências em CDN
-
-A página carrega bibliotecas externas via CDN:
-
-- Tonal.js
-- Soundfont Player
-- html2pdf.js
-- html2canvas
-- JSZip
-
-## Autor
-
-Desenvolvido por **Glauber Santiago (DAC/UFSCar)**.
+*Nota: Para utilizar as baterias e backing tracks de bossa e valsa localmente sem restrições de CORS, recomenda-se abrir a página a partir de um servidor local.*
