@@ -924,19 +924,24 @@
         </div>
         <div class="control-group" style="display: flex; flex-direction: column; gap: 8px; justify-content: flex-end; min-width: 190px; flex: none; margin-bottom: 2px;">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <input type="checkbox" id="spanFilter" onchange="reprocessScore()" checked style="cursor: pointer; margin: 0; width: 16px; height: 16px;">
-            <label for="spanFilter"
+            <input type="checkbox" id="spanFilter" onchange="reprocessScore()" checked title="Limita a abertura a 3 casas (permite 4 casas a partir da casa 8, onde a distância física dos trastes é menor)" style="cursor: pointer; margin: 0; width: 16px; height: 16px;">
+            <label for="spanFilter" title="Limita a abertura a 3 casas (permite 4 casas a partir da casa 8, onde a distância física dos trastes é menor)"
               style="cursor: pointer; color: var(--text-main); font-weight: normal; text-transform: none; font-size: 0.9rem; white-space: nowrap; margin: 0; user-select: none;">Abertura máx. (3 casas)</label>
           </div>
           <div style="display: flex; align-items: center; gap: 8px;">
-            <input type="checkbox" id="openStringsFilter" onchange="reprocessScore()" style="cursor: pointer; margin: 0; width: 16px; height: 16px;">
+            <input type="checkbox" id="openStringsFilter" onchange="reprocessScore()" checked style="cursor: pointer; margin: 0; width: 16px; height: 16px;">
             <label for="openStringsFilter"
-              style="cursor: pointer; color: var(--text-main); font-weight: normal; text-transform: none; font-size: 0.9rem; white-space: nowrap; margin: 0; user-select: none;">Permitir cordas soltas</label>
+              style="cursor: pointer; color: var(--text-main); font-weight: normal; text-transform: none; font-size: 0.9rem; white-space: nowrap; margin: 0; user-select: none;">Omitir cordas soltas</label>
           </div>
           <div style="display: flex; align-items: center; gap: 8px;">
             <input type="checkbox" id="cleanSoundFilter" onchange="reprocessScore()" checked style="cursor: pointer; margin: 0; width: 16px; height: 16px;">
             <label for="cleanSoundFilter"
               style="cursor: pointer; color: var(--text-main); font-weight: normal; text-transform: none; font-size: 0.9rem; white-space: nowrap; margin: 0; user-select: none;">Limpar som (>C#3)</label>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="blockFilter" onchange="reprocessScore()" checked style="cursor: pointer; margin: 0; width: 16px; height: 16px;">
+            <label for="blockFilter"
+              style="cursor: pointer; color: var(--text-main); font-weight: normal; text-transform: none; font-size: 0.9rem; white-space: nowrap; margin: 0; user-select: none;">Juntar bloco</label>
           </div>
         </div>
       </div>
@@ -978,7 +983,7 @@
             <h3>📖 Mini Tutorial</h3>
             <ol>
               <li><strong>Inicie um projeto:</strong> Carregue um arquivo no formato <code>.xml</code> ou
-                <code>.musicxml</code> (exportado do MuseScore, Finale, Sibelius, etc.) clicando em <strong>"Importar Cifra"</strong>, ou
+                <code>.musicxml</code> (exportado do MuseScore, Finale, Sibelius, etc.) clicando em <strong>"Imp. Cifra"</strong>, ou
                 crie um projeto do zero clicando em <strong>"Novo"</strong> para definir o título, fórmula de compasso e
                 quantidade inicial de compassos.
               </li>
@@ -990,14 +995,14 @@
                 desejada.</li>
               <li><strong>Edite cifras, gerencie compassos e desfaça ações:</strong> Ative a caixa <strong>"Editar Cifras"</strong>. Clique na cifra ou em "Editar" para digitar o acorde. O app corrige automaticamente o texto (minúsculas viram maiúsculas, o caractere <code>3</code> vira sustenido <code>#</code>, e o <code>b</code> vira bemol <code>b</code>), além de normalizar e validar musicalmente a cifra. Pressione <code>Enter</code> para salvar e avançar para o próximo compasso. Você também pode copiar, colar, inserir ou excluir compassos selecionados utilizando a barra de ferramentas inferior ou as teclas de atalho. Utilize os botões de seta (<strong>"↶"</strong> e <strong>"↷"</strong>) ou os atalhos <code>Ctrl+Z</code> e <code>Ctrl+Y</code> para desfazer/refazer suas edições.</li>
               <li><strong>Selecione múltiplos compassos:</strong> Clique em um compasso para selecioná-lo (ele ficará destacado com borda verde e fundo claro). Para selecionar um intervalo contíguo, mantenha pressionada a tecla <code>Shift</code> e clique em outro compasso (ou utilize as teclas <code>Shift + Seta Esquerda/Direita</code>). Os compassos selecionados podem ser copiados, colados ou excluídos em lote.</li>
-              <li><strong>Ouça uma prévia em andamento:</strong> Clique no botão <strong>"▶"</strong> para escutar o arranjo acompanhado por uma bateria e contrabaixo de bossa nova (o baixo toca sempre junto por padrão). Os botões de controle adicionais permitem ativar o loop (botão <strong>"🔁"</strong>) e a contagem rítmica de entrada de 8 batidas (botão de metrônomo). O controle de BPM permite ajustar o andamento entre 40 e 120 (o padrão é 75 BPM). Você pode regular e equilibrar os volumes da bateria, do violão e do contrabaixo individualmente a qualquer momento deslizando os controles <strong>"Bat."</strong>, <strong>"Viol."</strong> e <strong>"Bx."</strong> do mini-mixer inline. O seletor de estilo permite alternar a prévia entre <strong>Canção</strong> (com colcheia, semínima e colcheia), <strong>Bossa</strong> (estilo de 2 compassos sincopados com variações aleatórias), <strong>Ataque</strong> (notas simultâneas), <strong>Com Arpejo</strong> (notas dedilhadas rapidamente) ou <strong>Em Colcheia</strong> (notas arpejadas sustentadas no tempo de colcheia). O acorde atual é destacado visualmente com um fundo verde no grid enquanto soa.</li>
+              <li><strong>Ouça uma prévia em andamento:</strong> Clique no botão <strong>"▶"</strong> para escutar o arranjo acompanhado por uma bateria e contrabaixo (o baixo toca sempre junto por padrão). Projetos em compassos ternários/compostos (3/4, 6/8, 9/8, 12/8) utilizam acompanhamento rítmico de valsa, enquanto os demais utilizam bossa nova. Os botões de controle adicionais permitem ativar o loop (botão <strong>"🔁"</strong>) e a contagem rítmica de entrada de 8 batidas (botão de metrônomo). O controle de BPM permite ajustar o andamento entre 70 e 200 BPM (para compassos 4/4 e de valsa) ou entre 40 e 120 BPM (para os demais compassos). Você pode regular e equilibrar os volumes da bateria, do violão e do contrabaixo individualmente a qualquer momento deslizando os controles <strong>"Bat."</strong>, <strong>"Viol."</strong> e <strong>"Bx."</strong> do mini-mixer inline. O seletor de estilo permite alternar a prévia entre <strong>Canção</strong> (com colcheia, semínima e colcheia), <strong>Bossa</strong> (estilo de 2 compassos sincopados com variações aleatórias), <strong>Ataque</strong> (notas simultâneas), <strong>Com Arpejo</strong> (notas dedilhadas rapidamente) ou <strong>Em Colcheia</strong> (notas arpejadas sustentadas no tempo de colcheia). O acorde atual é destacado visualmente com um fundo verde no grid enquanto soa.</li>
               <li><strong>Gerencie a partitura:</strong> Adicione novas cifras com <code>+ Cifra</code>, delete-as com o
                 botão vermelho <code>&times;</code>, ou aumente/diminua a quantidade total de compassos pelos botões
                 <code>+</code> e <code>-</code> abaixo da partitura.
               </li>
-              <li><strong>Filtre posições:</strong> Configure o limite de inversão de baixos, permissão de cordas
-                soltas, registro de altura (grave, médio ou agudo), a abertura de casas e a filtragem de som limpo (Limpar som >C#3) para adequar os diagramas.</li>
-              <li><strong>Exporte o arranjo:</strong> Clique em <strong>"Exportar posições"</strong> para salvar os diagramas como imagem PNG, ou em <strong>"Exportar Cifras"</strong> para salvar a cifra no formato MusicXML (.musicxml).</li>
+              <li><strong>Filtre posições:</strong> Configure o limite de inversão de baixos, a omissão de cordas
+                soltas, registro de altura (grave, médio ou agudo), a abertura máxima de casas (com tolerância de +1 casa a partir da casa 8 devido à menor distância dos trastes), a filtragem de som limpo (Limpar som >C#3) e o filtro <strong>"Juntar bloco"</strong> (que exibe apenas posições com as três notas mais agudas em cordas contíguas) para adequar os diagramas.</li>
+              <li><strong>Exporte o arranjo:</strong> Clique em <strong>"Exp. Posições"</strong> para salvar os diagramas como imagem PNG, em <strong>"Exp. Cifra"</strong> para salvar a cifra no formato MusicXML (.musicxml) ou em <strong>"Exp. MP3"</strong> para exportar o áudio do arranjo como arquivo MP3.</li>
             </ol>
           </div>
 
@@ -2408,14 +2413,14 @@
         baseFret = (maxFret > 4 && minFret > 1) ? minFret : 1;
       }
 
-      const width = 85 * scale, height = 125 * scale;
+      const width = 95 * scale, height = 125 * scale;
       const stringSpacing = 13 * scale, fretSpacing = 24 * scale;
-      const startX = 10 * scale, startY = 20 * scale;
+      const startX = 20 * scale, startY = 20 * scale;
 
       let svg = `<svg width="${width}px" height="${height}px" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">`;
 
       if (baseFret > 1) {
-        svg += `<text x="0" y="${startY + 12 * scale}" font-size="${12 * scale}" font-weight="900" fill="var(--text-main)">${baseFret}</text>`;
+        svg += `<text x="${2 * scale}" y="${startY + 12 * scale}" font-size="${12 * scale}" font-weight="900" fill="var(--text-main)">${baseFret}</text>`;
       } else {
         svg += `<line x1="${startX}" y1="${startY}" x2="${startX + stringSpacing * 5}" y2="${startY}" stroke="var(--text-main)" stroke-width="${4.5 * scale}"/>`;
       }
@@ -2447,7 +2452,7 @@
           const x1 = startX + ((6 - maxStr) * stringSpacing), x2 = startX + ((6 - minStr) * stringSpacing);
           const relativeFret = minFret - baseFret + 1;
           const y = startY + ((relativeFret - 1) * fretSpacing) + (fretSpacing / 2);
-          svg += `<rect x="${x1}" y="${y - 4.5 * scale}" width="${x2 - x1}" height="${9 * scale}" rx="${4.5 * scale}" fill="var(--finger)" stroke="var(--text-main)" stroke-width="${1.5 * scale}"/>`;
+          svg += `<rect x="${x1 - 4.5 * scale}" y="${y - 4.5 * scale}" width="${(x2 - x1) + 9 * scale}" height="${9 * scale}" rx="${4.5 * scale}" fill="var(--finger)" stroke="var(--text-main)" stroke-width="${1.5 * scale}"/>`;
         }
       }
 
@@ -2535,11 +2540,12 @@
         reqChromas = reqChromas.filter(c => c !== rootChroma);
       }
       const maxInversionAllowed = overrides.inversion !== undefined ? overrides.inversion : parseInt(document.getElementById("inversionFilter").value);
-      const allowOpenStrings = overrides.openStrings !== undefined ? overrides.openStrings : (document.getElementById("openStringsFilter")?.checked === true);
+      const allowOpenStrings = overrides.openStrings !== undefined ? overrides.openStrings : (document.getElementById("openStringsFilter")?.checked === false);
       const forceCleanSound = overrides.cleanSound !== undefined ? overrides.cleanSound : (document.getElementById("cleanSoundFilter")?.checked === true);
       const isSpan3 = overrides.span !== undefined ? (overrides.span === 3) : (document.getElementById("spanFilter")?.checked === true);
       const spanVal = isSpan3 ? 3 : 4;
       const regFilter = overrides.reg !== undefined ? overrides.reg : (document.getElementById("registerFilter")?.value || "all");
+      const forceBlockFilter = overrides.block !== undefined ? overrides.block : (document.getElementById("blockFilter")?.checked === true);
 
       let requiredForVoicing = [...reqChromas];
       if (reqChromas.length >= 5) {
@@ -2609,6 +2615,17 @@
             let consecutiveMuted = 0;
             for (let s = pStrings[0]; s <= pStrings[pStrings.length - 1]; s++) {
               if (!pStrings.includes(s)) { if (++consecutiveMuted > 1) return; } else consecutiveMuted = 0;
+            }
+
+            if (forceBlockFilter) {
+              const playedSorted = [...played].sort((a, b) => a.string - b.string);
+              const acuteThree = playedSorted.slice(0, 3);
+              const s0 = acuteThree[0].string;
+              const s1 = acuteThree[1].string;
+              const s2 = acuteThree[2].string;
+              if (s1 !== s0 + 1 || s2 !== s1 + 1) {
+                return;
+              }
             }
 
             if (forceCleanSound) {
@@ -2685,7 +2702,8 @@
           openStrings: false,
           cleanSound: false,
           span: 4,
-          reg: "all"
+          reg: "all",
+          block: false
         });
         // Nos casos de exceção nunca utilize posições com notas abaixo do D3 (MIDI < 50)
         options = rawOptions.filter(v => !v.notes.some(n => n.fret !== -1 && n.midi < 50));
@@ -3257,7 +3275,7 @@
       renderScoreGrid();
 
       if (resVoicings.options.length === 0) {
-        await showCustomAlert("Aviso", `O acorde "${adjustedChordName}" foi salvo, mas nenhuma posição de violão foi encontrada com os filtros atuais. Experimente ajustar os filtros (ex: habilitar cordas soltas ou aumentar a abertura máxima).`);
+        await showCustomAlert("Aviso", `O acorde "${adjustedChordName}" foi salvo, mas nenhuma posição de violão foi encontrada com os filtros atuais. Experimente ajustar os filtros (ex: desmarcar 'Omitir cordas soltas' ou aumentar a abertura máxima).`);
       }
 
       if (goToNext) {
@@ -4223,6 +4241,7 @@
         cleanSoundFilter: document.getElementById("cleanSoundFilter").checked,
         registerFilter: document.getElementById("registerFilter").value,
         spanFilter: document.getElementById("spanFilter").checked,
+        blockFilter: document.getElementById("blockFilter").checked,
         measuresPerLine: document.getElementById("measuresPerLine").value,
         diagramScale: diagramScale
       };
@@ -4289,6 +4308,9 @@ e selecione este arquivo de texto.
           if (projectData.spanFilter !== undefined) {
             const isSpan3 = (projectData.spanFilter === true || projectData.spanFilter === "true" || projectData.spanFilter === 3 || projectData.spanFilter === "3");
             document.getElementById("spanFilter").checked = isSpan3;
+          }
+          if (projectData.blockFilter !== undefined) {
+            document.getElementById("blockFilter").checked = (projectData.blockFilter === true || projectData.blockFilter === "true");
           }
           if (projectData.measuresPerLine) {
             document.getElementById("measuresPerLine").value = projectData.measuresPerLine;
@@ -4656,7 +4678,7 @@ e selecione este arquivo de texto.
       if (progressBar) progressBar.style.width = "0%";
       if (progressText) progressText.innerText = "0%";
 
-      const durationSeconds = getProjectDurationSeconds() + 1.2; // 0.3s delay + 0.9s tail decay
+      const durationSeconds = getProjectDurationSeconds() + 0.35; // 0.3s delay + 0.05s click-prevention fadeout
       let samplesProcessed = 0;
 
       const sampleRate = audioCtx.sampleRate || 44100;
@@ -4717,7 +4739,7 @@ e selecione este arquivo de texto.
       startPreview().then(() => {
         const musicDuration = getProjectDurationSeconds();
         const fadeOutStartTime = backingTrackStartTime + musicDuration;
-        const fadeOutDuration = 0.9;
+        const fadeOutDuration = 0.05; // 50ms click-prevention fadeout
 
         try {
           recordingMasterGain.gain.cancelScheduledValues(audioCtx.currentTime);
