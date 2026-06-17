@@ -2115,11 +2115,12 @@
       }
 
       const beatDuration = 60 / actualBPM;
-      const countInDurationReal = previewCountIn ? 8 * beatDuration : 0;
+      const shouldCountIn = previewCountIn && (startMeasureIdx === null || startMeasureIdx === 0);
+      const countInDurationReal = shouldCountIn ? 8 * beatDuration : 0;
       const now = audioCtx.currentTime;
       const startDelay = 0.3; // 300ms delay to allow the audio hardware to fully initialize/wake up
 
-      if (previewCountIn) {
+      if (shouldCountIn) {
         const h = 1200; // Pitch do Beat 1 (mais agudo)
         const l = 800;  // Pitch do Beat 2 (mais grave)
         playClickSound(now + startDelay, h); // Beat 1
@@ -2607,6 +2608,32 @@
               const maxSpan = spanVal;
               const maxDiff = (maxSpan - 1) + (minF >= 8 ? 1 : 0);
               if (maxF - minF > maxDiff) return;
+
+              // Restrição para abertura de 4 ou mais casas (maxF - minF >= 3)
+              if (maxF - minF >= 3) {
+                // Se a nota na corda mais grave (fretted[0]) estiver na casa máxima (maxF)
+                if (fretted[0].fret === maxF) {
+                  // Verifica se é a exceção diagonal: 4 notas em cordas contíguas descendo
+                  let isExceptionDiagonal = false;
+                  if (fretted.length === 4) {
+                    const n0 = fretted[0];
+                    const n1 = fretted[1];
+                    const n2 = fretted[2];
+                    const n3 = fretted[3];
+                    if (n1.string === n0.string - 1 &&
+                        n2.string === n1.string - 1 &&
+                        n3.string === n2.string - 1 &&
+                        n0.fret === maxF &&
+                        n1.fret === maxF - 1 &&
+                        n2.fret === maxF - 2 &&
+                        n3.fret === minF) {
+                      isExceptionDiagonal = true;
+                    }
+                  }
+                  if (!isExceptionDiagonal) return;
+                }
+              }
+
               let notesOnMinFret = fretted.filter(n => n.fret === minF);
               if ((notesOnMinFret.length >= 2 ? 1 + (fretted.length - notesOnMinFret.length) : fretted.length) > 4) return;
             }
@@ -4678,7 +4705,7 @@ e selecione este arquivo de texto.
       if (progressBar) progressBar.style.width = "0%";
       if (progressText) progressText.innerText = "0%";
 
-      const durationSeconds = getProjectDurationSeconds() + 0.35; // 0.3s delay + 0.05s click-prevention fadeout
+      const durationSeconds = getProjectDurationSeconds() + 2.35; // 0.3s delay + 2.0s tail decay + 0.05s click-prevention fadeout
       let samplesProcessed = 0;
 
       const sampleRate = audioCtx.sampleRate || 44100;
@@ -4738,7 +4765,7 @@ e selecione este arquivo de texto.
       // Inicia o áudio
       startPreview().then(() => {
         const musicDuration = getProjectDurationSeconds();
-        const fadeOutStartTime = backingTrackStartTime + musicDuration;
+        const fadeOutStartTime = backingTrackStartTime + musicDuration + 2.0; // Wait 2.0s for notes to decay
         const fadeOutDuration = 0.05; // 50ms click-prevention fadeout
 
         try {
