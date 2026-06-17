@@ -783,6 +783,7 @@
             <button class="btn" style="background-color: #8e44ad; padding: 7px 12px; font-size: 0.85rem;" onclick="exportMusicXML()" title="Exportar cifra atual em formato MusicXML (.musicxml)">📤 Exp. Cifra</button>
             <button class="btn btn-accent" style="padding: 7px 12px; font-size: 0.85rem;" onclick="exportImage()" title="Exportar diagramas de posições como imagem PNG">🖼️ Exp. Posições</button>
             <button class="btn" style="background-color: #27ae60; padding: 7px 12px; font-size: 0.85rem;" onclick="exportMP3()" title="Exportar o áudio do arranjo como arquivo MP3">🎵 Exp. MP3</button>
+            <button class="btn" style="background-color: #16a085; padding: 7px 12px; font-size: 0.85rem;" onclick="exportHTML()" title="Exportar o aplicativo contendo este arranjo integrado">🌐 Exp. HTML</button>
           </div>
         </div>
 
@@ -1002,7 +1003,7 @@
               </li>
               <li><strong>Filtre posições:</strong> Configure o limite de inversão de baixos, a omissão de cordas
                 soltas, registro de altura (grave, médio ou agudo), a abertura máxima de casas (com tolerância de +1 casa a partir da casa 8 devido à menor distância dos trastes), a filtragem de som limpo (Limpar som >C#3) e o filtro <strong>"Juntar bloco"</strong> (que exibe apenas posições com as três notas mais agudas em cordas contíguas) para adequar os diagramas.</li>
-              <li><strong>Exporte o arranjo:</strong> Clique em <strong>"Exp. Posições"</strong> para salvar os diagramas como imagem PNG, em <strong>"Exp. Cifra"</strong> para salvar a cifra no formato MusicXML (.musicxml) ou em <strong>"Exp. MP3"</strong> para exportar o áudio do arranjo como arquivo MP3.</li>
+              <li><strong>Exporte o arranjo:</strong> Clique em <strong>"Exp. Posições"</strong> para salvar os diagramas como imagem PNG, em <strong>"Exp. Cifra"</strong> para salvar a cifra no formato MusicXML (.musicxml), em <strong>"Exp. MP3"</strong> para exportar o áudio do arranjo como arquivo MP3, ou em <strong>"Exp. HTML"</strong> para gerar um clone autônomo do aplicativo contendo este arranjo já integrado.</li>
             </ol>
           </div>
 
@@ -1092,6 +1093,9 @@
     <footer class="app-footer">
       <p>Desenvolvido pelo professor Glauber Santiago — DAC/UFSCar</p>
       <p class="footer-links">
+        <a href="https://glauberlasantiago.github.io/posi-cifra-flex/" target="_blank"
+          rel="noopener noreferrer">glauberlasantiago.github.io/posi-cifra-flex/</a>
+        <span class="separator">•</span>
         <a href="https://servidores.ufscar.br/glauber/" target="_blank"
           rel="noopener noreferrer">servidores.ufscar.br/glauber/</a>
         <span class="separator">•</span>
@@ -4295,6 +4299,85 @@ e selecione este arquivo de texto.
       URL.revokeObjectURL(url);
     }
 
+    function loadProjectData(projectData) {
+      currentRawXML = projectData.currentRawXML || null;
+      globalTitle = projectData.globalTitle || "Arranjo";
+      document.getElementById("scoreTitle").innerText = globalTitle;
+
+      if (projectData.rootFilter) {
+        document.getElementById("rootFilter").value = projectData.rootFilter;
+      }
+      if (projectData.inversionFilter) {
+        document.getElementById("inversionFilter").value = projectData.inversionFilter;
+      }
+      if (projectData.openStringsFilter !== undefined) {
+        document.getElementById("openStringsFilter").checked = (projectData.openStringsFilter === true || projectData.openStringsFilter === "true");
+      }
+      if (projectData.cleanSoundFilter !== undefined) {
+        document.getElementById("cleanSoundFilter").checked = (projectData.cleanSoundFilter === true || projectData.cleanSoundFilter === "true");
+      }
+      if (projectData.registerFilter) {
+        document.getElementById("registerFilter").value = projectData.registerFilter;
+      }
+      if (projectData.spanFilter !== undefined) {
+        const isSpan3 = (projectData.spanFilter === true || projectData.spanFilter === "true" || projectData.spanFilter === 3 || projectData.spanFilter === "3");
+        document.getElementById("spanFilter").checked = isSpan3;
+      }
+      if (projectData.blockFilter !== undefined) {
+        document.getElementById("blockFilter").checked = (projectData.blockFilter === true || projectData.blockFilter === "true");
+      }
+      if (projectData.measuresPerLine) {
+        document.getElementById("measuresPerLine").value = projectData.measuresPerLine;
+        updateMeasuresPerLine(projectData.measuresPerLine);
+      }
+      if (projectData.diagramScale) {
+        diagramScale = parseFloat(projectData.diagramScale);
+        const diagramZoomNode = document.getElementById("diagramZoom");
+        if (diagramZoomNode) diagramZoomNode.value = diagramScale;
+        const zoomValNode = document.getElementById("zoomVal");
+        if (zoomValNode) zoomValNode.innerText = Math.round(diagramScale * 100) + "%";
+      }
+
+      if (projectData.scoreData) {
+        scoreData = projectData.scoreData;
+        scoreData.forEach(m => {
+          m.chords.forEach(c => {
+            if (!c.originalChordName) c.originalChordName = c.chordName;
+          });
+        });
+        currentTransposeStep = projectData.currentTransposeStep !== undefined ? parseInt(projectData.currentTransposeStep) : 0;
+        const slider = document.getElementById("transposeSlider");
+        if (slider) {
+          slider.value = currentTransposeStep;
+          updateTransposeLabel();
+        }
+        clearMeasureSelection();
+        undoStack = [];
+        redoStack = [];
+        saveStateToHistory();
+        adjustTempoForTimeSignature();
+        renderScoreGrid();
+      } else {
+        // Suporte retroativo para arquivos do formato antigo
+        processXML();
+        if (projectData.selectedIndices) {
+          projectData.selectedIndices.forEach((measureIndices, mIdx) => {
+            if (scoreData[mIdx] && scoreData[mIdx].chords) {
+              measureIndices.forEach((selIdx, cIdx) => {
+                if (scoreData[mIdx].chords[cIdx] && selIdx < scoreData[mIdx].chords[cIdx].options.length) {
+                  scoreData[mIdx].chords[cIdx].selectedIndex = selIdx;
+                }
+              });
+            }
+          });
+          undoStack = [];
+          redoStack = [];
+          saveStateToHistory();
+          renderScoreGrid();
+        }
+      }
+    }
+
     function handleProjectUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -4313,81 +4396,7 @@ e selecione este arquivo de texto.
             return;
           }
 
-          currentRawXML = projectData.currentRawXML || null;
-          globalTitle = projectData.globalTitle || "Arranjo";
-          document.getElementById("scoreTitle").innerText = globalTitle;
-
-          if (projectData.rootFilter) {
-            document.getElementById("rootFilter").value = projectData.rootFilter;
-          }
-          if (projectData.inversionFilter) {
-            document.getElementById("inversionFilter").value = projectData.inversionFilter;
-          }
-          if (projectData.openStringsFilter !== undefined) {
-            document.getElementById("openStringsFilter").checked = (projectData.openStringsFilter === true || projectData.openStringsFilter === "true");
-          }
-          if (projectData.cleanSoundFilter !== undefined) {
-            document.getElementById("cleanSoundFilter").checked = (projectData.cleanSoundFilter === true || projectData.cleanSoundFilter === "true");
-          }
-          if (projectData.registerFilter) {
-            document.getElementById("registerFilter").value = projectData.registerFilter;
-          }
-          if (projectData.spanFilter !== undefined) {
-            const isSpan3 = (projectData.spanFilter === true || projectData.spanFilter === "true" || projectData.spanFilter === 3 || projectData.spanFilter === "3");
-            document.getElementById("spanFilter").checked = isSpan3;
-          }
-          if (projectData.blockFilter !== undefined) {
-            document.getElementById("blockFilter").checked = (projectData.blockFilter === true || projectData.blockFilter === "true");
-          }
-          if (projectData.measuresPerLine) {
-            document.getElementById("measuresPerLine").value = projectData.measuresPerLine;
-            updateMeasuresPerLine(projectData.measuresPerLine);
-          }
-          if (projectData.diagramScale) {
-            diagramScale = parseFloat(projectData.diagramScale);
-            document.getElementById("diagramZoom").value = diagramScale;
-            document.getElementById("zoomVal").innerText = Math.round(diagramScale * 100) + "%";
-          }
-
-          if (projectData.scoreData) {
-            scoreData = projectData.scoreData;
-            scoreData.forEach(m => {
-              m.chords.forEach(c => {
-                if (!c.originalChordName) c.originalChordName = c.chordName;
-              });
-            });
-            currentTransposeStep = projectData.currentTransposeStep !== undefined ? parseInt(projectData.currentTransposeStep) : 0;
-            const slider = document.getElementById("transposeSlider");
-            if (slider) {
-              slider.value = currentTransposeStep;
-              updateTransposeLabel();
-            }
-            clearMeasureSelection();
-            undoStack = [];
-            redoStack = [];
-            saveStateToHistory();
-            adjustTempoForTimeSignature();
-            renderScoreGrid();
-          } else {
-            // Suporte retroativo para arquivos do formato antigo
-            processXML();
-            if (projectData.selectedIndices) {
-              projectData.selectedIndices.forEach((measureIndices, mIdx) => {
-                if (scoreData[mIdx] && scoreData[mIdx].chords) {
-                  measureIndices.forEach((selIdx, cIdx) => {
-                    if (scoreData[mIdx].chords[cIdx] && selIdx < scoreData[mIdx].chords[cIdx].options.length) {
-                      scoreData[mIdx].chords[cIdx].selectedIndex = selIdx;
-                    }
-                  });
-                }
-              });
-              undoStack = [];
-              redoStack = [];
-              saveStateToHistory();
-              renderScoreGrid();
-            }
-          }
-
+          loadProjectData(projectData);
           await showCustomAlert("Projeto Carregado", "Projeto carregado com sucesso!");
         } catch (err) {
           console.error(err);
@@ -4861,9 +4870,104 @@ e selecione este arquivo de texto.
       if (modal) modal.style.display = "none";
     }
 
+    async function exportHTML() {
+      let htmlText = "";
+      try {
+        // Tenta obter o código-fonte limpo localmente
+        const response = await fetch(window.location.href);
+        if (!response.ok) throw new Error();
+        htmlText = await response.text();
+      } catch (err) {
+        // Se falhar (ex: CORS no protocolo file://), usa o outerHTML da página atual
+        htmlText = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+      }
+
+      if (!htmlText) {
+        await showCustomAlert("Exportar HTML", "Não foi possível obter o código-fonte da página.");
+        return;
+      }
+
+      // Substituir imagem de fundo local pelo URL absoluto no GitHub
+      const localBgPattern = /background-image:\s*url\(['"]?violoes\.png['"]?\)/g;
+      const remoteBg = "background-image: url('https://raw.githubusercontent.com/GlauberLASantiago/posi-cifra-flex/main/violoes.png')";
+      htmlText = htmlText.replace(localBgPattern, remoteBg);
+
+      // Se usamos o outerHTML, limpamos os estados dinâmicos para iniciar o app do zero
+      if (htmlText.includes("document.documentElement.outerHTML") || htmlText.includes("<!DOCTYPE html>")) {
+        // 1. Limpa o grid de partitura
+        htmlText = htmlText.replace(/<div class="score-systems (measures-4|measures-8)" id="scoreGrid">[\s\S]*?<\/div>/, 
+          '<div class="score-systems $1" id="scoreGrid"><p style="color: var(--text-muted); text-align: center; width: 100%;">Carregando arranjo...</p></div>');
+        
+        // 2. Limpa o status do áudio
+        htmlText = htmlText.replace(/<span id="audioStatus" class="audio-status[^"]*">[\s\S]*?<\/span>/, 
+          '<span id="audioStatus" class="audio-status">Carregando Violão Nylon...</span>');
+
+        // 3. Oculta a caixa de edição de compassos
+        htmlText = htmlText.replace(/<div id="editMeasuresBox" class="data-html2canvas-ignore" style="display:\s*(?:flex|none);/g, 
+          '<div id="editMeasuresBox" class="data-html2canvas-ignore" style="display: none;');
+
+        // 4. Oculta a barra de ações do compasso
+        htmlText = htmlText.replace(/<div id="selectedMeasureActions" style="display:\s*(?:flex|none);/g, 
+          '<div id="selectedMeasureActions" style="display: none;');
+
+        // 5. Oculta modais se estiverem abertos
+        htmlText = htmlText.replace(/id="(optionsModal|exportModal|mp3ExportModal|newProjectModal|editCifraModal|customAlertModal|customConfirmModal)" style="display:\s*flex;"/g, 
+          'id="$1" style="display: none;"');
+      }
+
+      // Cria a estrutura do projeto atual a ser embarcada
+      const projectData = {
+        globalTitle: globalTitle,
+        currentRawXML: currentRawXML,
+        scoreData: scoreData,
+        currentTransposeStep: currentTransposeStep,
+        rootFilter: document.getElementById("rootFilter").value,
+        inversionFilter: document.getElementById("inversionFilter").value,
+        openStringsFilter: document.getElementById("openStringsFilter").checked,
+        cleanSoundFilter: document.getElementById("cleanSoundFilter").checked,
+        registerFilter: document.getElementById("registerFilter").value,
+        spanFilter: document.getElementById("spanFilter").checked,
+        blockFilter: document.getElementById("blockFilter").checked,
+        measuresPerLine: document.getElementById("measuresPerLine").value,
+        diagramScale: diagramScale
+      };
+
+      const jsonStr = JSON.stringify(projectData).replace(/<\/script>/ig, "<\\/script>");
+      const replacementStr = `let initialEmbedProject = ${jsonStr};`;
+
+      // Substituição robusta da variável usando regex
+      const regex = /let initialEmbedProject\s*=\s*(null|{[\s\S]*?})\s*;/;
+      if (regex.test(htmlText)) {
+        htmlText = htmlText.replace(regex, replacementStr);
+      } else {
+        // Remove preventivamente qualquer menção para evitar duplicate let declaration
+        htmlText = htmlText.replace(/let initialEmbedProject\s*=\s*[\s\S]*?;/g, "");
+        const insertMarker = "window.addEventListener('DOMContentLoaded'";
+        if (htmlText.includes(insertMarker)) {
+          htmlText = htmlText.replace(insertMarker, `${replacementStr}\n    ${insertMarker}`);
+        }
+      }
+
+      const blob = new Blob([htmlText], { type: "text/html;charset=utf-8" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.href = url;
+      link.download = `${globalTitle.replace(/\s+/g, '_')}_app.html`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    let initialEmbedProject = null;
+
     window.addEventListener('DOMContentLoaded', () => {
-      const defaultUrl = 'https://raw.githubusercontent.com/GlauberLASantiago/posi-cifra-flex/main/posi-cifra-flex-demo.musicxml';
       const grid = document.getElementById("scoreGrid");
+      if (initialEmbedProject) {
+        loadProjectData(initialEmbedProject);
+        return;
+      }
+      const defaultUrl = 'https://raw.githubusercontent.com/GlauberLASantiago/posi-cifra-flex/main/posi-cifra-flex-demo.musicxml';
       grid.innerHTML = '<p style="color: var(--text-muted); text-align: center; width: 100%;">Carregando arranjo de demonstração...</p>';
 
       // Tenta primeiro carregar localmente. Se falhar (ex: CORS de arquivo local), tenta a URL remota do GitHub.
