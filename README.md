@@ -2,6 +2,9 @@
 
 **Posi-Cifra-Flex** é uma ferramenta web interativa projetada para músicos, arranjadores e estudantes de violão. Ela permite visualizar, criar e personalizar posições (diagramas/voicings) alternativas de acordes no braço do violão a partir de partituras e cifras importadas ou criadas do zero.
 
+<img width="1215" height="791" alt="image" src="https://github.com/user-attachments/assets/ce199b5d-0a4e-4a8a-80f6-201949fab0a8" />
+
+
 O projeto é executado inteiramente no navegador de forma independente, combinando bibliotecas de teoria musical e processamento de áudio em tempo real.
 
 ---
